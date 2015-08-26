@@ -1,0 +1,24 @@
+nono nodata
+mailSubject ~ ! @ # $ % ^ & * ( ) [ ]  < /> -- / \ space
+mailSubjectEscaped ~ ! @ # $ % ^ &amp; * ( ) [ ]  &lt; &gt; -- / \ space
+
+mailBody ~ ! @ # $ % ^ & * ( ) [ ]  < /> -- / \ space
+mailBodyEscaped ~ ! @ # $ % ^ &amp; * ( ) [ ]  &lt; &gt; -- / \ space
+
+mailFolder ~ ! @ # $ % ^ & * ( ) [ ]  < /> -- / \ space
+mailFolderEscaped -- \ space ~ ! @ $ ^ &amp; ( ) [ ]  &lt; &gt;
+
+plainSignatureEscaped -- \ space ~ ! @ $ ^ &amp; ( ) [ ]  &lt; &gt;
+
+no no no notDataNeeded
+contact(firstName,lastName)  -- \ space ~ ! @ $ ^ &amp; ( ) [ ]  &lt; &gt;
+
+
+
+
+
+
+
+
+
+

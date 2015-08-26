@@ -1,0 +1,741 @@
+Return-Path: <aa@tku.edu.tw>
+Original-Recipient: rfc822;test33@tku.edu.tw
+Received: from mta1.wm.tku.edu.tw (192.168.109.97) by cpms3.wm.tku.edu.tw (8.6.117.04)
+        id 5382E83C00000089 for test33@tku.edu.tw; Wed, 6 Aug 2014 13:36:18 +0800
+Received: from [163.13.240.33] (163.13.240.33) by mta1.wm.tku.edu.tw (8.6.117.04)
+        id 53BCD0EB0034C33F for test33@tku.edu.tw; Wed, 6 Aug 2014 13:36:18 +0800
+Received: from mta1.wm.tku.edu.tw (192.168.109.97) by cpms2.wm.tku.edu.tw (8.6.117.04)
+        id 539185AA000E6D0B for toodoo@mail.tku.edu.tw; Fri, 1 Aug 2014 03:29:58 +0800
+Received: from sendmail.tku.edu.tw (163.13.240.204) by mta1.wm.tku.edu.tw (8.6.117.04)
+        id 53BCD0EB002ACC8A for toodoo@mail.tku.edu.tw; Fri, 1 Aug 2014 03:29:58 +0800
+Received: from kennylo (unknown [210.60.221.197])
+	by sendmail.tku.edu.tw (Postfix) with SMTP id CD19F4CAD
+	for <toodoo@mail.tku.edu.tw>; Fri,  1 Aug 2014 03:29:58 +0800 (CST)
+thread-index: Ac+s9c37DuTqZpj3ReK7gFlKai16sg==
+Thread-Topic: =?big5?B?skimv6Rqvseu1aTNs3GwVML5pOulWrlxpGyz+E5vLjE2OS0tMjAxNC8wNy8zMQ==?=
+From: =?big5?B?skimv6Rqvseu1aTNqkGwyLpbuOq3vbVvrmmzQg==?= <fl@oa.tku.edu.tw>
+Subject: =?big5?B?skimv6Rqvseu1aTNs3GwVML5pOulWrlxpGyz+E5vLjE2OS0tMjAxNC8wNy8zMQ==?=
+Date: Fri, 1 Aug 2014 03:29:53 +0800
+Message-ID: <634EDCE40B8B4118B74C5473B42F79D9@kennylo>
+Content-Type: multipart/alternative;
+	boundary="----=_NextPart_000_F7A0_01CFAD38.DC1F3400"
+X-Mailer: Microsoft CDO for Windows 2000
+Content-Class: urn:content-classes:message
+X-MimeOLE: Produced By Microsoft MimeOLE V6.00.2900.6157
+MIME-Version: 1.0
+
+------=_NextPart_000_F7A0_01CFAD38.DC1F3400
+Content-Type: text/plain; charset="big5"
+Content-Transfer-Encoding: base64
+
+IOihqOmgrTxodHRwOi8vd3d3LmZsLnRrdS5lZHUudHcvZXBhcGVyL2ltYWdlcy9sb2dvMi5naWY+
+IAkNCrLEIDE2OSC0wSAopViqqaTptMGhRzIwMTQtMDctMzAgrFC0waRUKSBDYW4ndCByZWFkIHRo
+ZSBhcnRpY2xlcz8gUGxlYXNlIGNsaWNrIHRoZQ0KbGluayBiZWxvd2h0dHA6Ly93d3cuZmwudGt1
+LmVkdS50dzo4MDgwL25ld3MvCQ0KobuhQLLEIDEgqqkJDQoqCbZQoUmufa/osLeu1aTNpEq/76z8
+sOqhbbRJpPGkaKFuwvi7eKq6qMisd7dPtb2tXravul0NCg0KDQqn2q3Ms6OqvrlEqtGvq6TateGv
+U7dSv/qhQatvpKOzZ7D9pau7+6FGt1Kn67jqoUGrb6vcsU2qYKbbqO6hRqR3uGer3Kazv/qhQatv
+uGC7/KFCpc6lXKzjqHOn67jqvNCquqFCvPa3UqR1p0CozMLCoUaxYcBZscCwyrRJu6ihda69w9ip
+07/VoXa7UKhDpn4NCqRqtaeuvcPYs8yssKRIqdK81rlEoUOnQaq+uUS23KFIpXjGV6RdprOm7KTa
+teGvU6FBLi4uIDy41KX+pOU+DQo8aHR0cDovL3d3dy5mbC50a3UuZWR1LnR3OjgwODAvbmV3cy9p
+bmRleC5waHA/cGVyaW9kX2lkPTE2OSZtZW1vX25vPTEjMS0NCjE+IA0KDQoNCioJMjAxNKF1skim
+v6Rqvseu1aTNrtWq+LHQqHywqq5wt3yhdg0KDQoNCr10sF+hR6XArtW1161ertWkzbd8s6+8eahr
+t3yq+KnzpWimfjEwpOuhQaVYrnWp86rhvazBfL/spKehdaSktdilwbDqrtWkzcFgt3y3fK37pGq3
+fKF2rsmhQaazt1Cp86TWpGykxrnvvseu1aq6vcTAu6FBpFPFs6nzrtWkzaq6s8elWKrtsnuhQa7V
+pM0NCq7Vqvi2s7awoUG5Rb+zsF/BfL/srOOwUbd8oUGmQKZQrOPEs6ZdwLO1prKkoUG0o6jRLi4u
+IDy41KX+pOU+DQo8aHR0cDovL3d3dy5mbC50a3UuZWR1LnR3OjgwODAvbmV3cy9pbmRleC5waHA/
+cGVyaW9kX2lkPTE2OSZtZW1vX25vPTEjMS0NCjI+IA0KDQoNCioJrbu05K7VpM23fKZepcCu1bNY
+sN0NCg0KDQqtu7TkrtWkzbd8pl6lwK7Vs1iw3bnOpECm5jWkSKFBqfM1pOsyOaTpoV2lfKFepl6l
+wK7Vq/SzWKFBpqit+61wprO3fKr4uK22rrVeoUKwxrd8qvizwbd+pqjEs637pM68QrDqvfeu1aTN
+taWhQw0KDQrAubhVtNyw6rvaqMawyLDGrtWq+K9Tp0+lbLawrtWkzapBsMi6W7jqt721b65ps0K0
+XqxLtqew9abmqvihQi4uLiA8uNSl/qTlPg0KPGh0dHA6Ly93d3cuZmwudGt1LmVkdS50dzo4MDgw
+L25ld3MvaW5kZXgucGhwP3BlcmlvZF9pZD0xNjkmbWVtb19ubz0xIzEtDQozPiANCg0KDQoqCTEw
+M77Hpn6r17dzpc26W65hqviueb3Nt3yz9aa4qu0NCiA8uNSl/qTlPg0KPGh0dHA6Ly93d3cuZmwu
+dGt1LmVkdS50dzo4MDgwL25ld3MvaW5kZXgucGhwP3BlcmlvZF9pZD0xNjkmbWVtb19ubz0xIzEt
+DQo0PiANCg0KDQoqCbLEMjipoaF1skimv7XXrV6hdqr3xk68+rPHpViu1aTNv++p3g0KvdCmVa7V
+pM23fL/jxUSxwMLLDQoNCg0KDQoxMDOmfqvXssQyOKmhoXWySKa/tdetXqF2qvfGTrz6s8elWK7V
+pM2/76neoUGm26dZpOmwX6bcN6TrMzGk6aTuoUGo/LJ6pdO90KFDplWu1aTNt3ymcKazpfSm87Dd
+w0ShQcV3qu/ASK7JqNO5cayiuN+hQw0KDQqkWrJIpr+tXrFNoUKk5bJ6vsewfKTOpGq+x6SnrtWk
+zaFBqOOms7CqqXykp6t+vHehQbnvLi4uIDy41KX+pOU+DQo8aHR0cDovL3d3dy5mbC50a3UuZWR1
+LnR3OjgwODAvbmV3cy9pbmRleC5waHA/cGVyaW9kX2lkPTE2OSZtZW1vX25vPTEjMS0NCjU+IA0K
+DQoNCioJrtWkza3TpEi46q7Gq0/FQMFuqfoNCg0KDQqlwK7VsHSmWKF1rdOkSLjqrsarT8VAqmuh
+dqSnrEmm5qFBqMO+yaRKrdO46rresnqhQbnvqfOu1aTNpKet06RIuOquxsCzusm1vah9ut6yeqRI
+pKezZKX0oUGow6nzpcCu1br0r7ituq22pL2naaFHrdO46rresnqsRrWmwW6p+rtQwfSocMV2rEa1
+psFuDQqp+qFDDQoNCr7HqvipaqSnrdOkSLjqrsahR6ltplehQqZhp32hQi4uLiA8uNSl/qTlPg0K
+PGh0dHA6Ly93d3cuZmwudGt1LmVkdS50dzo4MDgwL25ld3MvaW5kZXgucGhwP3BlcmlvZF9pZD0x
+NjkmbWVtb19ubz0xIzEtDQo2PiANCg0KDQoqCcV3qu+oz6XOskimv6Rqvse0Trd+uvRodHRwOi8v
+ZWpvYi50a3UuZWR1LnR3LyANCrNv+di0o6jRpfi3frVuv/2oRKR+uOqwVCCssKXArtWu1aTNvFel
+W7ROt3663rlEDQoNCiA8uNSl/qTlPg0KPGh0dHA6Ly93d3cuZmwudGt1LmVkdS50dzo4MDgwL25l
+d3MvaW5kZXgucGhwP3BlcmlvZF9pZD0xNjkmbWVtb19ubz0xIzEtDQo3PiANCg0KDQoNCg0KICBf
+X19fXyAgDQoNCqG7oUCyxCAyIKqpCQ0KKgmy+KTlqGqu1aTNsbWl9KRqs7Cu1aTNwXC9y8Fgt3zB
+YLd8qvgNCqG9IKr0vvCqTK7VpM2xtaX0vHOqRq7VpM3BcL3Lt3y3fKr4DQqhvSCseLJXtdiu1aTN
+sbWl9LXYqkau1aTNwXC9y7d8t3yq+A0KDQoNCg0KMjAxM6Z+pGqzsK7VpM3BcL3LwWC3fLL4pOWo
+aq7VpM2l0bCqt3Olra7VpM2k4qSksbWkVcFgt3yq+KRAwr6hQbL4wWC3fKr4plCuya3dpfS8c6pG
+rtWkzcFwvcu3fLd8qvihQaZdprmp86ZQpn4xMqTrMjGk6aFdpLuhXqfvv++l0ar0vvCqTA0KrtWk
+zbG1pfS8c6pGrtWkzcFwvcu3fLd8qvihQajDqfOktaZ+NaTrMTek6aFdpLsuLi4gPLjUpf6k5T4N
+CjxodHRwOi8vd3d3LmZsLnRrdS5lZHUudHc6ODA4MC9uZXdzL2luZGV4LnBocD9wZXJpb2RfaWQ9
+MTY5Jm1lbW9fbm89MiMyLQ0KMT4gDQoNCg0KKgmw8rappauu1aTNt3zBfL/stE63fsG/rnkNCg0K
+DQqyprd+qXW4YLFOqOyhQbDytqmlq67VpM23fK9TwXy/7KF1wLOpobKmt36lzbROt37Bv655oXah
+QajDwdy90KnztE63fruyvsm74rDsqr6mV6q6rtWkzbzWpc2yULresnrFVbDdpKSk38LFpnC367D1
+puaq+LZ9wb+hQaSjvdesT7Kmt36lzanOpmKu1aXNs6MNCsSxsW+mrMOsuqG6oaFJDQoNCrNvs/W6
+dMG/pdGlwK7VrtWkzS4uLiA8uNSl/qTlPg0KPGh0dHA6Ly93d3cuZmwudGt1LmVkdS50dzo4MDgw
+L25ld3MvaW5kZXgucGhwP3BlcmlvZF9pZD0xNjkmbWVtb19ubz0yIzItDQoxMD4gDQoNCg0KKgm8
+1qyhvsetYqTpu3m6ccHBwXC9y7d8qPzB3LDRpVuk6aW7uXGleKVkqdRPS6Rqt3wNCg0KDQq81qyh
+vsetYqTpu3m6ccHBwXC9y7d8M6TrMTmk6aFdpFShXsCzpOmlu9TDpcmlq7lxtfileMHcvdCw0aVb
+rEupdaVkqdRPS6Rqt3yhQcDysW+sxrCqqrq1+7v5oUMNCg0KssQxpNGk6aTopM2kSKZ3scap86Tp
+pbuw6rd8xLOoxrDzpL2lwbd8wF241bDboUayxDKk0bpxsNukard8t3yz9aFBpdGp87d8rfutzC4u
+LiA8uNSl/qTlPg0KPGh0dHA6Ly93d3cuZmwudGt1LmVkdS50dzo4MDgwL25ld3MvaW5kZXgucGhw
+P3BlcmlvZF9pZD0xNjkmbWVtb19ubz0yIzItDQoxMT4gDQoNCg0KKgmn9aazqb6u1aTNxPKl9Kr3
+qvm/pK7VpM23fLJ6qMaq+A0KDQoNCqr3qvm/pK7VpM23fKnzNaTrMjSk6aFdpLuhXqFBsLKq96r5
+v6SqRqr5wFzGVcF8v+yyxDWpobLEMaa4t3yt+6VOqu2kard8oUG3fMSzpdGn9aazqb6yeqjGqvil
+RKv5oUGlwK7VsWmuYal5rtWq+KTOpKS12KXBsOqu1aTNwWC3fLOvqXekdLJ6qMYNCqr4p6GtULlx
+qu25Rq+stlChQ6W7t3zEs6FBsKOt7Ld8rfulfqFBp/O8V6Vbs1ymaKZ+Li4uIDy41KX+pOU+DQo8
+aHR0cDovL3d3dy5mbC50a3UuZWR1LnR3OjgwODAvbmV3cy9pbmRleC5waHA/cGVyaW9kX2lkPTE2
+OSZtZW1vX25vPTIjMi0NCjI+IA0KDQoNCioJwLm+x8KnrtWkzcTypfSw8rappauu1aTNt3yyeqjG
+qvgNCg0KDQqw8rappauu1aTNt3yp8zak6zIxpOmhXaS7oV4xNq7JoUGwsvjKs72leK78wkHAXMZV
+pWy2fbLEMTi2Z6Z+t3y8ebpbssQ5qaGyxDGmuLd8rfukard8oUG3fMSzpdHAub7HwqeyeqjGqvil
+RKv5oUOlwK7VrtWkzapBsMi6W7jqt721b65ps0INCrRerEu2p7D1puaq+KFCpKS12KXBsOqu1aTN
+wWC3fLOvqXekdLJ6qMaq+KFCs6+lv6hrLi4uIDy41KX+pOU+DQo8aHR0cDovL3d3dy5mbC50a3Uu
+ZWR1LnR3OjgwODAvbmV3cy9pbmRleC5waHA/cGVyaW9kX2lkPTE2OSZtZW1vX25vPTIjMi0NCjM+
+IA0KDQoNCioJpKS12KXBsOqu1aTNwWC3fLJ6usqoxsFwrnW3fMSzrbqmuLK+rnatt6uwDQoNCg0K
+pFemuLd8xLO1sqf0q+GhQbOhpMCyerrKqMatzKvYxLPBYLd8rFmox7d8xLO/76jsplW/pKWrrtWk
+zbd8s0LBfKbmoUGzr8Fgt3yq+KRdpOSr+bNvrdO6Y7dRoUGsR6hNqXexTqW7priyerrKqMbBcK51
+t3zEs7K+rnap87dzpsulq67VpM23fMF8puahRrdQDQrBwrdzpsulq67VpM23fLNcpEClrbJ6qMaq
++KTOw7m356xLwWC3RqjGvPak36jzp1WhQy4uLiA8uNSl/qTlPg0KPGh0dHA6Ly93d3cuZmwudGt1
+LmVkdS50dzo4MDgwL25ld3MvaW5kZXgucGhwP3BlcmlvZF9pZD0xNjkmbWVtb19ubz0yIzItDQo0
+PiANCg0KDQoqCaV4pV+lq67VpM23fLDRs1i8c6pGrtWkzcFwvcu3fA0KDQoNCqV4pV+lq67VpM23
+fKZipP27RrnFsnqoxqr4oUK4s7fYt3O6YcVBsnqoxqr4pM6kpLXYpcGw6q7VpM3BYLd8s6+l/Kb5
+sMayeqjGqvi1pbFhu+KkVaFBpECm5jIzpEip8zWk6zE2pOmhXaStoV6rZam5v0Sq+a7IuUOhQajD
+sNGzWLxzqkau1aTNwXANCr3Lt3yhQw0KDQqtuqX9sNGzWKpGsvClw6n0pK2q97bsvaa/+y4uLiA8
+uNSl/qTlPg0KPGh0dHA6Ly93d3cuZmwudGt1LmVkdS50dzo4MDgwL25ld3MvaW5kZXgucGhwP3Bl
+cmlvZF9pZD0xNjkmbWVtb19ubz0yIzItDQo1PiANCg0KDQoqCaV4pKSlq67VpM23fLLEMamhssQ3
+priyerrKqMa3fMSzDQoNCg0KpXikpKWrrtWkzbd8qfM1pOsyM6TpoV2kraFeMTauyaFBpWy2fbLE
+MamhssQzpriyerrKqMbBcK51t3zEs6FBpdGqTLTcv0CyeqjGqvilRKv5oUGkpLXYpcGw6q7VpM3B
+YLd8qkyx08BNsMayeqjGqvikzqXArtW0XqxLtqew9abmqvimQ651q/wNCr7JoUO3fKSks3G5TLJI
+pr+1161eqvfGTrz6scDCy6TOMTAzvsemfqvXt3OlzbpbLi4uIDy41KX+pOU+DQo8aHR0cDovL3d3
+dy5mbC50a3UuZWR1LnR3OjgwODAvbmV3cy9pbmRleC5waHA/cGVyaW9kX2lkPTE2OSZtZW1vX25v
+PTIjMi0NCjY+IA0KDQoNCioJqtulW630rtWkzbd8sWnEX6X6t3yq+LNYpcCu1a7VpM2zQg0KDQoN
+CqV4pKSlq67VpM23fKnzNaTrMjOk6aFdpK2hXjE2rsmhQaVstn2yxDGpobLEM6a4snq6yqjGwXCu
+dbd8xLOhQaXRqky03L9Asnqoxqr4pUSr+aFBpKS12KXBsOqu1aTNwWC3fKpMsdPATbDGsnqoxqr4
+pM6lwK7VtF6sS7ansPWm5qr4pkOudav8DQq+yaFDt3ykpLNxuUyySKa/tdetXqr3xk68+rHAwsuk
+zjEwM77Hpn6r17dzpc26Wy4uLiA8uNSl/qTlPg0KPGh0dHA6Ly93d3cuZmwudGt1LmVkdS50dzo4
+MDgwL25ld3MvaW5kZXgucGhwP3BlcmlvZF9pZD0xNjkmbWVtb19ubz0yIzItDQo3PiANCg0KDQoq
+CbCoqNOm6KjIrtWkzbd8qfq3c7PQt3y3fKr4s1ilwK7VrtWkzbNCDQoNCg0KsKio06boqMiu1aTN
+t3yzr6n6t3Oz0Ld8t3yq+KnzNqTrMTOk6aFdpK2hXjEzrsmzWKXArtWu1aTNs0KhQbOvqfq3c77H
+qvikzqTSpEimXrDqsNGlW6RrqOCyprd+qOXCp6FBsU21e7y3qsWmXqXArtWhQ6VMvtCwX7ftpn6z
+0KXfrtWkzbd8pM6mYg0KrtWoRL7Hwkm6d6FBs6OsT6z8pm6quqZevtChQ7Ovvseq+KRdtKOo7KXY
+q2Ww6qS6plUuLi4gPLjUpf6k5T4NCjxodHRwOi8vd3d3LmZsLnRrdS5lZHUudHc6ODA4MC9uZXdz
+L2luZGV4LnBocD9wZXJpb2RfaWQ9MTY5Jm1lbW9fbm89MiMyLQ0KOD4gDQoNCg0KKgmlX6Vbpnuu
+1aTNt3yo/MHcpViudaxLuGCq4aiuuUOm5rl7vPqx365iDQoNCg0KpV+lW6Z7rtWkzbd8sNGlWzIw
+MTSkQKZ+pECr18LCqvekc6xLuGCq4aiuuUOm5qFBskimv6RqvsekarmqtqSy5r9vptOlWKFBumHA
+8sLCqvekc6xLuGCq4aiuuUOm5nNlbGYtYnVpbGQgZmxvYXS2taXYssQyplehQ6W7DQqmuKXArtWu
+1aTNquGorrNdrXCqzKyww7nEq6FCpr+xV6mipNKw/KFBpUS/7LPmpuyraC4uLiA8uNSl/qTlPg0K
+PGh0dHA6Ly93d3cuZmwudGt1LmVkdS50dzo4MDgwL25ld3MvaW5kZXgucGhwP3BlcmlvZF9pZD0x
+NjkmbWVtb19ubz0yIzItDQo5PiANCg0KDQoNCg0KICBfX19fXyAgDQoNCqG7oUCyxCAzIKqpCQ0K
+KgmodKnSpM23fMFwpljBYLd8ssQyqaGyxDKmuLFgsMiyerrKqMbBcK51t3zEsw0KDQoNCqh0qdKk
+zbd8wXCmWMFgt3yp8zak6zI4pOmhXaS7oV6kV6TIMTGuyTMwpMChQcF8puayxDKpobLEMqa4sWCw
+yLJ6usqoxsFwrnW3fMSzoUOuXbfntqnBYLd8qvissLxXtmmxYLDIsnq6yqjGsaG9y6FBr1Omd7HG
+qfOkaKpMqHCmdsF8DQqm5qFBqMPB3Kz5srLE3cFwxXehQaZAwbiyscF8oUMNCg0Kt3ykpKFBLi4u
+IDy41KX+pOU+DQo8aHR0cDovL3d3dy5mbC50a3UuZWR1LnR3OjgwODAvbmV3cy9pbmRleC5waHA/
+cGVyaW9kX2lkPTE2OSZtZW1vX25vPTMjMy0NCjE+IA0KDQoNCioJsOq2VKh0qdKmUL7Ht3yyxDKp
+obLEMqa4snq6yqjGwXCudbd8xLMNCg0KDQqw6rZUqHSp0qZQvse3fKnzNaTrN6TpoV2kVKFeMTiu
+yTMwpMChQbCypLurfqRwwF3BfKbmssQypriyerrKqMbBcK51t3zEs6FDt3zEs6XRpP2sscBzsnqo
+xqr4pUSr+aFBt3ykpLBRvdehQaaopd+3fK37t3ywyMJYrmmpZa37t3yhQsFwvcusoQ0KsMqpZa37
+t3yhQrz6p1W+x6r3pM620rTaqWWt+7d8oUK+x7NOpOWkxrHArmmpZa37t3wuLi4gPLjUpf6k5T4N
+CjxodHRwOi8vd3d3LmZsLnRrdS5lZHUudHc6ODA4MC9uZXdzL2luZGV4LnBocD9wZXJpb2RfaWQ9
+MTY5Jm1lbW9fbm89MyMzLQ0KMTA+IA0KDQoNCioJpKSw6qRqs7Cs46hzqdKmUL7Ht3wyMrZnpn40
+plgxwFy3fA0KDQoNCqSksOqkarOwrOOoc6nSplC+x7d8NqTrN6TpoV2ku6FeoUGwsrtPpV+26qRz
+pGq2uqmxwXy/7Krvt3OhQrBlwsKhQsHCrnahQqnSpM23fDSmWDHAXLd8rKGwyqFBrKGwyqXRsWmk
+ramoqdKq+KVEq/mhQajDwdy90KXfqmupZa37pra78arbq2W3fKr4DQq2fbn1rVC1/KFBt+2k6aXA
+rtWu1aTNqkGwyLpbuOq3vbVvrmmzQrRerEu2p7D1puaq+C4uLiA8uNSl/qTlPg0KPGh0dHA6Ly93
+d3cuZmwudGt1LmVkdS50dzo4MDgwL25ld3MvaW5kZXgucGhwP3BlcmlvZF9pZD0xNjkmbWVtb19u
+bz0zIzMtDQoxMT4gDQoNCg0KKgkyNTCv6KTTpEi3xcTJsdTCwg0KDQoNCq/opNOodKh0pM23fKnz
+NaTrM6TpoV2ku6FepmK+x6XNrKGwyqSkpN+hQcF8v+yodKTNt3ymqKXfMjC2Z6Z+ulu3fKr4pr+4
+27phumHA8rDqrmG9WaXbvPqhQcL5s9/Be6r5oUm5TzI1MKbsqHSkzaZepcCu1alNp1mxTrphsGiq
+uqtlsMau1ar4DQq2vrTCreix0LHCt8XEybHUwsKhQ6yhsMqkpLl7tW/CsqRTt3Ol/aXNvPq+x6r3
+pM62vi4uLiA8uNSl/qTlPg0KPGh0dHA6Ly93d3cuZmwudGt1LmVkdS50dzo4MDgwL25ld3MvaW5k
+ZXgucGhwP3BlcmlvZF9pZD0xNjkmbWVtb19ubz0zIzMtDQoxMj4gDQoNCg0KKgmkxr7HpHW1e7tQ
+p/euxqR1tXu+x6h0qHSkzbd8MTAzpn6yxDGmuLFNt369177CDQoNCg0KpMan96h0qHSkzbd8NqTr
+Mjik6aFdpLuhXqFBqfOleKVfrtW26a7VpM3BcL3Lt3zAXcF8v+wxMDOmfrLEMaa4sU23fr3XvsKh
+Qbd8xLOl0bFppb+ofbJ6qMaq+KVEq/mhQa9Tp0/B3L3QpcCu1bOvt0aoa6tlsMau1ar4pM6w6rTL
+pfi3fqS9pXENCrOvpUC998FguGeyeqVEwb+hQa1wrPmmszcwpleu1aTNpkDBuLKxwXyhQ73XvsKl
+RC4uLiA8uNSl/qTlPg0KPGh0dHA6Ly93d3cuZmwudGt1LmVkdS50dzo4MDgwL25ld3MvaW5kZXgu
+cGhwP3BlcmlvZF9pZD0xNjkmbWVtb19ubz0zIzMtDQoxMz4gDQoNCg0KKgmySKa/pGq+x7jzt37B
+cL3Lt3ysobDKDQoNCg0Kskimv6Rqvse487d+wXC9y7d8NqTrMTmk6aFdpXyhXjE4rsmhQanzpXil
+X67Vtumu1aTNwXC9y7d8wF2hQcF8puau1aTNpfi3frhnwOel5qx5rKGwyqFBpdGzr6VApne3fKr4
+pUSr+aFDt3ykpKFBsKOkRsHcvdCofKaopKSk37+9t+eyu6VEDQql9KFCuOKwt6SkuGeyeqV+oUGo
+dKnSpM23fMFwpljBYLd8rUqyUa1zsWCwyLJ6qMakXaj8wdwuLi4gPLjUpf6k5T4NCjxodHRwOi8v
+d3d3LmZsLnRrdS5lZHUudHc6ODA4MC9uZXdzL2luZGV4LnBocD9wZXJpb2RfaWQ9MTY5Jm1lbW9f
+bm89MyMzLQ0KMTQ+IA0KDQoNCioJv+C2abhxrtWkzbG1pfSw6rvaqMawyLtQvtSypKzjqHOp0qnS
+pM23fLJ6qMaq+A0KDQoNCrDqu9qoxrDIu1C+1LKkrOOoc6nSqdKkzbd8qfM0pOsyN6TpoV2k6aFe
+oUGp86V4pV+u1bbprtWkzcFwvcu3fMBdoUGlbLZ9ssQzqaGyxDGmuLd8rfukard8oUO3fMSzpdGx
+aaVA4LGyeqjGqvilRKv5oUG7ULd8qdKkzblPNTCkSKFDpGq3fKZiDQqvzqn6veWp0qr4rVC1/KRV
+rmm2fafHufWhQbd8pKSwd7nvpcCu1cR3q9ihdaZ1wb6w6i4uLiA8uNSl/qTlPg0KPGh0dHA6Ly93
+d3cuZmwudGt1LmVkdS50dzo4MDgwL25ld3MvaW5kZXgucGhwP3BlcmlvZF9pZD0xNjkmbWVtb19u
+bz0zIzMtDQoyPiANCg0KDQoqCbbAr/Sv9K7VpM2xtaX0sNO63rrTpGjBcKZYplC+x7d8snqoxqr4
+DQoNCg0KsNO63rrTpGjBcKZYplC+x7d8qfM2pOs4oV2k6aFeMTKuyaFBsLKleMZXtdKwc6S9pXGr
+2LDqsHO8dKRqwqew86FBwXym5rLENKmhssQxpri3fK37pGq3fKFBpGq3fKXRs1y4caXBsnqoxqr4
+pUSr+aFBt3ykpMHcvdCu1aTNqkGwyLpbuOq3vbVvDQquabNCtF6sS7ansPWm5qr4oUKodKnSpM23
+fMFwpljBYLd8rl2357apwWC3fKr4pViudS4uLiA8uNSl/qTlPg0KPGh0dHA6Ly93d3cuZmwudGt1
+LmVkdS50dzo4MDgwL25ld3MvaW5kZXgucGhwP3BlcmlvZF9pZD0xNjkmbWVtb19ubz0zIzMtDQoz
+PiANCg0KDQoqCbOvqXbBSK7VpM2xtaX0uOqwVKR1tXu+x6h0qHSkzbd8t3yq+A0KDQoNCrjqpHWo
+dKh0pM23fKnzNqTrMjGk6aFdpLuhXjEzrskzMKTAoUGp86V4pV+u1bbprtWkzcFwvcu3fMBdoUGl
+bLZ9ssQzqaGyxDKmuLd8rfukard8oUOkard8pdGxabphtlG3fKr4pUSr+aFBpcCu1buvumHEo6tl
+rtWq+KFCrtWkzapBsMi6Ww0KuOq3vbVvrmmzQrRerEu2p7D1puaq+KTOqHSp0qTNt3zBcKZYwWC3
+fLNcuHGlwbDGwWAuLi4gPLjUpf6k5T4NCjxodHRwOi8vd3d3LmZsLnRrdS5lZHUudHc6ODA4MC9u
+ZXdzL2luZGV4LnBocD9wZXJpb2RfaWQ9MTY5Jm1lbW9fbm89MyMzLQ0KND4gDQoNCg0KKgmk9Ljq
+t72kzsD0udKkdbV7vseodKh0pM23fLLEMamhssQ5priyerrKqMbBcK51t3zEsw0KDQoNCqT0wPSo
+dKh0pM23fKnzNqTrMTWk6aFdpLuhXjEwrskzMKTAoUGp86V4pV+u1bbprtWkzcFwvcu3fMBdoUGl
+bLZ9ssQxqaGyxDmmuLJ6usqoxsFwrnW3fMSzoUO3fMSzpdGt2aVAvNCyeqjGqvilRKv5oUGlRK1u
+uXu1b8FawHWyTbRIvPq+xw0KqvehQaXnsHe577d8sMikzrDRs1i2aabmsFG916FDt3yr4aFBuXep
+d7LEMqmhsnq6yi4uLiA8uNSl/qTlPg0KPGh0dHA6Ly93d3cuZmwudGt1LmVkdS50dzo4MDgwL25l
+d3MvaW5kZXgucGhwP3BlcmlvZF9pZD0xNjkmbWVtb19ubz0zIzMtDQo1PiANCg0KDQoqCbLOrXC+
+x6h0qHSkzbd8ssQ5qaGyxDKmuLJ6usqoxsFwrnW3fMSzDQoNCg0Kss6tcL7HqHSodKTNt3yp8zWk
+6zEzpOmhXaRHoV6hQanzpXilX67Vtumu1aTNwXC9y7d8wF2hQaVstn2yxDmpobLEMqa4snq6yqjG
+wXCudbd8xLOhQbd8xLOl0a1KslGtc7d8qvilRKv5oUG3fMSzsFG916r3xk68+qTOs8elWKh0pM2/
+76neqU2t1w0Kpb+zubV7taWoxql5oUO3fKvhoUGoTcSzpbyo07FOwdy90KZVrMnAdahxqHSkzbZp
+puYuLi4gPLjUpf6k5T4NCjxodHRwOi8vd3d3LmZsLnRrdS5lZHUudHc6ODA4MC9uZXdzL2luZGV4
+LnBocD9wZXJpb2RfaWQ9MTY5Jm1lbW9fbm89MyMzLQ0KNj4gDQoNCg0KKgm46rBUut6yer7HqHSs
+46hzqdKp0qTNt3zBcL3LrKGwyg0KDQoNCrjqut6p0qnSpM23fKnzNqTrN6TpoV2ku6FeoUGp86V4
+pV+u1bbprtWkzcFwvcu3fMBdoUHBfL/sqdKkzbd8wXC9y6yhsMqhQbftpOm7ULd8qdKkzarxMTUw
+puyhQ7jqut6p0qZirtWlzaywxf2mVanSpM2kxLBfpmKu1aZevtChQajPpVi0/aituNENCrzGoUGn
+UaXOrmGx2qTOuUPAuMX9rKGwyrfFxMm89r54oUOldKV+oUHB3L3QsKqn06e7Li4uIDy41KX+pOU+
+DQo8aHR0cDovL3d3dy5mbC50a3UuZWR1LnR3OjgwODAvbmV3cy9pbmRleC5waHA/cGVyaW9kX2lk
+PTE2OSZtZW1vX25vPTMjMy0NCjc+IA0KDQoNCioJpfi63qh0qdKu1aTNt3yyxDGpobLENKa4snq6
+yqjGwXCudbd8xLMNCg0KDQql+LreqHSp0q7VpM23fDWk6zI4pOmhXaRUoV4xOK7JMzCkwKFBqfOl
+eKVfrtW26a7VpM3BcL3Lt3zAXcF8puayxDGpobLENKa4snq6yqjGwXCudbd8xLOhQ7d8xLOl0bFp
+qve3y7J6qMaq+KVEq/mhQbd8pKSoTcSzoUG0o6jRpfi63qh0pOkNCrahs6GiQbZpvsevWqZirtWl
+zahDpn6vxaZVMaZXvPak36pBsMi8+r7HqvehQcDyvPouLi4gPLjUpf6k5T4NCjxodHRwOi8vd3d3
+LmZsLnRrdS5lZHUudHc6ODA4MC9uZXdzL2luZGV4LnBocD9wZXJpb2RfaWQ9MTY5Jm1lbW9fbm89
+MyMzLQ0KOD4gDQoNCg0KKgmrT8BJvseodKh0pM23fLLEMqa4snq6yqjGt3zEsw0KDQoNCqtPwEmo
+dKh0pM23fKnzNaTrMjmk6aFdpXyhXjE4rsmhQanzpXilX67Vtumu1aTNwXC9y7d8wF2hQaVstn2y
+xDKmuLJ6usqoxrd8xLOhQ7d8xLOl0aa/tMI/t3yq+KVEq/mhQaV0pX6hQa9Tp0/B3L3QrtWkza7v
+pOWswqbRrnahQaVIoXWxcaRIDQqs277HrN2t06RIuUK1e6irttWhdqVEw0SssKh0pM2xTcNEunTB
+v6FDt3zEs7CjsFG91y4uLiA8uNSl/qTlPg0KPGh0dHA6Ly93d3cuZmwudGt1LmVkdS50dzo4MDgw
+L25ld3MvaW5kZXgucGhwP3BlcmlvZF9pZD0xNjkmbWVtb19ubz0zIzMtDQo5PiANCg0KDQoNCg0K
+ICBfX19fXyAgDQoNCqG7oUCyxCA0IKqpCQ0KKgm8QrSwpK+u1aTNw9i5TzOkZK7RDQoNCg0KpfTC
+vqVfrPysd7q1v9+l+Ld+uLOoxqr4qrqlfrt5qHSm6K9apPqk5bLVKLJ7pui7eah0Ka7VpM28QrSw
+pK+uvcPYuU8zpGSlu67RxHm1uaXArtW5z67RwF2hQa7RxHnD/qusslu7XKazpKSk5aFCpuivWqT6
+pOWhQrhxpGqnUaTlpM6lQKzJw8CzTqV2DQq1pajlwsOhQ7xCvseq+KrtpdyhQcH2tU2kd7hnwve2
+faXArtW2V7lMpWKlQKz2oUGm/S4uLiA8uNSl/qTlPg0KPGh0dHA6Ly93d3cuZmwudGt1LmVkdS50
+dzo4MDgwL25ld3MvaW5kZXgucGhwP3BlcmlvZF9pZD0xNjkmbWVtb19ubz00IzQtDQoxPiANCg0K
+DQoqCaF1pnXBvrDqu9q3fMSzpKSk36F2ttK02rJ7qnANCmh0dHA6Ly93d3cuZmwudGt1LmVkdS50
+dy9uZXdzLUlUQi5hc3AgDQoNCg0KoXWmdcG+sOq72rd8xLOkpKTfoXamyrhVqve/aqFCu8i/aqFC
+pECkSKRAv2oNCg0KrtWkzbr0tbisT6Rqvsequq2rrW646rKjoUGlwK7VqvGmfrHApVitq61uqrqr
+2LNdodCw6rvat3zEs6SkpN+hQbSjqNGu1aTNtW+0p7tFqEamqLbwqrqkT7ZxoUGssKXArtWnuaao
+q9izXaFDprmkQK2rrW6r2LNdoUGk6atlwPKxb659Li4uIDy41A0Kpf6k5T4NCjxodHRwOi8vd3d3
+LmZsLnRrdS5lZHUudHc6ODA4MC9uZXdzL2luZGV4LnBocD9wZXJpb2RfaWQ9MTY5Jm1lbW9fbm89
+NCM0LQ0KMj4gDQoNCg0KKgkxMDOmfjUtNqTrrr202qraple//aFBr1OmubdQwcKhQyBodHRwOi8v
+d3d3LmZsLnRrdS5lZHUudHcvYWNjb3UNCjxodHRwOi8vd3d3LmZsLnRrdS5lZHUudHcvYWNjb3Vu
+dC1jcmVkaXQuYXNwPiANCiA8uNSl/qTlPg0KPGh0dHA6Ly93d3cuZmwudGt1LmVkdS50dzo4MDgw
+L25ld3MvaW5kZXgucGhwP3BlcmlvZF9pZD0xNjkmbWVtb19ubz00IzQtDQozPiANCg0KDQqmcKzd
+pKOoo6RXpOik5bO5oae41KX+pOWhp7NztbKhQb3Qwkm/76RVpOizc7WyDQpodHRwOi8vd3d3LmZs
+LnRrdS5lZHUudHc6ODA4MC9uZXdzLw0Ksf2o+q74rXG+XKW7uXGkbLP4oUe90MJJv+8gqPqu+K1x
+vlylu7lxpGyz+A0KPGh0dHA6Ly93d3cuZmwudGt1LmVkdS50dzo4MDgwL25ld3MvbWFpbGxpc3Rf
+dW5zdWJzY3JpYmVfZW5ld3MucGhwPiANCkNvcHlSaWdodCBjIDIwMDEtMjAwMiCySKa/rtWkzapB
+sMi6W7jqt721b65ps0INCg0K
+
+------=_NextPart_000_F7A0_01CFAD38.DC1F3400
+Content-Type: text/html
+Content-Transfer-Encoding: quoted-printable
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html  lang=3D"zh-TW">
+<!--# include virtual=3D"/pm/msgcode.asp" -->
+
+<head>
+<meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Dbig5" =
+/>
+
+<link href=3D"http://www.fl.tku.edu.tw/css/epaper.css" =
+rel=3D"stylesheet" type=3D"text/css" />
+
+<title>=B9q=A4l=B3=F8=A1i=B2=C4 169 =B4=C1=A1j</title>
+<style type=3D"text/css">
+<!--
+a:link {
+	color: #F00;
+}
+a:visited {
+	color: #F00;
+}
+a:active {
+	color: #F7F6F3;
+}
+body,td,th {
+	font-size: 16px;
+	font-family: Times New Roman, Times, serif;
+}
+-->
+</style></head>
+<!--base href=3D"http://163.13.226.61"-->
+
+<body>
+<table summary=3D"layout" class=3D"layout" cellpadding=3D2 =
+cellspacing=3D1  border=3D"0" align=3D"center">
+	<tr><td align=3D"center"><img =
+src=3D"http://www.fl.tku.edu.tw/epaper/images/logo2.gif"  border=3D"0" =
+alt=3D"=E8=A1=A8=E9=A0=AD" align=3D"absmiddle"/></td></tr>=20
+	<tr><td align=3D"center"><span class=3D"color-white title">=B2=C4 169 =
+=B4=C1</span> (=A5X=AA=A9=A4=E9=B4=C1=A1G2014-07-30 =ACP=B4=C1=A4T) =
+Can't read the articles? Please click the link below<a =
+href=3D"http://www.fl.tku.edu.tw:8080/news/">http://www.fl.tku.edu.tw:808=
+0/news/</a></td></tr>=20
+	<tr><td align=3D"center">
+		<table width=3D"100%" class=3D"color-back" cellpadding=3D0 =
+cellspacing=3D0  border=3D"0" align=3D"center">
+		<tr><td class=3D"epaper-memo title">=A1=BB=A1@=B2=C4 1 =
+=AA=A9</td></tr><tr>	<td class=3D"epaper-title">		<li><span =
+class=3D"title =
+color-blue">=B6P=A1I=AE}=AF=E8=B0=B7=AE=D5=A4=CD=A4J=BF=EF=AC=FC=B0=EA=A1=
+m=B4I=A4=F1=A4h=A1n=C2=F8=BBx=AA=BA=A8=C8=ACw=B7O=B5=BD=AD^=B6=AF=BA]</sp=
+an><br><span =
+class=3D"epaper-message"><P>=A7=DA=AD=CC=B3=A3=AA=BE=B9D=AA=D1=AF=AB=A4=DA=
+=B5=E1=AFS=B7R=BF=FA=A1A=ABo=A4=A3=B3g=B0=FD=A5=AB=BB=FB=A1F=B7R=A7=EB=B8=
+=EA=A1A=ABo=AB=DC=B1M=AA`=A6=DB=A8=EE=A1F=A4w=B8g=AB=DC=A6=B3=BF=FA=A1A=AB=
+o=B8`=BB=FC=A1B=A5=CE=A5\=AC=E3=A8s=A7=EB=B8=EA=BC=D0=AA=BA=A1B=BC=F6=B7R=
+=A4u=A7@=A8=CC=C2=C2=A1F=B1a=C0Y=B1=C0=B0=CA=B4I=BB=A8=A1u=AE=BD=C3=D8=A9=
+=D3=BF=D5=A1v=BBP=A8C=A6~=A4j=B5=A7=AE=BD=C3=D8=B3=CC=AC=B0=A4H=A9=D2=BC=D6=
+=B9D=A1C=A7A=AA=BE=B9D=B6=DC=A1H=A5x=C6W=A4]=A6=B3=A6=EC=A4=DA=B5=E1=AFS=A1=
+A...&nbsp;<A =
+HREF=3D"http://www.fl.tku.edu.tw:8080/news/index.php?period_id=3D169&memo=
+_no=3D1#1-1"><=B8=D4=A5=FE=A4=E5></a><br><br></span>		</li>	=
+</td></tr><tr>	<td class=3D"epaper-title">		<li><span class=3D"title =
+color-blue">2014=A1u=B2H=A6=BF=A4j=BE=C7=AE=D5=A4=CD=AE=D5=AA=F8=B1=D0=A8=
+|=B0=AA=AEp=B7|=A1v</span><br><span =
+class=3D"epaper-message"><P>=BDt=B0_=A1G=A5=C0=AE=D5=B5=D7=AD^=AE=D5=A4=CD=
+=B7|=B3=AF=BCy=A8k=B7|=AA=F8=A9=F3=A5h=A6~10=A4=EB=A1A=A5X=AEu=A9=F3=AA=E1=
+=BD=AC=C1|=BF=EC=A4=A7=A1u=A4=A4=B5=D8=A5=C1=B0=EA=AE=D5=A4=CD=C1`=B7|=B7=
+|=AD=FB=A4j=B7|=A1v=AE=C9=A1A=A6=B3=B7P=A9=F3=A4=D6=A4l=A4=C6=B9=EF=BE=C7=
+=AE=D5=AA=BA=BD=C4=C0=BB=A1A=A4S=C5=B3=A9=F3=AE=D5=A4=CD=AA=BA=B3=C7=A5X=AA=
+=ED=B2{=A1A=AE=D5=A4=CD=AE=D5=AA=F8=B6=B3=B6=B0=A1A=B9E=BF=B3=B0_=C1|=BF=EC=
+=AC=E3=B0Q=B7|=A1A=A6@=A6P=AC=E3=C4=B3=A6]=C0=B3=B5=A6=B2=A4=A1A=B4=A3=A8=
+=D1...&nbsp;<A =
+HREF=3D"http://www.fl.tku.edu.tw:8080/news/index.php?period_id=3D169&memo=
+_no=3D1#1-2"><=B8=D4=A5=FE=A4=E5></a><br><br></span>		</li>	=
+</td></tr><tr>	<td class=3D"epaper-title">		<li><span class=3D"title =
+color-blue">=AD=BB=B4=E4=AE=D5=A4=CD=B7|=A6^=A5=C0=AE=D5=B3X=B0=DD</span>=
+<br><span =
+class=3D"epaper-message"><P>=AD=BB=B4=E4=AE=D5=A4=CD=B7|=A6^=A5=C0=AE=D5=B3=
+X=B0=DD=B9=CE=A4@=A6=E65=A4H=A1A=A9=F35=A4=EB29=A4=E9=A1]=A5|=A1^=A6^=A5=C0=
+=AE=D5=AB=F4=B3X=A1A=A6=A8=AD=FB=ADp=A6=B3=B7|=AA=F8=B8=AD=B6=AE=B5^=A1B=B0=
+=C6=B7|=AA=F8=B3=C1=B7~=A6=A8=C4=B3=AD=FB=A4=CE=BCB=B0=EA=BD=F7=AE=D5=A4=CD=
+=B5=A5=A1C</P>
+<P>=C0=B9=B8U=B4=DC=B0=EA=BB=DA=A8=C6=B0=C8=B0=C6=AE=D5=AA=F8=AFS=A7O=A5l=
+=B6=B0=AE=D5=A4=CD=AAA=B0=C8=BA[=B8=EA=B7=BD=B5o=AEi=B3B=B4^=ACK=B6=A7=B0=
+=F5=A6=E6=AA=F8=A1B...&nbsp;<A =
+HREF=3D"http://www.fl.tku.edu.tw:8080/news/index.php?period_id=3D169&memo=
+_no=3D1#1-3"><=B8=D4=A5=FE=A4=E5></a><br><br></span>		</li>	=
+</td></tr><tr>	<td class=3D"epaper-title">		<li><span class=3D"title =
+color-blue">103=BE=C7=A6~=AB=D7=B7s=A5=CD=BA[=AEa=AA=F8=AEy=BD=CD=B7|=B3=F5=
+=A6=B8=AA=ED</span><br><span class=3D"epaper-message">&nbsp;<A =
+HREF=3D"http://www.fl.tku.edu.tw:8080/news/index.php?period_id=3D169&memo=
+_no=3D1#1-4"><=B8=D4=A5=FE=A4=E5></a><br><br></span>		</li>	=
+</td></tr><tr>	<td class=3D"epaper-title">		<li><span class=3D"title =
+color-blue">=B2=C428=A9=A1=A1u=B2H=A6=BF=B5=D7=AD^=A1v=AA=F7=C6N=BC=FA=B3=
+=C7=A5X=AE=D5=A4=CD=BF=EF=A9=DE<br>
+=BD=D0=A6U=AE=D5=A4=CD=B7|=BF=E3=C5D=B1=C0=C2=CB<br></span><br><span =
+class=3D"epaper-message"><P>103=A6~=AB=D7=B2=C428=A9=A1=A1u=B2H=A6=BF=B5=D7=
+=AD^=A1v=AA=F7=C6N=BC=FA=B3=C7=A5X=AE=D5=A4=CD=BF=EF=A9=DE=A1A=A6=DB=A7Y=A4=
+=E9=B0_=A6=DC7=A4=EB31=A4=E9=A4=EE=A1A=A8=FC=B2z=A5=D3=BD=D0=A1C=A6U=AE=D5=
+=A4=CD=B7|=A6p=A6=B3=A5=F4=A6=F3=B0=DD=C3D=A1A=C5w=AA=EF=C0H=AE=C9=A8=D3=B9=
+q=AC=A2=B8=DF=A1C</P>
+<P>=A4Z=B2H=A6=BF=AD^=B1M=A1B=A4=E5=B2z=BE=C7=B0|=A4=CE=A4j=BE=C7=A4=A7=AE=
+=D5=A4=CD=A1A=A8=E3=A6=B3=B0=AA=A9|=A4=A7=AB~=BCw=A1A=B9=EF...&nbsp;<A =
+HREF=3D"http://www.fl.tku.edu.tw:8080/news/index.php?period_id=3D169&memo=
+_no=3D1#1-5"><=B8=D4=A5=FE=A4=E5></a><br><br></span>		</li>	=
+</td></tr><tr>	<td class=3D"epaper-title">		<li><span class=3D"title =
+color-blue">=AE=D5=A4=CD=AD=D3=A4H=B8=EA=AE=C6=ABO=C5@=C1n=A9=FA</span><b=
+r><span =
+class=3D"epaper-message"><P>=A5=C0=AE=D5=B0t=A6X=A1u=AD=D3=A4H=B8=EA=AE=C6=
+=ABO=C5@=AAk=A1v=A4=A7=ACI=A6=E6=A1A=A8=C3=BE=C9=A4J=AD=D3=B8=EA=BA=DE=B2=
+z=A1A=B9=EF=A9=F3=AE=D5=A4=CD=A4=A7=AD=D3=A4H=B8=EA=AE=C6=C0=B3=BA=C9=B5=BD=
+=A8}=BA=DE=B2z=A4H=A4=A7=B3d=A5=F4=A1A=A8=C3=A9=F3=A5=C0=AE=D5=BA=F4=AF=B8=
+=AD=BA=AD=B6=A4=BD=A7i=A1G=AD=D3=B8=EA=BA=DE=B2z=ACF=B5=A6=C1n=A9=FA=BBP=C1=
+=F4=A8p=C5v=ACF=B5=A6=C1n=A9=FA=A1C</P>
+<P>=BE=C7=AA=F8=A9j=A4=A7=AD=D3=A4H=B8=EA=AE=C6=A1G=A9m=A6W=A1B=A6a=A7}=A1=
+B...&nbsp;<A =
+HREF=3D"http://www.fl.tku.edu.tw:8080/news/index.php?period_id=3D169&memo=
+_no=3D1#1-6"><=B8=D4=A5=FE=A4=E5></a><br><br></span>		</li>	=
+</td></tr><tr>	<td class=3D"epaper-title">		<li><span class=3D"title =
+color-blue">=C5w=AA=EF=A8=CF=A5=CE=B2H=A6=BF=A4j=BE=C7=B4N=B7~=BA=F4http:=
+//ejob.tku.edu.tw/ <br>
+=B3o=F9=D8=B4=A3=A8=D1=A5=F8=B7~=B5n=BF=FD=A8D=A4~=B8=EA=B0T =
+=AC=B0=A5=C0=AE=D5=AE=D5=A4=CD=BCW=A5[=B4N=B7~=BA=DE=B9D<br></span><br><s=
+pan class=3D"epaper-message">&nbsp;<A =
+HREF=3D"http://www.fl.tku.edu.tw:8080/news/index.php?period_id=3D169&memo=
+_no=3D1#1-7"><=B8=D4=A5=FE=A4=E5></a><br><br></span>		</li>	=
+</td></tr><tr><td><br><hr></td></tr><tr><td class=3D"epaper-memo =
+title">=A1=BB=A1@=B2=C4 2 =AA=A9</td></tr><tr>	<td =
+class=3D"epaper-title">		<li><span class=3D"title =
+color-blue">=B2=F8=A4=E5=A8j=AE=D5=A4=CD=B1=B5=A5=F4=A4j=B3=B0=AE=D5=A4=CD=
+=C1p=BD=CB=C1`=B7|=C1`=B7|=AA=F8<br>
+=A1=BD =
+=AA=F4=BE=F0=AAL=AE=D5=A4=CD=B1=B5=A5=F4=BCs=AAF=AE=D5=A4=CD=C1p=BD=CB=B7=
+|=B7|=AA=F8<br>
+=A1=BD =
+=ACx=B2W=B5=D8=AE=D5=A4=CD=B1=B5=A5=F4=B5=D8=AAF=AE=D5=A4=CD=C1p=BD=CB=B7=
+|=B7|=AA=F8<br></span><br><span =
+class=3D"epaper-message"><P>2013=A6~=A4j=B3=B0=AE=D5=A4=CD=C1p=BD=CB=C1`=B7=
+|=B2=F8=A4=E5=A8j=AE=D5=A4=CD=A5=D1=B0=AA=B7s=A5=AD=AE=D5=A4=CD=A4=E2=A4=A4=
+=B1=B5=A4U=C1`=B7|=AA=F8=A4@=C2=BE=A1A=B2=F8=C1`=B7|=AA=F8=A6P=AE=C9=AD=DD=
+=A5=F4=BCs=AAF=AE=D5=A4=CD=C1p=BD=CB=B7|=B7|=AA=F8=A1A=A6]=A6=B9=A9=F3=A6=
+P=A6~12=A4=EB21=A4=E9=A1]=A4=BB=A1^=A7=EF=BF=EF=A5=D1=AA=F4=BE=F0=AAL=AE=D5=
+=A4=CD=B1=B5=A5=F4=BCs=AAF=AE=D5=A4=CD=C1p=BD=CB=B7|=B7|=AA=F8=A1A=A8=C3=A9=
+=F3=A4=B5=A6~5=A4=EB17=A4=E9=A1]=A4=BB...&nbsp;<A =
+HREF=3D"http://www.fl.tku.edu.tw:8080/news/index.php?period_id=3D169&memo=
+_no=3D2#2-1"><=B8=D4=A5=FE=A4=E5></a><br><br></span>		</li>	=
+</td></tr><tr>	<td class=3D"epaper-title">		<li><span class=3D"title =
+color-blue">=B0=F2=B6=A9=A5=AB=AE=D5=A4=CD=B7|=C1|=BF=EC=B4N=B7~=C1=BF=AE=
+y</span><br><span =
+class=3D"epaper-message"><P>=B2=A6=B7~=A9u=B8`=B1N=A8=EC=A1A=B0=F2=B6=A9=A5=
+=AB=AE=D5=A4=CD=B7|=AFS=C1|=BF=EC=A1u=C0=B3=A9=A1=B2=A6=B7~=A5=CD=B4N=B7~=
+=C1=BF=AEy=A1v=A1A=A8=C3=C1=DC=BD=D0=A9=F3=B4N=B7~=BB=B2=BE=C9=BB=E2=B0=EC=
+=AA=BE=A6W=AA=BA=AE=D5=A4=CD=BC=D6=A5=CD=B2P=BA=DE=B2z=C5U=B0=DD=A4=A4=A4=
+=DF=C2=C5=A6p=B7=EB=B0=F5=A6=E6=AA=F8=B6}=C1=BF=A1A=A4=A3=BD=D7=ACO=B2=A6=
+=B7~=A5=CD=A9=CE=A6b=AE=D5=A5=CD=B3=A3=C4=B1=B1o=A6=AC=C3=AC=BA=A1=BA=A1=A1=
+I</P>
+<P>=B3o=B3=F5=BAt=C1=BF=A5=D1=A5=C0=AE=D5=AE=D5=A4=CD...&nbsp;<A =
+HREF=3D"http://www.fl.tku.edu.tw:8080/news/index.php?period_id=3D169&memo=
+_no=3D2#2-10"><=B8=D4=A5=FE=A4=E5></a><br><br></span>		</li>	=
+</td></tr><tr>	<td class=3D"epaper-title">		<li><span class=3D"title =
+color-blue">=BC=D6=AC=A1=BE=C7=ADb=A4=E9=BBy=BAq=C1=C1=C1p=BD=CB=B7|=A8=FC=
+=C1=DC=B0=D1=A5[=A4=E9=A5=BB=B9q=A5x=A5d=A9=D4OK=A4j=B7|</span><br><span =
+class=3D"epaper-message"><P>=BC=D6=AC=A1=BE=C7=ADb=A4=E9=BBy=BAq=C1=C1=C1=
+p=BD=CB=B7|3=A4=EB19=A4=E9=A1]=A4T=A1^=C0=B3=A4=E9=A5=BB=D4=C3=A5=C9=A5=AB=
+=B9q=B5=F8=A5x=C1=DC=BD=D0=B0=D1=A5[=ACK=A9u=A5d=A9=D4OK=A4j=B7|=A1A=C0=F2=
+=B1o=AC=C6=B0=AA=AA=BA=B5=FB=BB=F9=A1C</P>
+<P>=B2=C41=A4=D1=A4=E9=A4=E8=A4=CD=A4H=A6w=B1=C6=A9=F3=A4=E9=A5=BB=B0=EA=B7=
+|=C4=B3=A8=C6=B0=F3=A4=BD=A5=C1=B7|=C0]=B8=D5=B0=DB=A1F=B2=C42=A4=D1=BAq=B0=
+=DB=A4j=B7|=B7|=B3=F5=A1A=A5=D1=A9=F3=B7|=AD=FB=AD=CC...&nbsp;<A =
+HREF=3D"http://www.fl.tku.edu.tw:8080/news/index.php?period_id=3D169&memo=
+_no=3D2#2-11"><=B8=D4=A5=FE=A4=E5></a><br><br></span>		</li>	=
+</td></tr><tr>	<td class=3D"epaper-title">		<li><span class=3D"title =
+color-blue">=A7=F5=A6=B3=A9=BE=AE=D5=A4=CD=C4=F2=A5=F4=AA=F7=AA=F9=BF=A4=AE=
+=D5=A4=CD=B7|=B2z=A8=C6=AA=F8</span><br><span =
+class=3D"epaper-message"><P>=AA=F7=AA=F9=BF=A4=AE=D5=A4=CD=B7|=A9=F35=A4=EB=
+24=A4=E9=A1]=A4=BB=A1^=A1A=B0=B2=AA=F7=AA=F9=BF=A4=AAF=AA=F9=C0\=C6U=C1|=BF=
+=EC=B2=C45=A9=A1=B2=C41=A6=B8=B7|=AD=FB=A5N=AA=ED=A4j=B7|=A1A=B7|=C4=B3=A5=
+=D1=A7=F5=A6=B3=A9=BE=B2z=A8=C6=AA=F8=A5D=AB=F9=A1A=A5=C0=AE=D5=B1i=AEa=A9=
+y=AE=D5=AA=F8=A4=CE=A4=A4=B5=D8=A5=C1=B0=EA=AE=D5=A4=CD=C1`=B7|=B3=AF=A9w=
+=A4t=B2z=A8=C6=AA=F8=A7=A1=ADP=B9q=AA=ED=B9F=AF=AC=B6P=A1C=A5=BB=B7|=C4=B3=
+=A1A=B0=A3=AD=EC=B7|=AD=FB=A5~=A1A=A7=F3=BCW=A5[=B3\=A6h=A6~...&nbsp;<A =
+HREF=3D"http://www.fl.tku.edu.tw:8080/news/index.php?period_id=3D169&memo=
+_no=3D2#2-2"><=B8=D4=A5=FE=A4=E5></a><br><br></span>		</li>	=
+</td></tr><tr>	<td class=3D"epaper-title">		<li><span class=3D"title =
+color-blue">=C0=B9=BE=C7=C2=A7=AE=D5=A4=CD=C4=F2=A5=F4=B0=F2=B6=A9=A5=AB=AE=
+=D5=A4=CD=B7|=B2z=A8=C6=AA=F8</span><br><span =
+class=3D"epaper-message"><P>=B0=F2=B6=A9=A5=AB=AE=D5=A4=CD=B7|=A9=F36=A4=EB=
+21=A4=E9=A1]=A4=BB=A1^16=AE=C9=A1A=B0=B2=F8=CA=B3=BD=A5x=AE=FC=C2A=C0\=C6=
+U=A5l=B6}=B2=C418=B6g=A6~=B7|=BCy=BA[=B2=C49=A9=A1=B2=C41=A6=B8=B7|=AD=FB=
+=A4j=B7|=A1A=B7|=C4=B3=A5=D1=C0=B9=BE=C7=C2=A7=B2z=A8=C6=AA=F8=A5D=AB=F9=A1=
+C=A5=C0=AE=D5=AE=D5=A4=CD=AAA=B0=C8=BA[=B8=EA=B7=BD=B5o=AEi=B3B=B4^=ACK=B6=
+=A7=B0=F5=A6=E6=AA=F8=A1B=A4=A4=B5=D8=A5=C1=B0=EA=AE=D5=A4=CD=C1`=B7|=B3=AF=
+=A9w=A4t=B2z=A8=C6=AA=F8=A1B=B3=AF=A5=BF=A8k...&nbsp;<A =
+HREF=3D"http://www.fl.tku.edu.tw:8080/news/index.php?period_id=3D169&memo=
+_no=3D2#2-3"><=B8=D4=A5=FE=A4=E5></a><br><br></span>		</li>	=
+</td></tr><tr>	<td class=3D"epaper-title">		<li><span class=3D"title =
+color-blue">=A4=A4=B5=D8=A5=C1=B0=EA=AE=D5=A4=CD=C1`=B7|=B2z=BA=CA=A8=C6=C1=
+p=AEu=B7|=C4=B3=AD=BA=A6=B8=B2=BE=AEv=AD=B7=AB=B0</span><br><span =
+class=3D"epaper-message"><P>=A4W=A6=B8=B7|=C4=B3=B5=B2=A7=F4=AB=E1=A1A=B3=
+=A1=A4=C0=B2z=BA=CA=A8=C6=AD=CC=AB=D8=C4=B3=C1`=B7|=ACY=A8=C7=B7|=C4=B3=BF=
+=EF=A8=EC=A6U=BF=A4=A5=AB=AE=D5=A4=CD=B7|=B3B=C1|=A6=E6=A1A=B3=AF=C1`=B7|=
+=AA=F8=A4]=A4=E4=AB=F9=B3o=AD=D3=BAc=B7Q=A1A=ACG=A8M=A9w=B1N=A5=BB=A6=B8=B2=
+z=BA=CA=A8=C6=C1p=AEu=B7|=C4=B3=B2=BE=AEv=A9=F3=B7s=A6=CB=A5=AB=AE=D5=A4=CD=
+=B7|=C1|=A6=E6=A1F=B7P=C1=C2=B7s=A6=CB=A5=AB=AE=D5=A4=CD=B7|=B3\=A4@=A5=AD=
+=B2z=A8=C6=AA=F8=A4=CE=C3=B9=B7=E7=ACK=C1`=B7F=A8=C6=BC=F6=A4=DF=A8=F3=A7=
+U=A1C...&nbsp;<A =
+HREF=3D"http://www.fl.tku.edu.tw:8080/news/index.php?period_id=3D169&memo=
+_no=3D2#2-4"><=B8=D4=A5=FE=A4=E5></a><br><br></span>		</li>	=
+</td></tr><tr>	<td class=3D"epaper-title">		<li><span class=3D"title =
+color-blue">=A5x=A5_=A5=AB=AE=D5=A4=CD=B7|=B0=D1=B3X=BCs=AAF=AE=D5=A4=CD=C1=
+p=BD=CB=B7|</span><br><span =
+class=3D"epaper-message"><P>=A5x=A5_=A5=AB=AE=D5=A4=CD=B7|=A6b=A4=FD=BBF=B9=
+=C5=B2z=A8=C6=AA=F8=A1B=B8=B3=B7=D8=B7s=BAa=C5A=B2z=A8=C6=AA=F8=A4=CE=A4=A4=
+=B5=D8=A5=C1=B0=EA=AE=D5=A4=CD=C1`=B7|=B3=AF=A5=FC=A6=F9=B0=C6=B2z=A8=C6=AA=
+=F8=B5=A5=B1a=BB=E2=A4U=A1A=A4@=A6=E623=A4H=A9=F35=A4=EB16=A4=E9=A1]=A4=AD=
+=A1^=ABe=A9=B9=BFD=AA=F9=AE=C8=B9C=A1A=A8=C3=B0=D1=B3X=BCs=AAF=AE=D5=A4=CD=
+=C1p=BD=CB=B7|=A1C</P>
+<P>=AD=BA=A5=FD=B0=D1=B3X=AAF=B2=F0=A5=C3=A9=F4=A4=AD=AA=F7=B6=EC=BD=A6=BF=
+=FB...&nbsp;<A =
+HREF=3D"http://www.fl.tku.edu.tw:8080/news/index.php?period_id=3D169&memo=
+_no=3D2#2-5"><=B8=D4=A5=FE=A4=E5></a><br><br></span>		</li>	=
+</td></tr><tr>	<td class=3D"epaper-title">		<li><span class=3D"title =
+color-blue">=A5x=A4=A4=A5=AB=AE=D5=A4=CD=B7|=B2=C41=A9=A1=B2=C47=A6=B8=B2=
+z=BA=CA=A8=C6=B7|=C4=B3</span><br><span =
+class=3D"epaper-message"><P>=A5x=A4=A4=A5=AB=AE=D5=A4=CD=B7|=A9=F35=A4=EB=
+23=A4=E9=A1]=A4=AD=A1^16=AE=C9=A1A=A5l=B6}=B2=C41=A9=A1=B2=C43=A6=B8=B2z=BA=
+=CA=A8=C6=C1p=AEu=B7|=C4=B3=A1A=A5=D1=AAL=B4=DC=BF@=B2z=A8=C6=AA=F8=A5D=AB=
+=F9=A1A=A4=A4=B5=D8=A5=C1=B0=EA=AE=D5=A4=CD=C1`=B7|=AAL=B1=D3=C0M=B0=C6=B2=
+z=A8=C6=AA=F8=A4=CE=A5=C0=AE=D5=B4^=ACK=B6=A7=B0=F5=A6=E6=AA=F8=A6C=AEu=AB=
+=FC=BE=C9=A1C=B7|=A4=A4=B3q=B9L=B2H=A6=BF=B5=D7=AD^=AA=F7=C6N=BC=FA=B1=C0=
+=C2=CB=A4=CE103=BE=C7=A6~=AB=D7=B7s=A5=CD=BA[...&nbsp;<A =
+HREF=3D"http://www.fl.tku.edu.tw:8080/news/index.php?period_id=3D169&memo=
+_no=3D2#2-6"><=B8=D4=A5=FE=A4=E5></a><br><br></span>		</li>	=
+</td></tr><tr>	<td class=3D"epaper-title">		<li><span class=3D"title =
+color-blue">=AA=DB=A5[=AD=F4=AE=D5=A4=CD=B7|=B1i=C4_=A5=FA=B7|=AA=F8=B3X=A5=
+=C0=AE=D5=AE=D5=A4=CD=B3B</span><br><span =
+class=3D"epaper-message"><P>=A5x=A4=A4=A5=AB=AE=D5=A4=CD=B7|=A9=F35=A4=EB=
+23=A4=E9=A1]=A4=AD=A1^16=AE=C9=A1A=A5l=B6}=B2=C41=A9=A1=B2=C43=A6=B8=B2z=BA=
+=CA=A8=C6=C1p=AEu=B7|=C4=B3=A1A=A5=D1=AAL=B4=DC=BF@=B2z=A8=C6=AA=F8=A5D=AB=
+=F9=A1A=A4=A4=B5=D8=A5=C1=B0=EA=AE=D5=A4=CD=C1`=B7|=AAL=B1=D3=C0M=B0=C6=B2=
+z=A8=C6=AA=F8=A4=CE=A5=C0=AE=D5=B4^=ACK=B6=A7=B0=F5=A6=E6=AA=F8=A6C=AEu=AB=
+=FC=BE=C9=A1C=B7|=A4=A4=B3q=B9L=B2H=A6=BF=B5=D7=AD^=AA=F7=C6N=BC=FA=B1=C0=
+=C2=CB=A4=CE103=BE=C7=A6~=AB=D7=B7s=A5=CD=BA[...&nbsp;<A =
+HREF=3D"http://www.fl.tku.edu.tw:8080/news/index.php?period_id=3D169&memo=
+_no=3D2#2-7"><=B8=D4=A5=FE=A4=E5></a><br><br></span>		</li>	=
+</td></tr><tr>	<td class=3D"epaper-title">		<li><span class=3D"title =
+color-blue">=B0=A8=A8=D3=A6=E8=A8=C8=AE=D5=A4=CD=B7|=A9=FA=B7s=B3=D0=B7|=B7=
+|=AA=F8=B3X=A5=C0=AE=D5=AE=D5=A4=CD=B3B</span><br><span =
+class=3D"epaper-message"><P>=B0=A8=A8=D3=A6=E8=A8=C8=AE=D5=A4=CD=B7|=B3=AF=
+=A9=FA=B7s=B3=D0=B7|=B7|=AA=F8=A9=F36=A4=EB13=A4=E9=A1]=A4=AD=A1^13=AE=C9=
+=B3X=A5=C0=AE=D5=AE=D5=A4=CD=B3B=A1A=B3=AF=A9=FA=B7s=BE=C7=AA=F8=A4=CE=A4=
+=D2=A4H=A6^=B0=EA=B0=D1=A5[=A4k=A8=E0=B2=A6=B7~=A8=E5=C2=A7=A1A=B1M=B5{=BC=
+=B7=AA=C5=A6^=A5=C0=AE=D5=A1C=A5L=BE=D0=B0_=B7=ED=A6~=B3=D0=A5=DF=AE=D5=A4=
+=CD=B7|=A4=CE=A6b=AE=D5=A8D=BE=C7=C2I=BAw=A1A=B3=A3=ACO=AC=FC=A6n=AA=BA=A6=
+^=BE=D0=A1C=B3=AF=BE=C7=AA=F8=A4]=B4=A3=A8=EC=A5=D8=ABe=B0=EA=A4=BA=A6U..=
+&nbsp;<A =
+HREF=3D"http://www.fl.tku.edu.tw:8080/news/index.php?period_id=3D169&memo=
+_no=3D2#2-8"><=B8=D4=A5=FE=A4=E5></a><br><br></span>		</li>	=
+</td></tr><tr>	<td class=3D"epaper-title">		<li><span class=3D"title =
+color-blue">=A5_=A5[=A6{=AE=D5=A4=CD=B7|=A8=FC=C1=DC=A5X=AEu=ACK=B8`=AA=E1=
+=A8=AE=B9C=A6=E6=B9{=BC=FA=B1=DF=AEb</span><br><span =
+class=3D"epaper-message"><P>=A5_=A5[=A6{=AE=D5=A4=CD=B7|=B0=D1=A5[2014=A4=
+@=A6~=A4@=AB=D7=C2=C2=AA=F7=A4s=ACK=B8`=AA=E1=A8=AE=B9C=A6=E6=A1A=B2H=A6=BF=
+=A4j=BE=C7=A4j=B9=AA=B6=A4=B2=E6=BFo=A6=D3=A5X=A1A=BAa=C0=F2=C2=C2=AA=F7=A4=
+s=ACK=B8`=AA=E1=A8=AE=B9C=A6=E6self-build =
+float=B6=B5=A5=D8=B2=C42=A6W=A1C=A5=BB=A6=B8=A5=C0=AE=D5=AE=D5=A4=CD=AA=E1=
+=A8=AE=B3]=ADp=AA=CC=AC=B0=C3=B9=C4=AB=A1B=A6=BF=B1W=A9=A2=A4=D2=B0=FC=A1=
+A=A5D=BF=EC=B3=E6=A6=EC=ABh...&nbsp;<A =
+HREF=3D"http://www.fl.tku.edu.tw:8080/news/index.php?period_id=3D169&memo=
+_no=3D2#2-9"><=B8=D4=A5=FE=A4=E5></a><br><br></span>		</li>	=
+</td></tr><tr><td><br><hr></td></tr><tr><td class=3D"epaper-memo =
+title">=A1=BB=A1@=B2=C4 3 =AA=A9</td></tr><tr>	<td =
+class=3D"epaper-title">		<li><span class=3D"title =
+color-blue">=A8t=A9=D2=A4=CD=B7|=C1p=A6X=C1`=B7|=B2=C42=A9=A1=B2=C42=A6=B8=
+=B1`=B0=C8=B2z=BA=CA=A8=C6=C1p=AEu=B7|=C4=B3</span><br><span =
+class=3D"epaper-message"><P>=A8t=A9=D2=A4=CD=B7|=C1p=A6X=C1`=B7|=A9=F36=A4=
+=EB28=A4=E9=A1]=A4=BB=A1^=A4W=A4=C811=AE=C930=A4=C0=A1A=C1|=A6=E6=B2=C42=A9=
+=A1=B2=C42=A6=B8=B1`=B0=C8=B2z=BA=CA=A8=C6=C1p=AEu=B7|=C4=B3=A1C=AE]=B7=E7=
+=B6=A9=C1`=B7|=AA=F8=AC=B0=BCW=B6i=B1`=B0=C8=B2z=BA=CA=A8=C6=B1=A1=BD=CB=A1=
+A=AFS=A6w=B1=C6=A9=F3=A4h=AAL=A8p=A6v=C1|=A6=E6=A1A=A8=C3=C1=DC=AC=F9=B2=B2=
+=C4=DD=C1p=C5w=A1A=A6@=C1=B8=B2=B1=C1|=A1C</P>
+<P>=B7|=A4=A4=A1A...&nbsp;<A =
+HREF=3D"http://www.fl.tku.edu.tw:8080/news/index.php?period_id=3D169&memo=
+_no=3D3#3-1"><=B8=D4=A5=FE=A4=E5></a><br><br></span>		</li>	=
+</td></tr><tr>	<td class=3D"epaper-title">		<li><span class=3D"title =
+color-blue">=B0=EA=B6T=A8t=A9=D2=A6P=BE=C7=B7|=B2=C42=A9=A1=B2=C42=A6=B8=B2=
+z=BA=CA=A8=C6=C1p=AEu=B7|=C4=B3</span><br><span =
+class=3D"epaper-message"><P>=B0=EA=B6T=A8t=A9=D2=A6P=BE=C7=B7|=A9=F35=A4=EB=
+7=A4=E9=A1]=A4T=A1^18=AE=C930=A4=C0=A1A=B0=B2=A4=BB=AB~=A4p=C0]=C1|=A6=E6=
+=B2=C42=A6=B8=B2z=BA=CA=A8=C6=C1p=AEu=B7|=C4=B3=A1C=B7|=C4=B3=A5=D1=A4=FD=
+=AC=B1=C0s=B2z=A8=C6=AA=F8=A5D=AB=F9=A1A=B7|=A4=A4=B0Q=BD=D7=A1A=A6=A8=A5=
+=DF=B7|=AD=FB=B7|=B0=C8=C2X=AEi=A9e=AD=FB=B7|=A1B=C1p=BD=CB=AC=A1=B0=CA=A9=
+e=AD=FB=B7|=A1B=BC=FA=A7U=BE=C7=AA=F7=A4=CE=B6=D2=B4=DA=A9e=AD=FB=B7|=A1B=
+=BE=C7=B3N=A4=E5=A4=C6=B1=C0=AEi=A9e=AD=FB=B7|...&nbsp;<A =
+HREF=3D"http://www.fl.tku.edu.tw:8080/news/index.php?period_id=3D169&memo=
+_no=3D3#3-10"><=B8=D4=A5=FE=A4=E5></a><br><br></span>		</li>	=
+</td></tr><tr>	<td class=3D"epaper-title">		<li><span class=3D"title =
+color-blue">=A4=A4=B0=EA=A4j=B3=B0=AC=E3=A8s=A9=D2=A6P=BE=C7=B7|22=B6g=A6=
+~4=A6X1=C0\=B7|</span><br><span =
+class=3D"epaper-message"><P>=A4=A4=B0=EA=A4j=B3=B0=AC=E3=A8s=A9=D2=A6P=BE=
+=C7=B7|6=A4=EB7=A4=E9=A1]=A4=BB=A1^=A1A=B0=B2=BBO=A5_=B6=EA=A4s=A4j=B6=BA=
+=A9=B1=C1|=BF=EC=AA=EF=B7s=A1B=B0e=C2=C2=A1B=C1=C2=AEv=A1B=A9=D2=A4=CD=B7=
+|4=A6X1=C0\=B7|=AC=A1=B0=CA=A1A=AC=A1=B0=CA=A5=D1=B1i=A4=AD=A9=A8=A9=D2=AA=
+=F8=A5D=AB=F9=A1A=A8=C3=C1=DC=BD=D0=A5=DF=AAk=A9e=AD=FB=A6=B6=BB=F1=AA=DB=
+=ABe=B7|=AA=F8=B6}=B9=F5=ADP=B5=FC=A1A=B7=ED=A4=E9=A5=C0=AE=D5=AE=D5=A4=CD=
+=AAA=B0=C8=BA[=B8=EA=B7=BD=B5o=AEi=B3B=B4^=ACK=B6=A7=B0=F5=A6=E6=AA=F8...=
+&nbsp;<A =
+HREF=3D"http://www.fl.tku.edu.tw:8080/news/index.php?period_id=3D169&memo=
+_no=3D3#3-11"><=B8=D4=A5=FE=A4=E5></a><br><br></span>		</li>	=
+</td></tr><tr>	<td class=3D"epaper-title">		<li><span class=3D"title =
+color-blue">250=AF=E8=A4=D3=A4H=B7=C5=C4=C9=B1=D4=C2=C2</span><br><span =
+class=3D"epaper-message"><P>=AF=E8=A4=D3=A8t=A8t=A4=CD=B7|=A9=F35=A4=EB3=A4=
+=E9=A1]=A4=BB=A1^=A6b=BE=C7=A5=CD=AC=A1=B0=CA=A4=A4=A4=DF=A1A=C1|=BF=EC=A8=
+t=A4=CD=B7|=A6=A8=A5=DF20=B6g=A6~=BA[=B7|=AA=F8=A6=BF=B8=DB=BAa=BAa=C0=F2=
+=B0=EA=AEa=BDY=A5=DB=BC=FA=A1A=C2=F9=B3=DF=C1{=AA=F9=A1I=B9O250=A6=EC=A8t=
+=A4=CD=A6^=A5=C0=AE=D5=A9M=A7Y=B1N=BAa=B0h=AA=BA=ABe=B0=C6=AE=D5=AA=F8=B6=
+=BE=B4=C2=AD=E8=B1=D0=B1=C2=B7=C5=C4=C9=B1=D4=C2=C2=A1C=AC=A1=B0=CA=A4=A4=
+=B9{=B5o=C2=B2=A4S=B7s=A5=FD=A5=CD=BC=FA=BE=C7=AA=F7=A4=CE=B6=BE...&nbsp;=
+<A =
+HREF=3D"http://www.fl.tku.edu.tw:8080/news/index.php?period_id=3D169&memo=
+_no=3D3#3-12"><=B8=D4=A5=FE=A4=E5></a><br><br></span>		</li>	=
+</td></tr><tr>	<td class=3D"epaper-title">		<li><span class=3D"title =
+color-blue">=A4=C6=BE=C7=A4u=B5{=BBP=A7=F7=AE=C6=A4u=B5{=BE=C7=A8t=A8t=A4=
+=CD=B7|103=A6~=B2=C41=A6=B8=B1M=B7~=BD=D7=BE=C2</span><br><span =
+class=3D"epaper-message"><P>=A4=C6=A7=F7=A8t=A8t=A4=CD=B7|6=A4=EB28=A4=E9=
+=A1]=A4=BB=A1^=A1A=A9=F3=A5x=A5_=AE=D5=B6=E9=AE=D5=A4=CD=C1p=BD=CB=B7|=C0=
+]=C1|=BF=EC103=A6~=B2=C41=A6=B8=B1M=B7~=BD=D7=BE=C2=A1A=B7|=C4=B3=A5=D1=B1=
+i=A5=BF=A8}=B2z=A8=C6=AA=F8=A5D=AB=F9=A1A=AFS=A7O=C1=DC=BD=D0=A5=C0=AE=D5=
+=B3=AF=B7F=A8k=ABe=B0=C6=AE=D5=AA=F8=A4=CE=B0=EA=B4=CB=A5=F8=B7~=A4=BD=A5=
+q=B3=AF=A5@=BD=F7=C1`=B8g=B2z=A5D=C1=BF=A1A=ADp=AC=F9=A6=B370=A6W=AE=D5=A4=
+=CD=A6@=C1=B8=B2=B1=C1|=A1C=BD=D7=BE=C2=A5D...&nbsp;<A =
+HREF=3D"http://www.fl.tku.edu.tw:8080/news/index.php?period_id=3D169&memo=
+_no=3D3#3-13"><=B8=D4=A5=FE=A4=E5></a><br><br></span>		</li>	=
+</td></tr><tr>	<td class=3D"epaper-title">		<li><span class=3D"title =
+color-blue">=B2H=A6=BF=A4j=BE=C7=B8=F3=B7~=C1p=BD=CB=B7|=AC=A1=B0=CA</spa=
+n><br><span =
+class=3D"epaper-message"><P>=B2H=A6=BF=A4j=BE=C7=B8=F3=B7~=C1p=BD=CB=B7|6=
+=A4=EB19=A4=E9=A1]=A5|=A1^18=AE=C9=A1A=A9=F3=A5x=A5_=AE=D5=B6=E9=AE=D5=A4=
+=CD=C1p=BD=CB=B7|=C0]=A1A=C1|=A6=E6=AE=D5=A4=CD=A5=F8=B7~=B8g=C0=E7=A5=E6=
+=ACy=AC=A1=B0=CA=A1A=A5=D1=B3=AF=A5@=A6w=B7|=AA=F8=A5D=AB=F9=A1C=B7|=A4=A4=
+=A1A=B0=A3=A4F=C1=DC=BD=D0=A8|=A6=A8=A4=A4=A4=DF=BF=BD=B7=E7=B2=BB=A5D=A5=
+=F4=A1B=B8=E2=B0=B7=A4=A4=B8g=B2z=A5~=A1A=A8t=A9=D2=A4=CD=B7|=C1p=A6X=C1`=
+=B7|=ADJ=B2Q=ADs=B1`=B0=C8=B2z=A8=C6=A4]=A8=FC=C1=DC...&nbsp;<A =
+HREF=3D"http://www.fl.tku.edu.tw:8080/news/index.php?period_id=3D169&memo=
+_no=3D3#3-14"><=B8=D4=A5=FE=A4=E5></a><br><br></span>		</li>	=
+</td></tr><tr>	<td class=3D"epaper-title">		<li><span class=3D"title =
+color-blue">=BF=E0=B6i=B8q=AE=D5=A4=CD=B1=B5=A5=F4=B0=EA=BB=DA=A8=C6=B0=C8=
+=BBP=BE=D4=B2=A4=AC=E3=A8s=A9=D2=A9=D2=A4=CD=B7|=B2z=A8=C6=AA=F8</span><b=
+r><span =
+class=3D"epaper-message"><P>=B0=EA=BB=DA=A8=C6=B0=C8=BBP=BE=D4=B2=A4=AC=E3=
+=A8s=A9=D2=A9=D2=A4=CD=B7|=A9=F34=A4=EB27=A4=E9=A1]=A4=E9=A1^=A1A=A9=F3=A5=
+x=A5_=AE=D5=B6=E9=AE=D5=A4=CD=C1p=BD=CB=B7|=C0]=A1A=A5l=B6}=B2=C43=A9=A1=B2=
+=C41=A6=B8=B7|=AD=FB=A4j=B7|=A1C=B7|=C4=B3=A5=D1=B1i=A5@=E0=B1=B2z=A8=C6=AA=
+=F8=A5D=AB=F9=A1A=BBP=B7|=A9=D2=A4=CD=B9O50=A4H=A1C=A4j=B7|=A6b=AF=CE=A9=FA=
+=BD=E5=A9=D2=AA=F8=ADP=B5=FC=A4U=AEi=B6}=A7=C7=B9=F5=A1A=B7|=A4=A4=B0w=B9=
+=EF=A5=C0=AE=D5=C4w=AB=D8=A1u=A6u=C1=BE=B0=EA...&nbsp;<A =
+HREF=3D"http://www.fl.tku.edu.tw:8080/news/index.php?period_id=3D169&memo=
+_no=3D3#3-2"><=B8=D4=A5=FE=A4=E5></a><br><br></span>		</li>	=
+</td></tr><tr>	<td class=3D"epaper-title">		<li><span class=3D"title =
+color-blue">=B6=C0=AF=F4=AF=F4=AE=D5=A4=CD=B1=B5=A5=F4=B0=D3=BA=DE=BA=D3=A4=
+h=C1p=A6X=A6P=BE=C7=B7|=B2z=A8=C6=AA=F8</span><br><span =
+class=3D"epaper-message"><P>=B0=D3=BA=DE=BA=D3=A4h=C1p=A6X=A6P=BE=C7=B7|=A9=
+=F36=A4=EB8=A1]=A4=E9=A1^12=AE=C9=A1A=B0=B2=A5x=C6W=B5=D2=B0s=A4=BD=A5q=AB=
+=D8=B0=EA=B0s=BCt=A4j=C2=A7=B0=F3=A1A=C1|=A6=E6=B2=C44=A9=A1=B2=C41=A6=B8=
+=B7|=AD=FB=A4j=B7|=A1A=A4j=B7|=A5=D1=B3\=B8q=A5=C1=B2z=A8=C6=AA=F8=A5D=AB=
+=F9=A1A=B7|=A4=A4=C1=DC=BD=D0=AE=D5=A4=CD=AAA=B0=C8=BA[=B8=EA=B7=BD=B5o=AE=
+i=B3B=B4^=ACK=B6=A7=B0=F5=A6=E6=AA=F8=A1B=A8t=A9=D2=A4=CD=B7|=C1p=A6X=C1`=
+=B7|=AE]=B7=E7=B6=A9=C1`=B7|=AA=F8=A5X=AEu...&nbsp;<A =
+HREF=3D"http://www.fl.tku.edu.tw:8080/news/index.php?period_id=3D169&memo=
+_no=3D3#3-3"><=B8=D4=A5=FE=A4=E5></a><br><br></span>		</li>	=
+</td></tr><tr>	<td class=3D"epaper-title">		<li><span class=3D"title =
+color-blue">=B3=AF=A9v=C1H=AE=D5=A4=CD=B1=B5=A5=F4=B8=EA=B0T=A4u=B5{=BE=C7=
+=A8t=A8t=A4=CD=B7|=B7|=AA=F8</span><br><span =
+class=3D"epaper-message"><P>=B8=EA=A4u=A8t=A8t=A4=CD=B7|=A9=F36=A4=EB21=A4=
+=E9=A1]=A4=BB=A1^13=AE=C930=A4=C0=A1A=A9=F3=A5x=A5_=AE=D5=B6=E9=AE=D5=A4=CD=
+=C1p=BD=CB=B7|=C0]=A1A=A5l=B6}=B2=C43=A9=A1=B2=C42=A6=B8=B7|=AD=FB=A4j=B7=
+|=A1C=A4j=B7|=A5=D1=B1i=BAa=B6Q=B7|=AA=F8=A5D=AB=F9=A1A=A5=C0=AE=D5=BB=AF=
+=BAa=C4=A3=ABe=AE=D5=AA=F8=A1B=AE=D5=A4=CD=AAA=B0=C8=BA[=B8=EA=B7=BD=B5o=AE=
+i=B3B=B4^=ACK=B6=A7=B0=F5=A6=E6=AA=F8=A4=CE=A8t=A9=D2=A4=CD=B7|=C1p=A6X=C1=
+`=B7|=B3\=B8q=A5=C1=B0=C6=C1`...&nbsp;<A =
+HREF=3D"http://www.fl.tku.edu.tw:8080/news/index.php?period_id=3D169&memo=
+_no=3D3#3-4"><=B8=D4=A5=FE=A4=E5></a><br><br></span>		</li>	=
+</td></tr><tr>	<td class=3D"epaper-title">		<li><span class=3D"title =
+color-blue">=A4=F4=B8=EA=B7=BD=A4=CE=C0=F4=B9=D2=A4u=B5{=BE=C7=A8t=A8t=A4=
+=CD=B7|=B2=C41=A9=A1=B2=C49=A6=B8=B2z=BA=CA=A8=C6=C1p=AEu=B7|=C4=B3</span=
+><br><span =
+class=3D"epaper-message"><P>=A4=F4=C0=F4=A8t=A8t=A4=CD=B7|=A9=F36=A4=EB15=
+=A4=E9=A1]=A4=BB=A1^10=AE=C930=A4=C0=A1A=A9=F3=A5x=A5_=AE=D5=B6=E9=AE=D5=A4=
+=CD=C1p=BD=CB=B7|=C0]=A1A=A5l=B6}=B2=C41=A9=A1=B2=C49=A6=B8=B2z=BA=CA=A8=C6=
+=C1p=AEu=B7|=C4=B3=A1C=B7|=C4=B3=A5=D1=AD=D9=A5@=BC=D0=B2z=A8=C6=AA=F8=A5=
+D=AB=F9=A1A=A5D=ADn=B9{=B5o=C1Z=C0u=B2M=B4H=BC=FA=BE=C7=AA=F7=A1A=A5=E7=B0=
+w=B9=EF=B7|=B0=C8=A4=CE=B0=D1=B3X=B6i=A6=E6=B0Q=BD=D7=A1C=B7|=AB=E1=A1A=B9=
+w=A9w=B2=C42=A9=A1=B2z=BA=CA...&nbsp;<A =
+HREF=3D"http://www.fl.tku.edu.tw:8080/news/index.php?period_id=3D169&memo=
+_no=3D3#3-5"><=B8=D4=A5=FE=A4=E5></a><br><br></span>		</li>	=
+</td></tr><tr>	<td class=3D"epaper-title">		<li><span class=3D"title =
+color-blue">=B2=CE=ADp=BE=C7=A8t=A8t=A4=CD=B7|=B2=C49=A9=A1=B2=C42=A6=B8=B2=
+z=BA=CA=A8=C6=C1p=AEu=B7|=C4=B3</span><br><span =
+class=3D"epaper-message"><P>=B2=CE=ADp=BE=C7=A8t=A8t=A4=CD=B7|=A9=F35=A4=EB=
+13=A4=E9=A1]=A4G=A1^=A1A=A9=F3=A5x=A5_=AE=D5=B6=E9=AE=D5=A4=CD=C1p=BD=CB=B7=
+|=C0]=A1A=A5l=B6}=B2=C49=A9=A1=B2=C42=A6=B8=B2z=BA=CA=A8=C6=C1p=AEu=B7|=C4=
+=B3=A1A=B7|=C4=B3=A5=D1=ADJ=B2Q=ADs=B7|=AA=F8=A5D=AB=F9=A1A=B7|=C4=B3=B0Q=
+=BD=D7=AA=F7=C6N=BC=FA=A4=CE=B3=C7=A5X=A8t=A4=CD=BF=EF=A9=DE=A9M=AD=D7=A5=
+=BF=B3=B9=B5{=B5=A5=A8=C6=A9y=A1C=B7|=AB=E1=A1A=A8M=C4=B3=A5=BC=A8=D3=B1N=
+=C1=DC=BD=D0=A6U=AC=C9=C0u=A8q=A8t=A4=CD=B6i=A6=E6...&nbsp;<A =
+HREF=3D"http://www.fl.tku.edu.tw:8080/news/index.php?period_id=3D169&memo=
+_no=3D3#3-6"><=B8=D4=A5=FE=A4=E5></a><br><br></span>		</li>	=
+</td></tr><tr>	<td class=3D"epaper-title">		<li><span class=3D"title =
+color-blue">=B8=EA=B0T=BA=DE=B2z=BE=C7=A8t=AC=E3=A8s=A9=D2=A9=D2=A4=CD=B7=
+|=C1p=BD=CB=AC=A1=B0=CA</span><br><span =
+class=3D"epaper-message"><P>=B8=EA=BA=DE=A9=D2=A9=D2=A4=CD=B7|=A9=F36=A4=EB=
+7=A4=E9=A1]=A4=BB=A1^=A1A=A9=F3=A5x=A5_=AE=D5=B6=E9=AE=D5=A4=CD=C1p=BD=CB=
+=B7|=C0]=A1A=C1|=BF=EC=A9=D2=A4=CD=B7|=C1p=BD=CB=AC=A1=B0=CA=A1A=B7=ED=A4=
+=E9=BBP=B7|=A9=D2=A4=CD=AA=F1150=A6=EC=A1C=B8=EA=BA=DE=A9=D2=A6b=AE=D5=A5=
+=CD=AC=B0=C5=FD=A6U=A9=D2=A4=CD=A4=C4=B0_=A6b=AE=D5=A6^=BE=D0=A1A=A8=CF=A5=
+X=B4=FD=A8=AD=B8=D1=BC=C6=A1A=A7Q=A5=CE=AEa=B1=DA=A4=CE=B9C=C0=B8=C5=FD=AC=
+=A1=B0=CA=B7=C5=C4=C9=BC=F6=BEx=A1C=A5t=A5~=A1A=C1=DC=BD=D0=B0=AA=A7=D3=A7=
+=BB...&nbsp;<A =
+HREF=3D"http://www.fl.tku.edu.tw:8080/news/index.php?period_id=3D169&memo=
+_no=3D3#3-7"><=B8=D4=A5=FE=A4=E5></a><br><br></span>		</li>	=
+</td></tr><tr>	<td class=3D"epaper-title">		<li><span class=3D"title =
+color-blue">=A5=F8=BA=DE=A8t=A9=D2=AE=D5=A4=CD=B7|=B2=C41=A9=A1=B2=C44=A6=
+=B8=B2z=BA=CA=A8=C6=C1p=AEu=B7|=C4=B3</span><br><span =
+class=3D"epaper-message"><P>=A5=F8=BA=DE=A8t=A9=D2=AE=D5=A4=CD=B7|5=A4=EB=
+28=A4=E9=A1]=A4T=A1^18=AE=C930=A4=C0=A1A=A9=F3=A5x=A5_=AE=D5=B6=E9=AE=D5=A4=
+=CD=C1p=BD=CB=B7|=C0]=C1|=A6=E6=B2=C41=A9=A1=B2=C44=A6=B8=B2z=BA=CA=A8=C6=
+=C1p=AEu=B7|=C4=B3=A1C=B7|=C4=B3=A5=D1=B1i=AA=F7=B7=CB=B2z=A8=C6=AA=F8=A5=
+D=AB=F9=A1A=B7|=A4=A4=A8M=C4=B3=A1A=B4=A3=A8=D1=A5=F8=BA=DE=A8t=A4=E9=B6=A1=
+=B3=A1=A2A=B6i=BE=C7=AFZ=A6b=AE=D5=A5=CD=A8C=A6~=AF=C5=A6U1=A6W=BC=F6=A4=DF=
+=AAA=B0=C8=BC=FA=BE=C7=AA=F7=A1A=C0=F2=BC=FA...&nbsp;<A =
+HREF=3D"http://www.fl.tku.edu.tw:8080/news/index.php?period_id=3D169&memo=
+_no=3D3#3-8"><=B8=D4=A5=FE=A4=E5></a><br><br></span>		</li>	=
+</td></tr><tr>	<td class=3D"epaper-title">		<li><span class=3D"title =
+color-blue">=ABO=C0I=BE=C7=A8t=A8t=A4=CD=B7|=B2=C42=A6=B8=B2z=BA=CA=A8=C6=
+=B7|=C4=B3</span><br><span =
+class=3D"epaper-message"><P>=ABO=C0I=A8t=A8t=A4=CD=B7|=A9=F35=A4=EB29=A4=E9=
+=A1]=A5|=A1^18=AE=C9=A1A=A9=F3=A5x=A5_=AE=D5=B6=E9=AE=D5=A4=CD=C1p=BD=CB=B7=
+|=C0]=A1A=A5l=B6}=B2=C42=A6=B8=B2z=BA=CA=A8=C6=B7|=C4=B3=A1C=B7|=C4=B3=A5=
+=D1=A6=BF=B4=C2?=B7|=AA=F8=A5D=AB=F9=A1A=A5t=A5~=A1A=AFS=A7O=C1=DC=BD=D0=AE=
+=D5=A4=CD=AE=EF=A4=E5=AC=C2=A6=D1=AEv=A1A=A5H=A1u=B1q=A4H=AC=DB=BE=C7=AC=DD=
+=AD=D3=A4H=B9B=B5{=A8=AB=B6=D5=A1v=A5D=C3D=AC=B0=A8t=A4=CD=B1M=C3D=BAt=C1=
+=BF=A1C=B7|=C4=B3=B0=A3=B0Q=BD=D7...&nbsp;<A =
+HREF=3D"http://www.fl.tku.edu.tw:8080/news/index.php?period_id=3D169&memo=
+_no=3D3#3-9"><=B8=D4=A5=FE=A4=E5></a><br><br></span>		</li>	=
+</td></tr><tr><td><br><hr></td></tr><tr><td class=3D"epaper-memo =
+title">=A1=BB=A1@=B2=C4 4 =AA=A9</td></tr><tr>	<td =
+class=3D"epaper-title">		<li><span class=3D"title =
+color-blue">=BCB=B4=B0=A4=AF=AE=D5=A4=CD=C3=D8=B9O3=A4d=AE=D1</span><br><=
+span =
+class=3D"epaper-message"><P>=A5=F4=C2=BE=A5_=AC=FC=ACw=BA=B5=BF=DF=A5=F8=B7=
+~=B8=B3=A8=C6=AA=F8=AA=BA=A5~=BBy=A8t=A6=E8=AFZ=A4=FA=A4=E5=B2=D5(=B2{=A6=
+=E8=BBy=A8t)=AE=D5=A4=CD=BCB=B4=B0=A4=AF=AE=BD=C3=D8=B9O3=A4d=A5=BB=AE=D1=
+=C4y=B5=B9=A5=C0=AE=D5=B9=CF=AE=D1=C0]=A1A=AE=D1=C4y=C3=FE=AB=AC=B2[=BB\=A6=
+=B3=A4=A4=A4=E5=A1B=A6=E8=AFZ=A4=FA=A4=E5=A1B=B8q=A4j=A7Q=A4=E5=A4=CE=A5@=
+=AC=C9=C3=C0=B3N=A5v=B5=A5=A8=E5=C2=C3=A1C=BCB=BE=C7=AA=F8=AA=ED=A5=DC=A1=
+A=C1=F6=B5M=A4w=B8g=C2=F7=B6}=A5=C0=AE=D5=B6W=B9L=A5b=A5@=AC=F6=A1A=A6=FD=
+..&nbsp;<A =
+HREF=3D"http://www.fl.tku.edu.tw:8080/news/index.php?period_id=3D169&memo=
+_no=3D4#4-1"><=B8=D4=A5=FE=A4=E5></a><br><br></span>		</li>	=
+</td></tr><tr>	<td class=3D"epaper-title">		<li><span class=3D"title =
+color-blue">=A1u=A6u=C1=BE=B0=EA=BB=DA=B7|=C4=B3=A4=A4=A4=DF=A1v=B6=D2=B4=
+=DA=B2{=AAp<br>
+<a href=3Dhttp://www.fl.tku.edu.tw/news-ITB.asp =
+>http://www.fl.tku.edu.tw/news-ITB.asp </a></span><br><span =
+class=3D"epaper-message"><P>=A1u=A6u=C1=BE=B0=EA=BB=DA=B7|=C4=B3=A4=A4=A4=
+=DF=A1v=A6=CA=B8U=AA=F7=BFj=A1B=BB=C8=BFj=A1B=A4@=A4H=A4@=BFj</P>
+<P>=AE=D5=A4=CD=BA=F4=B5=B8=ACO=A4j=BE=C7=AA=BA=AD=AB=ADn=B8=EA=B2=A3=A1A=
+=A5=C0=AE=D5=AA=F1=A6~=B1=C0=A5X=AD=AB=ADn=AA=BA=AB=D8=B3]=A1=D0=B0=EA=BB=
+=DA=B7|=C4=B3=A4=A4=A4=DF=A1A=B4=A3=A8=D1=AE=D5=A4=CD=B5o=B4=A7=BBE=A8F=A6=
+=A8=B6=F0=AA=BA=A4O=B6q=A1A=AC=B0=A5=C0=AE=D5=A7=B9=A6=A8=AB=D8=B3]=A1C=A6=
+=B9=A4@=AD=AB=ADn=AB=D8=B3]=A1A=A4=E9=ABe=C0=F2=B1o=AE}...&nbsp;<A =
+HREF=3D"http://www.fl.tku.edu.tw:8080/news/index.php?period_id=3D169&memo=
+_no=3D4#4-2"><=B8=D4=A5=FE=A4=E5></a><br><br></span>		</li>	=
+</td></tr><tr>	<td class=3D"epaper-title">		<li><span class=3D"title =
+color-blue">103=A6~5-6=A4=EB=AE=BD=B4=DA=AA=DA=A6W=BF=FD=A1A=AFS=A6=B9=B7=
+P=C1=C2=A1C
+<a href=3Dhttp://www.fl.tku.edu.tw/account-credit.asp
+target=3D_blank>http://www.fl.tku.edu.tw/accou</span><br><span =
+class=3D"epaper-message">&nbsp;<A =
+HREF=3D"http://www.fl.tku.edu.tw:8080/news/index.php?period_id=3D169&memo=
+_no=3D4#4-3"><=B8=D4=A5=FE=A4=E5></a><br><br></span>		</li>	</td></tr>
+		</table>
+	</td></tr>
+</table>
+<div align=3D"center">
+	=
+=A6p=AC=DD=A4=A3=A8=A3=A4W=A4=E8=A4=E5=B3=B9&ldquo;=B8=D4=A5=FE=A4=E5&ldq=
+uo;=B3s=B5=B2=A1A=BD=D0=C2I=BF=EF=A4U=A4=E8=B3s=B5=B2<br>
+	<a =
+href=3D"http://www.fl.tku.edu.tw:8080/news/">http://www.fl.tku.edu.tw:808=
+0/news/</a><br>
+	=B1=FD=A8=FA=AE=F8=ADq=BE\=A5=BB=B9q=A4l=B3=F8=A1G=BD=D0=C2I=BF=EF <a =
+href=3D"http://www.fl.tku.edu.tw:8080/news/maillist_unsubscribe_enews.php=
+" target=3D"_blank"> =A8=FA=AE=F8=ADq=BE\=A5=BB=B9q=A4l=B3=F8 </a> <br>
+  <span class=3D"color-orange">CopyRight &copy; 2001-2002 =
+=B2H=A6=BF=AE=D5=A4=CD=AAA=B0=C8=BA[=B8=EA=B7=BD=B5o=AEi=B3B</span></p>
+</div>
+</body>
+</html>
+
+------=_NextPart_000_F7A0_01CFAD38.DC1F3400--

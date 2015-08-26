@@ -1,0 +1,52 @@
+*** Settings ***
+Documentation     This suite cover all related webtop API by functional steps
+Resource          ../Libs/resource-rubykiwi.txt
+Library           ../Libs/CalendarLib.py    ${common_url}
+Library           ../Libs/PrefsLib.py    ${common_url}
+Library           ../Libs/MailLib.py    ${common_url}
+Library           ../Libs/CommonLib.py    ${common_url}
+Library           ../Libs/SpecialDataLib.py    ${common_url}
+Library           ../Libs/ContactLib.py    ${common_url}
+
+*** Test Cases ***
+Special characters - Send mail for subject and body
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${mail title}    Send Special Data    functionName=send_message    specialDataName=subject    data=mailSubjectEscaped    from=${common_from}${common_domain}    to=${common_to}${common_domain}
+    ...    priority=3
+    ${mail body}    Send Special Data    functionName=send_message    specialDataName=body    data=mailBodyEscaped    from=${common_from}${common_domain}    to=${common_to}${common_domain}
+    ...    priority=3
+    User Logout
+
+Special characters -Save draft for subject and body
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${save draft}    Send Special Data    functionName=save_message_as_draft    specialDataName=subject    data=mailBodyEscaped    bodytype=plain    from=${common_from}${common_domain}
+    ${save draft}    Send Special Data    functionName=save_message_as_draft    specialDataName=body    data=mailBodyEscaped    bodytype=plain    from=${common_from}${common_domain}
+    User Logout
+
+Special characters - Create folder for folder name
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${create folder}    Send Special Data    functionName=create_folder    specialDataName=name    data=mailFolderEscaped
+    ${delete all folders}    Move Folder    target=Trash    all=true
+    ${result}    Empty Folder
+    User Logout
+
+Repeat - blocksenders
+    User Login    username=mhwang3${common_domain}    password=${mail_password}
+    ${block sender}    Block Senders    domain=${common_domain}    n=198
+    User Logout
+
+Special characters - Rename folder for folder name
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${create folder}    Create Folder
+    ${rename for special data}    Send Special Data    functionName=rename_folder    specialDataName=target    data=mailFolderEscaped
+    ${move folder}    Move Folder    target=Trash    all=true
+    ${result}    Empty Folder
+    User Logout
+
+Special characters - Set plain text signature
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${set plain signature text}    Send Special Data    functionName=set_signature    specialDataName=text    data=plainSignatureEscaped    type=text    position=below
+    ...    isdefault=true
+    ${set plain signature lable}    Send Special Data    functionName=set_signature    specialDataName=label    data=plainSignatureEscaped    type=text    position=below
+    ...    isDefault=true
+    User Logout

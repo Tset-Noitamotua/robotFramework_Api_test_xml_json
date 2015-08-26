@@ -1,0 +1,1240 @@
+*** Settings ***
+Documentation     This suite cover all related webtop API by functional steps
+Library           ../baseapi/Login.py    ${login_url}
+Library           ../testcase/MailLib.py    ${common_url}
+Library           ../testcase/PrefsLib.py    ${common_url}
+Library           ../testcase/ContactLib.py    ${common_url}
+Library           ../testcase/SessionTokenLib.py    ${common_url}
+Library           ../testcase/GlobalHelper.py
+Library           ../testcase/FileUploadLib.py    ${common_url}
+Library           ../util/MultiThreadLib.py    ${common_url}    ${login_url}
+
+*** Test Cases ***
+Folder - create nested folder
+    [Documentation]    folder name length limitation
+    [Tags]
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${delete all folder result}    delete_all_folder
+    ${create max nested layer folder result}    Create MaxNestedLayer Folder    folderDepth=${folder_nested_depth}
+    ${delete all folder result}    delete_all_folder
+    User Logout
+
+Mail - receipt - no deliver receipt
+    [Documentation]    json:
+    ...    requestSuccessDsn=true:deliver receipt when succeed
+    ...    requestSuccessDsn=false:deliver receipt when failure, delay
+    [Tags]
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${delete msg}    empty_folder    folderPath=INBOX
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${delete msg}    empty_folder    folderPath=INBOX
+    ${sendMsgKW}    send_mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=no receipt test    body=text body    bodyType=plain
+    ...    requestSuccessDsn=false
+    sleep    10
+    ${check receipt in from folder}    check_message_by_subject    expectCnt=0    subject=${deliver_receipt_subject}    folderPath=INBOX
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${check result}    check_message_by_subject    expectCnt=1    subject=no receipt test    folderPath=INBOX
+    ${final empty to folder}    empty_folder    folderPath=INBOX
+    User Logout
+
+Mail - receipt - send deliver succeed receipt
+    [Documentation]    json:
+    ...    requestSuccessDsn=true:deliver receipt when succeed
+    ...    requestSuccessDsn=false:deliver receipt when failure, delay
+    [Tags]
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${delete msg}    Run Keyword And Ignore Error    empty_folder    folderPath=INBOX
+    ${sendMsgKW}    Run Keyword And Ignore Error    send_mail    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=deliver receipt test    body=i am used for test deliver receipt
+    ...    bodyType=plain    requestSuccessDsn=true
+    ${check result}    check_message_by_subject    expectCnt=1    subject=${deliver_receipt_subject}    folderPath=INBOX
+    ${delete msg}    Run Keyword And Ignore Error    empty_folder    folderPath=INBOX
+    User Logout
+
+-----------------Mail - receipt - send deliver fail receipt
+    [Documentation]    how to make a mail failed to be delivered
+    [Tags]    excluded
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${delete msg}    Run Keyword And Ignore Error    empty_folder    folderPath=INBOX
+    ${sendMsgKW}    Run Keyword And Ignore Error    send_mail    to=fake${common_domain}    from=${common_from}${common_domain}    subject=deliver receipt test    body=i am used for test deliver receipt
+    ...    bodyType=plain    requestSuccessDsn=true
+    ${check result}    check_message_by_subject    expectCnt=1    subject=${deliver_receipt_subject}    folderPath=INBOX
+    User Logout
+
+Setting - General settings - msg with rich text format
+    [Tags]    excluded
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${params_map_true}    makeHashField    str-attr.user.mail.SendFormat=rich
+    ${sendFormat rich}    Set Mail Prefs    params.map=${params_map_true}
+    ${check result}    check_mail_prefs    attr.user.mail.SendFormat=rich    expect=true
+    User Logout
+
+Setting - General settings - save outgoing msg:true
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty folder 2}    Empty Folder    folderPath=${sent_mail_folder}
+    ${set save outgoing true }    set_mail_preference    params.object.saveOutgoingMessages=true
+    ${send mail 1}    Send Mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=for save outgoing
+    ${check msg header 1}    check_message_by_subject    folderPath=${sent_mail_folder}    subject=for save outgoing    expectCnt=1
+    User Logout
+
+Setting - General settings - save outgoing msg:false
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${set save outgoing false }    set_mail_preference    params.object.saveOutgoingMessages=false
+    ${empty folder 2}    Empty Folder    folderPath=${sent_mail_folder}
+    ${send mail 2}    Send Mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=for save outgoing
+    ${check msg header 2}    check_message_by_subject    folderPath=${sent_mail_folder}    subject=for save outgoing    expectCnt=0
+    User Logout
+
+Setting - General settings - auto save receipt as contact:true-todo
+    [Documentation]    todo:
+    ...    test the function after contact suite
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${autoCreateContact true}    set_mail_preference    params.object.autoCreateContact=true
+    User Logout
+
+Setting - General settings - auto save receipt as contact:false-todo
+    [Documentation]    todo:
+    ...    test the function after contact suite
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${autoCreateContact false}    set_mail_preference    params.object.autoCreateContact=false
+    User Logout
+
+Setting - General settings - include original msg
+    [Documentation]    is controled by UI,can not test function here
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${3prefs}    set_mail_preference    params.object.replyQuoting=true
+    ${3prefs}    set_mail_preference    params.object.replyQuoting=false
+    User Logout
+
+Setting - General settings - indent prefix
+    [Documentation]    controled by UI,can not test function here
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${params_map_1}    makeHashField    str-attr.user.mail.ReplyPrefix=&gt;
+    ${replyPrefix >}    Set Mail Prefs    params.map=${params_map_1}
+    ${params_map_2}    makeHashField    str-attr.user.mail.ReplyPrefix=-;
+    ${replyPrefix -}    Set Mail Prefs    params.map=${params_map_2}
+    ${params_map_3}    makeHashField    str-attr.user.mail.ReplyPrefix=;
+    ${replyPrefix \ }    Set Mail Prefs    params.map=${params_map_3}
+    User Logout
+
+Setting - General settings - AutoSaveDraftFlag
+    [Documentation]    controlled by UI,can not test here
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${params_map_1}    makeHashField    str-attr.user.mail.AutoSaveDraftFlag=true
+    ${autoSaveDraft true}    Set Mail Prefs    params.map=${params_map_1}
+    User Logout
+
+Setting - General settings - SaveToDraftsInterval
+    [Documentation]    controlled by UI,can not test here
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${params_map_1}    makeHashField    str-attr.user.mail.SaveToDraftsInterval=60
+    ${saveDraftInterval 60}    Set Mail Prefs    params.map=${params_map_1}
+    User Logout
+
+Setting - General settings - check for new interval
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${3prefs}    set_mail_preference    params.object.autoCheckInterval=1800
+    User Logout
+
+Setting - General settings - All Languages
+    [Documentation]    Set all values and test current settings value for each API
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    : FOR    ${lg}    IN    @{language}
+    \    Log    ${lg}
+    \    ${params_map}    makeHashField    str-attr.user.LocaleLanguage=${lg}
+    \    ${set result}    Set Mail Prefs    params.map=${params_map}
+    User Logout
+
+Setting - General settings - Date Format
+    [Documentation]    controled by UI,can not test here
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${params_map_1}    makeHashField    str-attr.user.DateFormat=YYYY/MM/DD
+    ${save format YYYY/MM/DD}    Set Mail Prefs    params.map=${params_map_1}
+    ${params_map_2}    makeHashField    str-attr.user.DateFormat=MM/DD/YYYY
+    ${save format MM/DD/YYYY }    Set Mail Prefs    params.map=${params_map_2}
+    ${params_map_3}    makeHashField    str-attr.user.DateFormat=DD/MM/YY
+    ${save format DD/MM/YY }    Set Mail Prefs    params.map=${params_map_3}
+    ${params_map_4}    makeHashField    str-attr.user.DateFormat=DD/MM/YYYY
+    ${save format DD/MM/YYYY }    Set Mail Prefs    params.map=${params_map_4}
+    User Logout
+
+Setting - General settings - Time Format
+    [Documentation]    controled by UI,can not test here
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${params_map_1}    makeHashField    str-attr.user.24HourTimeFormatFlag=FALSE
+    ${save format 12HOUR}    Set Mail Prefs    params.map=${params_map_1}
+    ${params_map_2}    makeHashField    str-attr.user.24HourTimeFormatFlag=TRUE
+    ${save format 24HOUR}    Set Mail Prefs    params.map=${params_map_2}
+    User Logout
+
+Setting - General settings - TimeDisplayFormat
+    [Documentation]    controled by UI,can not test here
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${params_map_1}    makeHashField    str-attr.user.mail.TimeDisplayFormat=short
+    ${TimeDisplayFormat short}    Set Mail Prefs    params.map=${params_map_1}
+    ${params_map_2}    makeHashField    str-attr.user.mail.TimeDisplayFormat=long
+    ${TimeDisplayFormat short}    Set Mail Prefs    params.map=${params_map_2}
+    User Logout
+
+Setting - General settings - change password
+    [Documentation]    change password user single quota, Passwords are not obfuscated in log.
+    ...    it is a bug, but won't fixed
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${change result}    change_pwd_positive    oldPassword=${mail_password}    newPassword=test
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=test
+    ${change result}    change_pwd_positive    oldPassword=test    newPassword=${mail_password}
+    User Logout
+
+Setting - General settings - use device zone
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${params_map_1}    makeHashField    str-attr.user.timezone.UseDeviceTimeZone=false
+    ${save no use device zone}    Set Mail Prefs    params.map=${params_map_1}
+    User Logout
+
+Setting - General settings - save and load all
+    [Documentation]    SENDING_RECEIPT_PROMPT = 0;
+    ...    SENDING_RECEIPT_ALWAYS = 1;
+    ...    SENDING_RECEIPT_NEVER = 2;
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${set result}    set_mail_preference    params.object.showCheckmarks=false    params.object.emptyTrashOnLogout=false    params.object.replyQuoting=false    params.object.spellcheckOnSend=false    params.object.maxMessagesPerFetch=10
+    ...    params.object.autoCheckInterval=3    params.object.preferPlaintext=false    params.object.maxMessageSizePerFetch=1024    params.object.sendingReceipt=0    params.object.from=test from    params.object.playSound=false
+    ...    params.object.autoInsertSignature=false    params.object.blockExternalImages=false    params.object.accountName=test account name    params.object.replyTo=test reply to    params.object.preferPlaintextEditor=false    params.object.realName=test realname
+    ...    params.object.saveOutgoingMessages=false    params.object.imageBlockerOption=alwaysAllow    params.object.permanentDelete=false    params.object.requestReceiptWithNewMail=false
+    ${load res}    load_mail_preference
+    should contain    ${load res}    ${common_to}${common_domain}
+    should contain    ${load res}    test realname
+    should contain    ${load res}    test from
+    should contain    ${load res}    test reply to
+    should contain    ${load res}    alwaysAllow
+    should contain    ${load res}    0
+    should contain    ${load res}    10
+    should contain    ${load res}    1024
+    User Logout
+
+Setting - prefs save profile
+    [Documentation]    what is this used for ?
+    ...    attr.user.alternateEmail
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${result}    Empty Folder    folderPath=INBOX
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${params_map_first}    makeHashField    str-attr.user.firstName=firstname
+    ${set firstname}    Set Mail Prefs    params.map=${params_map_first}
+    ${params_map_last}    makeHashField    str-attr.user.lastName=lastname
+    ${set lastname}    Set Mail Prefs    params.map=${params_map_last}
+    ${params_map_mail}    makeHashField    str-attr.user.alternateEmail=test@openwave.com
+    ${set mail addre}    Set Mail Prefs    params.map=${params_map_mail}
+    ${set realname}    set_mail_preference    params.object.realName=my real name
+    ${empty result}    Empty Folder    folderPath=INBOX
+    ${sendMsgKW}    Send Mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=test profile name
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${check result}    check_message_by_from_name    name=my real name    expectCnt=1    folderPath=INBOX
+    User Logout
+
+Setting - prefs auto suggest on/off
+    [Documentation]    function will be tesed in Contact suite
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${params_map_true}    makeHashField    str-contacts.autoSuggestCL=false
+    ${set sutosuggest false}    Set Mail Prefs    params.map=${params_map_true}
+    ${params_map_false}    makeHashField    str-contacts.autoSuggestCL=true
+    ${set autosuggest true}    Set Mail Prefs    params.map=${params_map_false}
+    User Logout
+
+Setting - prefs StartTimeOfDay - set and get
+    [Tags]
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${params_map_true}    makeHashField    int-attr.user.StartTimeOfDay=1
+    ${set sutosuggest false}    Set Mail Prefs    params.map=${params_map_true}
+    ${check result}    check_mail_prefs    attr.user.StartTimeOfDay=1    expect=true
+    User Logout
+
+Setting - signature - Set and del
+    [Documentation]    todo:signature update,get
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${empty result}    empty_signature
+    ${plain}    Create Signature Positive    params.object.contentType=text/plain    params.object.text=ffvsfs    params.object.label=text
+    ${html}    Create Signature Positive    params.object.contentType=text/html    params.object.default=false
+    ${empty result}    empty_signature
+    User Logout
+
+Setting - signature - max number( webtop config )
+    [Documentation]    <signatures enabled="true" limit="10" maxTextSize="1k" maxLabelSize="128" />
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${del all signature}    empty_signature
+    ${result}    Run Keyword And Continue On Failure    Create MaxCnt Signature    maxCnt=${max_signature}
+    User Logout
+    [Teardown]
+
+Setting - signature - max size( webtop config )
+    [Documentation]    type=html should be tested too
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${empty result}    empty_signature
+    ${create signature 1026 length}    create_maxsize_signature    params.object.contentType=text    params.object.text=1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890abcdefghijklmnopqrstuvwxyz    params.object.label=text
+    User Logout
+
+Setting - signature - position
+    [Documentation]    controlled by UI, can not test here
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${params_map_below}    makeHashField    str-attr.mail.signaturePosition=below
+    ${set position below}    Set Mail Prefs    params.map=${params_map_below}
+    ${params_map_above}    makeHashField    str-attr.mail.signaturePosition=above
+    ${set position above}    Set Mail Prefs    params.map=${params_map_above}
+    User Logout
+
+Setting - external account - test connection,add,list,delete
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${empty result}    Empty External Account
+    ${test result}    Test External Account Succ    params.account.username=new.swisscom@yahoo.com    params.account.password=laszlo123
+    ${creat_external_accounts}    Add External Account    params.object.username=new.swisscom@yahoo.com    params.object.password=laszlo123
+    ${check_external_accounts}    Check external Account    username=new.swisscom@yahoo.com    expectCnt=1
+    User Logout
+
+Setting - create external account with signature
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${delete all external account}    Empty External Account
+    ${empty signature}    empty_signature
+    ${plain}    Create Signature Positive    params.object.contentType=text    params.object.text=ffvsfs    params.object.label=for external account
+    ${signature id}    get_signature_id_by_label    label=for external account
+    ${creat_external_accounts}    Add External Account    params.object.username=new.swisscom@yahoo.com    params.object.password=laszlo123    params.object.signatureId=${signature id}
+    ${check account}    Check external Account    username=new.swisscom@yahoo.com    expectCnt=1    expectStr=${signature id}
+    User Logout
+
+Setting - update external account
+    [Documentation]    test connection use accountName and password to test the account
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${delete all external account}    Empty External Account
+    ${create_external_accounts}    Add External Account    params.object.username=new.swisscom@yahoo.com    params.object.password=laszlo123    params.object.accountName=88888
+    ${external account id}    Get External Account Id    username=new.swisscom@yahoo.com
+    ${update_external_accounts}    update_external_account    params.object.username=new.swisscom@yahoo.com    params.object.password=laszlo123    params.object.accountName=77777updated    params.object.id=${external account id}    params.object.accountId=${external account id}
+    ${check account}    Check external Account    username=new.swisscom@yahoo.com    expectCnt=1    expectStr=77777updated
+    User Logout
+
+Setting - external account - check external account mail list
+    [Documentation]    METHANE-144 (CPMS-Json) Mail - got INTERNAL_ERROR when adding external account
+    ...
+    ...    mail may appear in external account folder:Inbox,Bulk Mail
+    ...
+    ...    if the case failed, try another folder
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${empty result}    Empty External Account
+    ${test result}    Test External Account Succ    params.account.username=new.swisscom@yahoo.com    params.account.password=laszlo123
+    ${creat_external_accounts}    Add External Account    params.object.username=new.swisscom@yahoo.com    params.object.password=laszlo123
+    ${external account id}    Get External Account Id    username=new.swisscom@yahoo.com
+    ${list result}    list_mail    params.folderPath=Inbox    params.accountId=${external account id}
+    User Logout
+
+Setting - external account - max count( webtop config )
+    [Documentation]    i dont know what is the external account limitation
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${delete all external account}    Empty External Account
+    ${crate max cnt external acc}    create_MaxCnt_external_acc    username=new.swisscom@yahoo.com    maxCnt=${max_external_acc}
+    ${empty result}    Empty External Account
+    User Logout
+
+Setting - enable Auto forward and keep a copy
+    [Documentation]    something strange:
+    ...    sometimes, this case failed, but if you send mail from UI, it worked
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${email list}    create list    ${mail_cc}${common_domain}
+    ${set auto fwd}    auto_forward    params.object.addresses=${email list}    params.object.keepCopy=true    params.object.enabled=true    params.object.sendAsAttachment=false
+    ${empty to input}    Empty Folder    folderPath=INBOX
+    User Logout
+    User Login    username=${mail_cc}${common_domain}    password=${mail_password}
+    ${disable auto fwd}    Auto Forward    params.object.enabled=false    params.object.keepCopy=false    params.object.sendAsAttachment=false
+    ${empty cc input}    Empty Folder    folderPath=INBOX
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${send msg to to}    Send Mail    from=${common_from}${common_domain}    to=${common_to}${common_domain}    body=${mail_body}    subject=${mail_subject}
+    User Logout
+    User Login    username=${mail_cc}${common_domain}    password=${mail_password}
+    ${Cc check msg header}    check_message_by_subject    folderPath=INBOX    subject=${mail_subject}    expectCnt=1
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${to check msg header}    check_message_by_subject    folderPath=INBOX    subject=${mail_subject}    expectCnt=1
+    ${disable auto fwd}    Auto Forward    params.object.enabled=false    params.object.keepCopy=false    params.object.sendAsAttachment=false
+    User Logout
+
+Setting - Auto forward - enabled and keep no copy
+    [Documentation]    something strange:
+    ...    sometimes, this case failed, but if you send mail from UI, it worked
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${email list}    create list    ${mail_cc}${common_domain}
+    ${set auto fwd}    auto_forward    params.object.addresses=${email list}    params.object.keepCopy=false    params.object.enabled=true    params.object.sendAsAttachment=false
+    ${empty to input}    Empty Folder    folderPath=INBOX
+    User Logout
+    User Login    username=${mail_cc}${common_domain}    password=${mail_password}
+    ${disable auto fwd}    Auto Forward    params.object.enabled=false    params.object.keepCopy=false    params.object.sendAsAttachment=false
+    ${empty cc input}    Empty Folder    folderPath=INBOX
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${send msg to to}    Send Mail    from=${common_from}${common_domain}    to=${common_to}${common_domain}    body=${mail_body}    subject=${mail_subject}    priority=3
+    User Logout
+    User Login    username=${mail_cc}${common_domain}    password=${mail_password}
+    ${Cc check msg header}    check_message_by_subject    folderPath=INBOX    subject=${mail_subject}    expectCnt=1
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${to check msg header}    check_message_by_subject    folderPath=INBOX    subject=${mail_subject}    expectCnt=0
+    ${disable auto fwd}    Auto Forward    params.object.enabled=false    params.object.keepCopy=false    params.object.sendAsAttachment=false
+    User Logout
+
+Setting - diable Auto forward
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${empty cc input}    Empty Folder    folderPath=INBOX
+    ${email list}    create list    ${mail_cc}${common_domain}
+    ${set auto fwd}    Auto Forward    params.object.addresses=${email list}    params.object.keepCopy=true    params.object.enabled=true    params.object.sendAsAttachment=false
+    ${set auto fwd}    Auto Forward    params.object.enabled=false    params.object.keepCopy=false    params.object.sendAsAttachment=false
+    User Logout
+    User Login    username=${mail_cc}${common_domain}    password=${mail_password}
+    ${empty cc input}    Empty Folder    folderPath=INBOX
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${send msg to to}    Send Mail    from=${common_from}${common_domain}    to=${common_to}${common_domain}    body=${mail_body}    subject=${mail_subject}
+    User Logout
+    User Login    username=${mail_cc}${common_domain}    password=${mail_password}
+    ${Cc check msg header}    check_message_by_subject    folderPath=INBOX    subject=${mail_subject}    expectCnt=0
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${to check msg header}    check_message_by_subject    folderPath=INBOX    subject=${mail_subject}    expectCnt=1
+    User Logout
+
+Setting - disposable address - add
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${add}    add_disposable_address    params.object.name=testname${common_domain}    params.object.preferredName=fakename
+    User Logout
+
+Setting - disposable address - list
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${add}    add_disposable_address    name=test1@devmybtinternet.com    preferredName=fakename
+    ${add}    add_disposable_address    name=test2@devmybtinternet.com    preferredName=fake.name
+    ${add}    add_disposable_address    name=test3@devmybtinternet.com    preferredName=fake_name
+    ${list}    List Disposable address positive
+    ${list length}    Get Length    ${list}
+    Should Be True    ${list length}==3    'Disposable list count is not 3!'
+    User Logout
+
+Setting - disposable address - delete
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${add}    add_disposable_address    name=testname@devmybtinternet.com    preferredName=fakename
+    ${id list}    List Disposable address positive
+    ${list length}    Get Length    ${id list}
+    Should Be True    ${list length}==1    'Disposable list count is not 1!'
+    ${empty result}    empty disposable address    ids=${id list}
+    ${list}    List Disposable address positive
+    ${list length}    Get Length    ${list}
+    Should Be True    ${list length}==0    'Disposable list count should be 0!'
+    User Logout
+
+Setting - disposable address - get
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${id list}    List Disposable address positive
+    ${empty result}    empty disposable address    ids=${id list}
+    ${add}    add_disposable_address    name=test1@devmybtinternet.com    preferredName=fakename
+    ${id list}    List Disposable address positive
+    ${check result}    check_disposable_address    ids=${id list}    expectStr=test1@devmybtinternet.com ,fakename
+    User Logout
+
+Setting - disposable address - update
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${id list}    List Disposable address positive
+    ${empty result}    empty disposable address    ids=${id list}
+    ${add}    add_disposable_address    params.object.name=testname@devmybtinternet.com    params.object.preferredName=fakename
+    ${id_for_update}    get_disposable_id_by_name    name=testname@devmybtinternet.com
+    ${add}    update_disposable_address    params.object.name=testname888@devmybtinternet.com    params.object.preferredName=fakename888
+    ${check result}    check_disposable_address    ids=${id list}    expectStr=testname888@devmybtinternet.com,fakename888
+    ,fakename
+
+Setting - disposable address - function
+    Fail    [Disposable function not ready for script]
+
+Setting - block sender - list, del
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${remove result}    Empty Blocksenders
+    User Logout
+
+Setting - block sender - add
+    [Documentation]    blocked by save API bugs
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${remove result}    Empty Blocksenders
+    ${sender_1}    create list    bs1.a@rwchinoki05.owmessaging.com
+    ${block sender}    add_block_sender    params.object.senders=${sender_1}
+    ${sender_2}    create list    bs2.b${common_domain}
+    ${block sender}    add_block_sender    params.object.senders=${sender_2}
+    ${check result}    check_blocksender_existed    expectStr=bs2.b${common_domain}
+    ${remove result}    Empty Blocksenders
+    User Logout
+
+Setting - block sender - update
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${remove result}    Empty Blocksenders
+    ${sender_1}    create list    bs1.a@rwchinoki05.owmessaging.com    bs2.b${common_domain}
+    ${block sender}    add_block_sender    params.object.senders=${sender_1}
+    ${remove result}    update_blocksender    remove=bs1.a@rwchinoki05.owmessaging.com
+    ${check existed}    check_blocksender_existed    expectStr=bs2.b${common_domain}
+    ${msg} =    Run Keyword And Expect Error    *    check_blocksender_existed    expectStr=bs1.a@rwchinoki05.owmessaging.com
+    ${remove result}    Empty Blocksenders
+    User Logout
+
+Setting - block sender - disable, enable, isblocked
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${remove result}    Empty Blocksenders
+    ${sender_1}    create list    bs1.a@rwchinoki05.owmessaging.com
+    ${block sender}    add_block_sender    params.object.senders=${sender_1}
+    ${disable blocksender}    disable_blocksender
+    ${check result_1}    check_sender_isblocked    sender=bs1.a@rwchinoki05.owmessaging.com
+    Should Be Equal    true    ${check result_1}
+    ${enable blocksender}    enable_blocksender
+    ${check result_2}    check_sender_isblocked    sender=bs1.a@rwchinoki05.owmessaging.com
+    Should Be Equal    true    ${check result_2}
+    ${remove result}    Empty Blocksenders
+    User Logout
+
+Setting - block sender - add, function
+    [Documentation]    Send, check fetch, block, send again, check fetch again
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${result}    Empty Folder    folderPath=INBOX
+    ${remove result}    Empty Blocksenders
+    ${sender_1}    create list    ${common_from}${common_domain}
+    ${block sender}    add_block_sender    params.object.senders=${sender_1}
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${send msg again}    Send Mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=${mail_subject}
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${list result}    list_mail    params.folderPath=INBOX
+    ${folderStatus}    get_res_value_by_key    res=${list result}    key=folderStatus
+    ${check_result}    check_result_item    res=${folderStatus}    messageCount=0
+
+Setting - safe sender - list, del
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${remove result}    empty_safesenders
+    User Logout
+
+Setting - safe sender - add
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${remove result}    empty_safesenders
+    ${sender_1}    create list    bs1.a@rwchinoki05.owmessaging.com
+    ${block sender}    add_safesender    params.object.senders=${sender_1}
+    ${sender_2}    create list    bs2.b${common_domain}
+    ${block sender}    add_safesender    params.object.senders=${sender_2}
+    ${check result}    check_safesender_existed    expectStr=bs2.b${common_domain}
+    ${remove result}    empty_safesenders
+    User Logout
+
+Setting - safe sender - update
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${remove result}    empty_safesenders
+    ${sender_1}    create list    bs1.a@rwchinoki05.owmessaging.com    bs2.b${common_domain}
+    ${block sender}    add_safesender    params.object.senders=${sender_1}
+    ${remove result}    update_safesender    remove=bs1.a@rwchinoki05.owmessaging.com
+    ${check result}    check_safesender_existed    expectStr=bs2.b${common_domain}
+    ${msg} =    Run Keyword And Expect Error    *    check_safesender_existed    expectStr=bs1.a@rwchinoki05.owmessaging.com
+    ${remove result}    empty_safesenders
+    User Logout
+
+Setting - safe sender - disable, enable, isallowed
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${remove result}    empty_safesenders
+    ${sender_1}    create list    bs1.a@rwchinoki05.owmessaging.com    bs2.b${common_domain}
+    ${block sender}    add_safesender    params.object.senders=${sender_1}
+    ${disable blocksender}    disable_safesender
+    ${check result_1}    check_sender_isallowed    sender=bs1.a@rwchinoki05.owmessaging.com
+    Should Be Equal    true    ${check result_1}
+    ${enable blocksender}    enable_safesender
+    ${check result_2}    check_sender_isallowed    sender=bs1.a@rwchinoki05.owmessaging.com
+    Should Be Equal    true    ${check result_2}
+    ${remove result}    update_safesender    remove=bs1.a@rwchinoki05.owmessaging.com
+    ${remove result}    empty_safesenders
+    User Logout
+
+Setting - safe sender - add, function
+    [Documentation]    block sender
+
+Setting - block image - set four different ways
+    [Documentation]    0 - Always allow images, 1 - Always block images, 2 - Always allow images from contacts in address book, 3 - Always allow images except when tagged as spam or in spam_folder
+    [Tags]    excluded
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${0}    set_mail_preference    params.object.imageBlockerOption=alwaysAllow
+    ${1}    set_mail_preference    params.object.imageBlockerOption=alwaysBlock
+    ${2}    set_mail_preference    params.object.imageBlockerOption=allowFromContacts
+    ${3}    set_mail_preference    params.object.imageBlockerOption=blockFromSpam
+    ${result}    load_mail_preference
+    should contain    ${result}    blockFromSpam
+    User Logout
+
+Setting - block image - always allow image
+    [Tags]    excluded
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${0}    set_mail_preference    params.object.imageBlockerOption=alwaysAllow
+    ${delete msg}    empty_folder    folderPath=INBOX
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${send result}    Send With Img    to=${common_to}${common_domain}    from=${common_from}${common_domain}    imgurl=${mail_faceImg}    subject=mail with img
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${mail id}    get_mail_id_by_subject    subject=mail with img    params.folderPath=INBOX
+    ${check}    check_img_mail    block=false    params.folderPath=INBOX    params.messageUid=${mail id}    imgurl=${mail_faceImg}    format=html
+    ${delete msg}    empty_folder    folderPath=INBOX
+    User Logout
+
+Setting - block image - always block
+    [Tags]    excluded
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${0}    set_mail_preference    params.object.imageBlockerOption=alwaysBlock
+    ${delete msg}    empty_folder    folderPath=INBOX
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${r}    Send With Img    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=for always block    imgurl=${mail_faceImg}
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${mail id}    get_mail_id_by_subject    subject=for always block    params.folderPath=INBOX
+    ${check}    check_img_mail    block=true    params.folderPath=INBOX    params.messageUid=${mail id}    format=html
+    User Logout
+
+Setting - block image - allow images from contacts in address book
+    [Documentation]    fix after contact
+    ...    todo:delete all contact before testing
+    [Tags]    excluded
+    User Login    username=${mail_cc}${common_domain}    password=${mail_password}
+    ${delete msg}    empty_folder    folderPath=INBOX
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${default addressbook id}    get_addressbook_id_by_name    name=${default_addressbook_name}
+    ${work mail}    makeContactField    label=work    type=lzEmail    value=${common_from}${common_domain}    primary=false
+    ${contact fields}    Create List    ${work mail}
+    ${contact info json}    make_contact    @type=Contact    firstName=${common_from}    lastName=testLast    email=${common_from}${common_domain}    fields=${contact fields}
+    ${create contact res}    create_contact    params.addressBookId=${default addressbook id}    params.contact=${contact info json}
+    ${set allowfromcontact}    set_mail_preference    params.object.imageBlockerOption=allowFromContacts
+    ${delete msg}    empty_folder    folderPath=INBOX
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${from sendmail}    Send With Img    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=for img blocker - contact    imgurl=${mail_faceImg}
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${mail id from contact}    get_mail_id_by_subject    subject=for img blocker - contact    params.folderPath=INBOX
+    ${check img not blocked}    check_img_mail    block=false    params.folderPath=INBOX    params.messageUid=${mail id from contact}    imgurl=${mail_faceImg}    format=html
+    User Logout
+    User Login    username=${mail_cc}${common_domain}    password=${mail_password}
+    ${cc send mail}    Send With Img    to=${common_to}${common_domain}    from=${mail_cc}${common_domain}    subject=${mail_subject}    imgurl=${mail_faceImg}
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${mail id}    get_mail_id_by_subject    subject=${mail_subject}    params.folderPath=INBOX
+    ${check}    check_img_mail    block=true    params.folderPath=INBOX    params.messageUid=${mail id}    format=html
+    User Logout
+
+Setting - block image - allow except Spam
+    [Documentation]    don't under stand the function
+    [Tags]    excluded
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${empty inbox}    Empty Folder    folderPath=INBOX
+    ${empty spam}    Empty Folder    folderPath=${spam_folder}
+    ${3}    set_mail_preference    params.object.imageBlockerOption=blockFromSpam
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${r}    Send With Img    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=for img blocker - spam    imgurl=${mail_faceImg}
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${mail id}    get_mail_id_by_subject    subject=for img blocker - spam    params.folderPath=INBOX
+    ${check}    check_img_mail    block=false    params.folderPath=INBOX    params.messageUid=${mail id}    imgurl=${mail_faceImg}    format=html
+    ${id to spam}    create list    ${mail id}
+    ${report spam}    Report Message    folderPath=INBOX    destFolderPath=${spam_folder}    type=junk    params.selection=${id to spam}
+    ${mail id 1}    get_mail_id_by_subject    subject=for img blocker - spam    params.folderPath=${spam_folder}
+    ${check}    check_img_mail    block=true    params.folderPath=${spam_folder}    params.messageUid=${mail id 1}    format=html
+    User Logout
+
+Setting - trust sender - list, del
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${remove result}    empty_trustsenders
+    User Logout
+
+Setting - trust sender - add
+    [Documentation]    blocked by save API bug
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${remove result}    empty_trustsenders
+    ${block sender 1}    create_trust_sender    params.object.address=bs1.a@rwchinoki05.owmessaging.com
+    ${block sender 2}    create_trust_sender    params.object.address=bs2.b${common_domain}
+    ${check result 1}    check_trustsender_existed    expectStr=bs1.a@rwchinoki05.owmessaging.com
+    ${check result 2}    check_trustsender_existed    expectStr=bs2.b${common_domain}
+    ${remove result}    empty_trustsenders
+    User Logout
+
+Setting - trust sender - update
+    [Documentation]    blocked by save API bug
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${remove result}    empty_trustsenders
+    ${block sender}    create_trust_sender    params.object.address=bs1.a@rwchinoki05.owmessaging.com
+    ${trust_sender_id}    get_trustsender_id_by_address    address=bs1.a@rwchinoki05.owmessaging.com
+    ${remove result}    update_trust_sender    params.object.id=${trust_sender_id}    params.object.address=bs2.b${common_domain}
+    ${check result}    check_trustsender_existed    expectStr=bs2.b${common_domain}
+    ${msg} =    Run Keyword And Expect Error    *    check_trustsender_existed    expectStr=bs1.a@rwchinoki05.owmessaging.com
+    ${remove result}    empty_trustsenders
+    User Logout
+
+Setting - Timezone - set all timezones
+    [Documentation]    timezone:
+    ...    Pacific/Johnston
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty inbox}    Empty Folder    folderPath=INBOX
+    ${params_map_1}    makeHashField    str-attr.user.timezone.UseDeviceTimeZone=false
+    ${save no use device zone}    Set Mail Prefs    params.map=${params_map_1}
+    @{tz list}    get_timezone_for_test
+    : FOR    ${tz}    IN    @{tz list}
+    \    Log    ${tz} set:
+    \    ${set timezone}    set_timzone    zoneId=${tz}
+    \    sleep    1
+    \    Log    ${tz} set end.
+    User Logout
+    [Teardown]
+
+Setting - Timezone - check time in msgHeaderlist response
+    [Documentation]    below timezone have been uncorrect:
+    ...    Pacific/Johnston
+    ...    Africa/Casablanca
+    ...    America/Grand_Turk
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty inbox}    Empty Folder    folderPath=INBOX
+    ${params_map_1}    makeHashField    str-attr.user.timezone.UseDeviceTimeZone=false
+    ${save no use device zone}    Set Mail Prefs    params.map=${params_map_1}
+    ${set timezone}    set_timzone    zoneId=Pacific/Bougainville
+    ${sendMsgKW}    Send Mail    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=${mail_subject}
+    ${target date}    get_date_from_msg_header_list    folderPath=INBOX    subject=${mail_subject}    fieldName=sentDate
+    ${check msg header}    check_tz_format    targetdate=${target date}    format=%Y%m%dT%H%M%S    timezone=Pacific/Bougainville
+    User Logout
+    [Teardown]
+
+Setting - Timezone - check time in msgFetch response
+    [Documentation]    America/Los_Angeles
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty inbox}    Empty Folder    folderPath=INBOX
+    ${params_map_1}    makeHashField    str-attr.user.timezone.UseDeviceTimeZone=false
+    ${save no use device zone}    Set Mail Prefs    params.map=${params_map_1}
+    ${set timezone}    set_timzone    zoneId=Asia/Krasnoyarsk
+    ${sendMsgKW}    Send Mail    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=i am for timezone check
+    ${mail id}    get_mail_id_by_subject    subject=i am for timezone check    folderPath=INBOX
+    ${target date}    get_date_from_msg_fetch    messageUid=${mail id}    folderPath=INBOX    subject=i am for timezone check    fieldName=sentDate
+    ${check msg header}    check_tz_format    targetdate=${target date}    format=%Y%m%dT%H%M%S    timezone=Asia/Krasnoyarsk
+    User Logout
+    [Teardown]
+
+Setting - Timezone - check time in vmsgheaderlist res
+    [Documentation]    Europe/Paris
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty inbox}    Empty Folder    folderPath=INBOX
+    ${params_map_1}    makeHashField    str-attr.user.timezone.UseDeviceTimeZone=false
+    ${save no use device zone}    Set Mail Prefs    params.map=${params_map_1}
+    ${set timezone}    set_timzone    zoneId=Pacific/Apia
+    ${sendMsgKW}    Send Mail    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=i am for timezone check
+    ${target date}    get_date_from_vmsgheaderlist    params.folderPaths=INBOX    params.subject=i am for timezone check    fieldName=sentDate
+    ${check msg header}    check_tz_format    targetdate=${target date}    format=%Y%m%dT%H%M%S    timezone=Pacific/Apia
+    User Logout
+    [Teardown]
+
+Setting - Timezone - check time in saveMsgResp res
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty inbox}    Empty Folder    folderPath=Drafts
+    ${params_map_1}    makeHashField    str-attr.user.timezone.UseDeviceTimeZone=false
+    ${save no use device zone}    Set Mail Prefs    params.map=${params_map_1}
+    ${set timezone}    set_timzone    zoneId=Australia/Sydney
+    ${save draft}    save_draft    from=${common_from}${common_domain}    subject=${mail_subject}
+    ${target date}    get_date_from_msg_header_list    folderPath=Drafts    subject=${mail_subject}    fieldName=receivedDate
+    ${check msg header}    check_tz_format    targetdate=${target date}    format=%Y%m%dT%H%M%S    timezone=Australia/Sydney
+    User Logout
+    [Teardown]
+
+Setting - Timezone - ALL timezone - check time in msgHeaderlist res(group 1)
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty inbox}    Empty Folder    folderPath=INBOX
+    ${params_map_1}    makeHashField    str-attr.user.timezone.UseDeviceTimeZone=false
+    ${save no use device zone}    Set Mail Prefs    params.map=${params_map_1}
+    @{tz list}    get_timezone_by_gmt    gmt=@{timezone_group_1}
+    : FOR    ${tz}    IN    @{tz list}
+    \    Log    ${tz} test start:
+    \    ${set timezone}    set_timzone    zoneId=${tz}
+    \    ${empty inbox}    Empty Folder    folderPath=INBOX
+    \    ${sendMsgKW}    Send Mail    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=${tz}
+    \    ${mail id}    get_mail_id_by_subject    subject=${tz}    folderPath=INBOX
+    \    ${target date}    get_date_from_msg_fetch    messageUid=${mail id}    folderPath=INBOX    subject=${tz}    fieldName=sentDate
+    \    Run Keyword And Continue On Failure    check_tz_format    targetdate=${target date}    format=%Y%m%dT%H%M%S    timezone=${tz}
+    \    sleep    1
+    \    Log    ${tz} test end.
+    User Logout
+
+Setting - Timezone - ALL timezone - check time in msgHeaderlist res(group 2)
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty inbox}    Empty Folder    folderPath=INBOX
+    ${params_map_1}    makeHashField    str-attr.user.timezone.UseDeviceTimeZone=false
+    ${save no use device zone}    Set Mail Prefs    params.map=${params_map_1}
+    @{tz list}    get_timezone_by_gmt    gmt=@{timezone_group_2}
+    : FOR    ${tz}    IN    @{tz list}
+    \    Log    ${tz} test start:
+    \    ${set timezone}    set_timzone    zoneId=${tz}
+    \    ${empty inbox}    Empty Folder    folderPath=INBOX
+    \    ${sendMsgKW}    Send Mail    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=${tz}
+    \    ${mail id}    get_mail_id_by_subject    subject=${tz}    folderPath=INBOX
+    \    ${target date}    get_date_from_msg_fetch    messageUid=${mail id}    folderPath=INBOX    subject=${tz}    fieldName=sentDate
+    \    Run Keyword And Continue On Failure    check_tz_format    targetdate=${target date}    format=%Y%m%dT%H%M%S    timezone=${tz}
+    \    sleep    1
+    \    Log    ${tz} test end.
+    User Logout
+
+Setting - Timezone - ALL timezone - check time in msgHeaderlist res(group 3)
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty inbox}    Empty Folder    folderPath=INBOX
+    ${params_map_1}    makeHashField    str-attr.user.timezone.UseDeviceTimeZone=false
+    ${save no use device zone}    Set Mail Prefs    params.map=${params_map_1}
+    @{tz list}    get_timezone_by_gmt    gmt=@{timezone_group_3}
+    : FOR    ${tz}    IN    @{tz list}
+    \    Log    ${tz} test start:
+    \    ${set timezone}    set_timzone    zoneId=${tz}
+    \    ${empty inbox}    Empty Folder    folderPath=INBOX
+    \    ${sendMsgKW}    Send Mail    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=${tz}
+    \    ${mail id}    get_mail_id_by_subject    subject=${tz}    folderPath=INBOX
+    \    ${target date}    get_date_from_msg_fetch    messageUid=${mail id}    folderPath=INBOX    subject=${tz}    fieldName=sentDate
+    \    Run Keyword And Continue On Failure    check_tz_format    targetdate=${target date}    format=%Y%m%dT%H%M%S    timezone=${tz}
+    \    sleep    1
+    \    Log    ${tz} test end.
+    User Logout
+
+Setting - Timezone - ALL timezone - check time in msgHeaderlist res(group 4)
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty inbox}    Empty Folder    folderPath=INBOX
+    ${params_map_1}    makeHashField    str-attr.user.timezone.UseDeviceTimeZone=false
+    ${save no use device zone}    Set Mail Prefs    params.map=${params_map_1}
+    @{tz list}    get_timezone_by_gmt    gmt=@{timezone_group_4}
+    : FOR    ${tz}    IN    @{tz list}
+    \    Log    ${tz} test start:
+    \    ${set timezone}    set_timzone    zoneId=${tz}
+    \    ${empty inbox}    Empty Folder    folderPath=INBOX
+    \    ${sendMsgKW}    Send Mail    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=${tz}
+    \    ${mail id}    get_mail_id_by_subject    subject=${tz}    folderPath=INBOX
+    \    ${target date}    get_date_from_msg_fetch    messageUid=${mail id}    folderPath=INBOX    subject=${tz}    fieldName=sentDate
+    \    Run Keyword And Continue On Failure    check_tz_format    targetdate=${target date}    format=%Y%m%dT%H%M%S    timezone=${tz}
+    \    sleep    1
+    \    Log    ${tz} test end.
+    User Logout
+
+Setting - Timezone - ALL timezone - check time in msgHeaderlist res(group 5)
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty inbox}    Empty Folder    folderPath=INBOX
+    ${params_map_1}    makeHashField    str-attr.user.timezone.UseDeviceTimeZone=false
+    ${save no use device zone}    Set Mail Prefs    params.map=${params_map_1}
+    @{tz list}    get_timezone_by_gmt    gmt=@{timezone_group_5}
+    : FOR    ${tz}    IN    @{tz list}
+    \    Log    ${tz} test start:
+    \    ${set timezone}    set_timzone    zoneId=${tz}
+    \    ${empty inbox}    Empty Folder    folderPath=INBOX
+    \    ${sendMsgKW}    Send Mail    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=${tz}
+    \    ${mail id}    get_mail_id_by_subject    subject=${tz}    folderPath=INBOX
+    \    ${target date}    get_date_from_msg_fetch    messageUid=${mail id}    folderPath=INBOX    subject=${tz}    fieldName=sentDate
+    \    Run Keyword And Continue On Failure    check_tz_format    targetdate=${target date}    format=%Y%m%dT%H%M%S    timezone=${tz}
+    \    sleep    1
+    \    Log    ${tz} test end.
+    User Logout
+
+Setting - Timezone - ALL timezone - check time in msgHeaderlist res(group 6)
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty inbox}    Empty Folder    folderPath=INBOX
+    ${params_map_1}    makeHashField    str-attr.user.timezone.UseDeviceTimeZone=false
+    ${save no use device zone}    Set Mail Prefs    params.map=${params_map_1}
+    @{tz list}    get_timezone_by_gmt    gmt=@{timezone_group_6}
+    : FOR    ${tz}    IN    @{tz list}
+    \    Log    ${tz} test start:
+    \    ${set timezone}    set_timzone    zoneId=${tz}
+    \    ${empty inbox}    Empty Folder    folderPath=INBOX
+    \    ${sendMsgKW}    Send Mail    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=${tz}
+    \    ${mail id}    get_mail_id_by_subject    subject=${tz}    folderPath=INBOX
+    \    ${target date}    get_date_from_msg_fetch    messageUid=${mail id}    folderPath=INBOX    subject=${tz}    fieldName=sentDate
+    \    Run Keyword And Continue On Failure    check_tz_format    targetdate=${target date}    format=%Y%m%dT%H%M%S    timezone=${tz}
+    \    sleep    1
+    \    Log    ${tz} test end.
+    User Logout
+
+Setting - Timezone - ALL timezone - check time in msgHeaderlist res(group 7)
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty inbox}    Empty Folder    folderPath=INBOX
+    ${params_map_1}    makeHashField    str-attr.user.timezone.UseDeviceTimeZone=false
+    ${save no use device zone}    Set Mail Prefs    params.map=${params_map_1}
+    @{tz list}    get_timezone_by_gmt    gmt=@{timezone_group_7}
+    : FOR    ${tz}    IN    @{tz list}
+    \    Log    ${tz} test start:
+    \    ${set timezone}    set_timzone    zoneId=${tz}
+    \    ${empty inbox}    Empty Folder    folderPath=INBOX
+    \    ${sendMsgKW}    Send Mail    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=${tz}
+    \    ${mail id}    get_mail_id_by_subject    subject=${tz}    folderPath=INBOX
+    \    ${target date}    get_date_from_msg_fetch    messageUid=${mail id}    folderPath=INBOX    subject=${tz}    fieldName=sentDate
+    \    Run Keyword And Continue On Failure    check_tz_format    targetdate=${target date}    format=%Y%m%dT%H%M%S    timezone=${tz}
+    \    sleep    1
+    \    Log    ${tz} test end.
+    User Logout
+
+Setting - Timezone - ALL timezone - check time in msgFetch res
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty inbox}    Empty Folder    folderPath=INBOX
+    ${params_map_1}    makeHashField    str-attr.user.timezone.UseDeviceTimeZone=false
+    ${save no use device zone}    Set Mail Prefs    params.map=${params_map_1}
+    @{tz list}    get_timezone_by_gmt    gmt=@{timezone_group_1}
+    : FOR    ${tz}    IN    @{tz list}
+    \    Log    ${tz} test start:
+    \    ${set timezone}    set_timzone    zoneId=${tz}
+    \    ${sendMsgKW}    Send Mail    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=${tz}
+    \    ${mail id}    get_mail_id_by_subject    subject=${tz}    folderPath=INBOX
+    \    ${target date}    get_date_from_msg_fetch    messageUid=${mail id}    folderPath=INBOX    subject=${tz}    fieldName=sentDate
+    \    ${check msg header}    check_tz_format    targetdate=${target date}    format=%Y%m%dT%H%M%S    timezone=${tz}
+    \    Log    ${tz} test end.
+    User Logout
+    [Teardown]
+
+Mail settings - mobile signature - load
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${load result}    load_mobile_signature
+    User Logout
+
+Mail settings - mobile signature - add
+    [Tags]
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${save result 1}    save_mobile_signature    params.object.contentType=text/plain    params.object.text=ffvsfs    params.object.label=text
+    ${save result 2}    save_mobile_signature    params.object.contentType=text/html    params.object.text=<b>test</b>    params.object.label=html    params.object.default=false
+    ${check result}    check_mobile_signature    expectStr=<b>test</b>
+    User Logout
+
+FUS-6292 : (CPMS)Mail settings - auto reply message
+    [Tags]    cpms
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${r}    set_auto_reply_cpms
+    ${r}    set_auto_reply_cpms    option=[{'name':'vactionMode','value':'false'},{'name':'attachOriginalMessageToReply','value':'false'}]
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${result}    Empty Folder    name=INBOX
+    ${disable auto fwd}    Auto Forward    enabled=false    keepCopy=false    sendAsAttachment=false
+    ${subject}    Send Mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=test for auto reply    notifyOptions=
+    sleep    1s
+    ${check msgfetch}    Check Message By Subject    folder=INBOX    subject=Re: test for auto reply    expectCnt=1
+    User Logout
+
+FUS-6291 : (CPMS)Mail settings - disable auto reply message
+    [Tags]    cpms
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${r}    set_auto_reply_cpms
+    ${disable}    disable_auto_reply_cpms
+    ${check result}    check_get_autoreply    res=${disable}    name=enabled    value=false
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${result}    Empty Folder    name=INBOX
+    ${subject}    Send Mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=test for auto reply
+    sleep    1s
+    ${check msgfetch}    Check Message By Subject    folder=INBOX    subject=Re: test for auto reply    expectCnt=0
+    User Logout
+
+FUS-6280 : (CPMS)Mail settings - auto reply message - Send a reply once to each sender
+    [Documentation]    it seems can only test once for each user
+    [Tags]    cpms
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${disable}    disable_auto_reply_cpms
+    ${r}    set_auto_reply_cpms    interval=0    option=[{'name':'vacationMode','value':'true'}]
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${result}    Empty Folder    name=INBOX
+    ${subject1}    Send Mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=test for auto reply
+    sleep    1s
+    ${check msgfetch}    Check Message By Subject    folder=INBOX    subject=Re: test for auto reply    expectCnt=1
+    ${subject2}    Send Mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=test for auto reply
+    sleep    1s
+    ${check msgfetch}    Check Message By Subject    folder=INBOX    subject=Re: test for auto reply    expectCnt=1
+    User Logout
+
+FUS-6281 : (CPMS)Mail settings - autoreply with original message
+    [Documentation]    if sendmail and returnReceipt='NEVER', then you won't get this reply msg
+    [Tags]    cpms
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${disable}    disable_auto_reply_cpms
+    ${set original message}    set_auto_reply_cpms    original=true    option=[{'name':'attachOriginalMessageToReply','value':'true'}]
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${result}    Empty Folder    name=INBOX
+    ${sendMsgKW}    Send Mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=auto reply msg
+    ${check msgfetch}    Check Message By Subject    folder=INBOX    subject=Re: auto reply msg    expectCnt=1
+    ${mail id}    get_mail_id_by_subject    subject=Re: auto reply msg    folderPath=INBOX
+    ${fetch result}    check_message_fetch_by_subject    uid=${mail id}    folder=INBOX    expectStr=attachment size=
+    User Logout
+
+FUS-6282 : (CPMS)Mail settings - autoreply to specific message to specific domain
+    [Tags]    cpms
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${disable}    disable_auto_reply_cpms
+    ${set interval}    set_auto_reply_cpms    altDomains=${external_domain}    altMessage=auto reply for ${external_domain}
+    User Logout
+    User Login    username=${external_user}@${external_domain}    password=${mail_password}
+    ${result}    Empty Folder    name=INBOX
+    ${sendMsgKW}    Send Mail    to=${common_to}${common_domain}    from=${external_user}@${external_domain}    subject=auto reply msg
+    ${check msgfetch}    Check Message By Subject    folder=INBOX    subject=Re: auto reply msg    expectCnt=1
+    ${mail id}    get_mail_id_by_subject    subject=Re: auto reply msg    folderPath=INBOX
+    ${fetch result}    check_message_fetch_by_subject    uid=${mail id}    folder=INBOX    expectStr=auto reply for ${external_domain}
+    User Logout
+
+FUS-6286 : (CPMS)Mail settings - autoreply with interval frequency
+    [Tags]    cpms
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${disable}    disable_auto_reply_cpms
+    ${set interval}    set_auto_reply_cpms    frequency=on    interval=5    endday=15    option=[{'name':'vactionMode','value':'true'}]
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${result}    Empty Folder    name=INBOX
+    ${subject}    Send Mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=test for auto reply
+    sleep    1s
+    ${check msgfetch}    Check Message By Subject    folder=INBOX    subject=Re: test for auto reply    expectCnt=1
+    User Logout
+
+FUS-6287 : (CPMS)Mail settings - autoreply - check load - with original message
+    [Tags]    cpms
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${disable}    disable_auto_reply_cpms
+    ${set original message}    set_auto_reply_cpms    original=true    option=[{'name':'attachOriginalMessageToReply','value':'true'}]
+    ${load autoreply}    load_auto_reply    limit=0
+    ${check result}    check_get_autoreply    res=${load autoreply}    name=original    value=true
+    User Logout
+
+FUS-6288 : (CPMS)Mail settings - autoreply - check load - with interval and vacation mode
+    [Tags]    cpms
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${disable}    disable_auto_reply_cpms
+    ${r}    set_auto_reply_cpms    interval=0    option=[{'name':'vacationMode','value':'true'}]
+    ${load autoreply}    load_auto_reply    limit=0
+    ${check result1}    check_get_autoreply    res=${load autoreply}    name=vacationMode    value=true
+    ${check result1}    check_get_autoreply    res=${load autoreply}    name=interval    value=0
+    User Logout
+
+FUS-6289 : (CPMS)Mail settings - autoreply - check load - with specific message to specific domain
+    [Tags]    cpms
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${disable}    disable_auto_reply_cpms
+    ${r}    set_auto_reply_cpms    altDomains=openwave.com    altMessage=auto reply for openwave
+    ${load autoreply}    load_auto_reply    limit=0
+    ${check result1}    check_get_autoreply    res=${load autoreply}    name=altDomains    value=openwave.com
+    ${check result2}    check_get_autoreply    res=${load autoreply}    name=altMessage    value=auto reply for openwave
+    User Logout
+
+FUS-6290 : (CPMS)Mail settings - autoreply - check load - with interval frequency
+    [Tags]    cpms
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${disable}    disable_auto_reply_cpms
+    ${r}    set_auto_reply_cpms    frequency=on    interval=5    endday=15
+    ${endDate}    get_date_from_response    date=endDate    response=${r}
+    ${load autoreply}    load_auto_reply    limit=0
+    ${check result1}    check_get_autoreply    res=${load autoreply}    name=interval    value=5
+    ${check result2}    check_get_autoreply    res=${load autoreply}    name=endDate    value=${endDate}
+    User Logout
+
+Mail settings - (MX) auto reply message with VACATION mode(once)
+    [Tags]    mx
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${result}    Empty Folder    folderPath=INBOX
+    ${disable}    set_auto_reply    params.object.enabled=false
+    ${auto-reply}    set_auto_reply    params.object.enabled=true    params.object.mode=vacation    params.object.message=test auto reply
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${result}    Empty Folder    folderPath=INBOX
+    ${sent result}    Send Mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=test auto reply
+    ${check msgfetch}    Check Message By Subject    folderPath=INBOX    subject=Re: test auto reply    expectCnt=1
+    ${sent result2}    Send Mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=test for auto reply2
+    ${check msgfetch}    Check Message By Subject    folderPath=INBOX    subject=Re: test for auto reply2    expectCnt=0
+    User Logout
+
+Mail settings - (MX) auto reply message with ECHO mode(original msg)
+    [Tags]    mx
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${auto-reply}    set_auto_reply    params.object.enabled=true    params.object.mode=echo    params.object.message=test auto reply
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${result}    Empty Folder    folderPath=INBOX
+    ${sendMsgKW}    Send Mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=auto reply msg    body= text body
+    sleep    1s
+    ${check subject}    Check Message By Subject    folderPath=INBOX    subject=Re: auto reply msg    expectCnt=1
+    ${mail id}    get_mail_id_by_subject    subject=Re: auto reply msg    folderPath=INBOX
+    ${fetch result}    check_message_fetch_by_subject    messageUid=${mail id}    folderPath=INBOX    expectStr=auto reply msg.eml
+    User Logout
+
+Mail settings - (MX) auto reply message with REPLY mode(not once)
+    [Tags]    mx
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${auto-reply}    set_auto_reply    params.object.enabled=true    params.object.mode=reply    params.object.message=test auto reply
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${result}    Empty Folder    folderPath=INBOX
+    ${subject}    Send Mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=test for auto reply
+    ${check msgfetch}    Check Message By Subject    folderPath=INBOX    subject=Re: test for auto reply    expectCnt=1
+    ${subject}    Send Mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=test for auto reply
+    ${check msgfetch}    Check Message By Subject    folderPath=INBOX    subject=Re: test for auto reply    expectCnt=2
+    User Logout
+
+Mail settings - (MX) disable auto reply message
+    [Tags]    mx
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${result}    Empty Folder    folderPath=INBOX
+    ${disable}    set_auto_reply    params.object.enabled=false
+    ${load auto reply}    load_auto_reply
+    should contain    ${load auto reply}    False
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${result}    Empty Folder    folderPath=INBOX
+    ${subject}    Send Mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=test for auto reply
+    ${check msgfetch}    Check Message By Subject    folderPath=INBOX    subject=Re: test for auto reply    expectCnt=0
+    User Logout
+
+Mail settings - (MX) autoreply - check load - with VACATION mode
+    [Tags]    mx
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${auto-reply}    set_auto_reply    params.object.enabled=true    params.object.mode=vacation    params.object.message=test auto reply-vacation
+    ${load res}    load_auto_reply
+    should contain    ${load res}    True
+    should contain    ${load res}    vacation
+    User Logout
+
+Mail settings - (MX) autoreply - check load - with ECHO mode(original msg)
+    [Tags]    mx
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${auto-reply}    set_auto_reply    params.object.enabled=true    params.object.mode=echo    params.object.message=test auto reply-echo
+    ${load res}    load_auto_reply
+    should contain    ${load res}    True
+    should contain    ${load res}    echo
+    User Logout
+
+Mail settings - (MX) autoreply - check load - with REPLY mode(not once)
+    [Tags]    mx
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${auto-reply}    set_auto_reply    params.object.enabled=true    params.object.mode=reply    params.object.message=test auto reply-reply
+    ${load res}    load_auto_reply
+    should contain    ${load res}    True
+    should contain    ${load res}    reply
+    should contain    ${load res}    test auto reply-reply
+    User Logout
+
+Session - cache timeout( webtop config ) -----------------------
+    [Documentation]    cache="1m" soft="3m" hard="5m"
+    [Tags]    config
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    sleep    65s
+    ${msg} =    Run Keyword And Expect Error    *    list_mail    folderPath=INBOX
+    Should Contain    ${msg}    AUTHENTICATION_REQUIRED
+
+Session - between cache and soft timeout ( webtop config ) -------------------
+    [Documentation]    cache="1m" soft="3m" hard="5m"
+    [Tags]    config
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    sleep    65s
+    ${auth.loginByToken}    user_auth_loginByToken    request=auth.loginByToken    url=${login_url}
+    ${after_auth.loginByToken}    list_mail    folderPath=INBOX
+
+Mail - prefs - mail quota
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${quota info}    check_get_quota
+    User Logout
+
+Mail - prefs - set conversation on
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${list result}    list_mail    params.folderPath=INBOX    params.thread=true
+    User Logout
+
+Mail - prefs - set conversation off
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${list result}    list_mail    params.folderPath=${sent_mail_folder}    params.thread=false
+    User Logout
+
+Negative - MessageHeaderList - mail.message.check count limit
+    [Tags]    negative
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${send_loop_requests}    send_loop_requests    n=5    keyword=send_mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=my msg
+    ${check_headerlist_1page}    Run Keyword And Ignore Error    mail_header_list_check    params.folderPath=INBOX    params.count=3
+    ${expect error}    expect_error    res=${check_headerlist_1page}    expectStr=mail.message.tooManyNewMessages
+    ${result}    Empty Folder    folderPath=INBOX
+
+Mail - prefs - set layout - previewright,conversationOn
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${preview_map}    makeHashField    str-attr.user.FirstName=${common_from}${common_domain}    str-attr.user.LastName=${common_from}${common_domain}    str-attr.user.mail.ViewMode=previewright,conversationOn
+    ${set_prefs_id}    set_prefs_id    params.map=${preview_map}    url=${common_url}
+
+Mail - prefs - set layout - previewbelow,conversationOn
+    [Tags]
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${preview_map}    makeHashField    str-attr.user.FirstName=${common_from}${common_domain}    str-attr.user.LastName=${common_from}${common_domain}    str-attr.user.mail.ViewMode=previewbelow,conversationOn
+    ${set_prefs_id}    set_prefs_id    params.map=${preview_map}    url=${common_url}
+
+Mail - prefs - set layout - nopreview,conversationOn
+    [Tags]
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${preview_map}    makeHashField    str-attr.user.FirstName=${common_from}${common_domain}    str-attr.user.LastName=${common_from}${common_domain}    str-attr.user.mail.ViewMode=nopreview,conversationOn
+    ${set_prefs_id}    set_prefs_id    params.map=${preview_map}    url=${common_url}
+
+t1
+    [Tags]    excluded
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${preview_map}    makeHashField    str-contacts.autoSuggestCL=false    str-attr.user.FirstName=${common_from}${common_domain}    str-attr.user.LastName=${common_from}${common_domain}    str-attr.user.mail.ViewMode=previewright,conversationOn
+    ${set_prefs_id}    set_prefs_id    params.map=${preview_map}    url=${common_url}
+    ${get_prefs}    get_prefs
+    Should Contain    ${get_prefs}    false
+
+t3
+    [Tags]    excluded
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${session_token}    Api Call Emptyfolder    name=INBOX    host=${HostPort}    \    c=3
+    \    \    \    \    \    c=3
+
+t4
+    [Tags]    excluded
+
+t5
+    [Tags]    excluded
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${result}    Empty Folder    folderPath=INBOX
+    ${disable}    set_auto_reply    params.object.enabled=true
+
+Session - between soft and hard timeout ( webtop config )-------------
+    [Documentation]    cache="1m" soft="3m" hard="5m"
+    [Tags]    config
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    sleep    61s
+    ${authlogin_after cache}    user_auth_loginByToken    request=auth.loginByToken    url=${login_url}
+    ${after_auth.loginByToken}    list_mail    folderPath=INBOX
+    sleep    121s
+    ${authlogin_after soft}    user_auth_loginByToken    request=auth.loginByToken    url=${login_url}
+    ${try after soft}    list_mail    folderPath=INBOX
+
+Session - after hard timeout ( webtop config )-------------
+    [Documentation]    cache="1m" soft="3m" hard="5m"
+    [Tags]    config
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    log    after 1m cache, renew session
+    sleep    61s
+    ${authlogin_after cache}    user_auth_loginByToken    request=auth.loginByToken    url=${login_url}
+    ${after_auth.loginByToken}    list_mail    folderPath=INBOX
+    log    after 3m soft, renew session
+    sleep    121s
+    ${authlogin_after soft}    user_auth_loginByToken    request=auth.loginByToken    url=${login_url}
+    ${try after soft}    list_mail    folderPath=INBOX
+    log    after 4m, \ renew session
+    sleep    61s
+    ${authlogin_before_hard}    user_auth_loginByToken    request=auth.loginByToken    url=${login_url}
+    ${try before hard}    list_mail    folderPath=INBOX
+    log    after 5m, \ renew session, expect failed
+    sleep    59s
+    ${autologin after hard} =    Run Keyword And Expect Error    *    user_auth_loginByToken    request=auth.loginByToken    url=${login_url}
+    ${try after hard} =    Run Keyword And Expect Error    *    list_mail    folderPath=INBOX
+    Should Contain    ${autologin after hard}    AUTHENTICATION_FAILURE
+    Should Contain    ${try after hard}    AUTHENTICATION_REQUIRED
+
+Request throttling - sameIP sameUser-amount/time limit ( webtop config )
+    [Documentation]    <rateLimiter enabled="true" scanInterval="30s" blockDuration="10s">
+    ...    <user track="true" block="true" />
+    ...    <address track="true" block="true" />
+    ...    <request limit="10" window="1s" />
+    ...    <batch limit="10" window="1s" maxSize="50" />
+    [Tags]    config
+    ${login}    thread_login    username=${common_from}${common_domain}    password=${mail_password}
+    ${accounts}    Create List    ${common_from}${common_domain}
+    ${threads}    build_user_threads    users=${accounts}    password=${mail_password}    amount=12
+    ${run}    start_threads    users=${accounts}    ms=1000    amount=12
+
+Config - send bootstrap getConfig
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${configs}    bootstrap_getConfig

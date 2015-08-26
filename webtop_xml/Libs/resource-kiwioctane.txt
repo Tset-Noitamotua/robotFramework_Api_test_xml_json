@@ -1,0 +1,23 @@
+*** Variables ***
+${HostPort}       http://172.20.0.78:8080/kiwi-octane
+${common_url}     ${HostPort}/dd
+${common_domain}    @openwave.com
+${common_to}      webtop2
+${common_from}    webtop3
+${mail_password}    p
+${mail_subject}    test
+${mail_body}      Mail Body
+${mail_cc}        webtop3
+${mail_bcc}       webtop4
+${common_upload_url}    ${HostPort}/http/upload?token=%s&sessionId=%s
+${mail_get_attach_url}    ${HostPort}/http/viewattachment?&accountId&folder=%s&uid=%s&part=%s
+${file_name}      Fish.jpg Owl.png test2.docx
+${mail_faceImg}    ${HostPort}/html/rte/resources/images/
+${contact_PABhost}    opal.qa.laszlosystems.com
+${mail_vieweml}    ${HostPort}/bin
+${contact_export}    ${HostPort}/http/download/
+${max_signature}    11
+${max_autocmpltcontact}    20
+${embedImg}       &amp;#128516;&lt;br&gt;
+${folder_nested_depth}    30
+${token_expiry_hour}    24

@@ -1,0 +1,1010 @@
+*** Settings ***
+Documentation     This suite cover all related webtop API by functional steps
+Library           ../baseapi/Login.py    ${login_url}
+Library           ../testcase/MailLib.py    ${common_url}
+Library           ../testcase/PrefsLib.py    ${common_url}
+Library           ../testcase/ContactLib.py    ${common_url}
+Library           ../testcase/SessionTokenLib.py    ${common_url}
+Library           ../testcase/GlobalHelper.py
+Library           ../testcase/FileUploadLib.py    ${common_url}
+Library           ../util/MultiThreadLib.py    ${common_url}    ${login_url}
+
+*** Test Cases ***
+Folder - create simple/nested folder
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${time stamp}    Get Time    epoch
+    ${folder name}    Convert To String    ${time stamp}
+    ${create folder}    create_folder_positive    name=${folder name}
+    ${create nested folder}    create_folder_positive    name=${folder name}    parentPath=${folder name}
+    User Logout
+
+Folder - delete simple/nested folder
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${time stamp}    Get Time    epoch
+    ${folder name}    Convert To String    ${time stamp}
+    ${create simple folder}    create_folder_positive    name=${folder name}
+    ${folder name}    create list    ${folder name}
+    ${delete simple folder}    delete_folder_positive    params.folderPaths=${folder name}
+    ${time stamp1}    Get Time    epoch
+    ${folder name1}    Convert To String    ${time stamp1}
+    ${create folder1}    create_folder_positive    name=${folder name1}
+    ${create nested folder1}    create_folder_positive    name=${folder name1}    parentPath=${folder name1}
+    ${folder name1}    create list    ${folder name1}
+    ${delete parent folder1}    delete_folder_positive    params.folderPaths=${folder name1}
+    ${time stamp2}    Get Time    epoch
+    ${folder name2}    Convert To String    ${time stamp2}
+    ${create folder2}    create_folder_positive    name=${folder name2}    parentPath=
+    ${create nested folder2}    create_folder_positive    name=${folder name2}    parentPath=${folder name2}
+    ${full_path_folder}    create list    ${folder name2}/${folder name2}
+    ${folder name2}    create list    ${folder name2}
+    ${delete sub folder2}    delete_folder_positive    params.folderPaths=${full_path_folder}
+    ${delete parent folder2}    delete_folder_positive    params.folderPaths=${folder name2}
+    User Logout
+
+Folder - list folder
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${delete all folder result}    delete_all_folder
+    ${time stamp}    Get Time    epoch
+    ${folder name}    Convert To String    ${time stamp}
+    ${create folder}    create_folder_positive    name=${folder name}
+    ${create nested folder}    create_folder_positive    name=${folder name}    parentPath=${folder name}
+    ${check result 1}    check_folder_existed    expectCnt=1    fullname=${folder name}    params.depth=-1
+    ${check result 2}    check_folder_existed    expectCnt=1    fullname=${folder name}/${folder name}    params.depth=-1
+    User Logout
+
+Folder - move folder
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${delete all folder result}    delete_all_folder
+    ${create folder}    create_folder_positive    name=folder1
+    ${create nested folder}    create_folder_positive    name=folder2
+    ${source_folder_1}    create list    folder2
+    ${move folder 1}    move_folder    params.folderPaths=${source_folder_1}    params.newParentPath=folder1
+    ${check result 1}    check_folder_existed    expectCnt=1    fullname=folder1/folder2    params.depth=-1
+    ${check result 1}    check_folder_existed    expectCnt=0    fullname=folder2    params.depth=-1
+    ${source_folder_2}    create list    folder1
+    ${move folder 2}    move_folder    params.folderPaths=${source_folder_2}    params.newParentPath=Trash
+    ${check result 2}    check_folder_existed    expectCnt=1    fullname=Trash/folder1/folder2    params.depth=-1
+    User Logout
+
+Folder - rename simple folder
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${delete all folder result}    delete_all_folder
+    ${time stamp}    Get Time    epoch
+    ${folder name}    Convert To String    ${time stamp}
+    ${create folder}    create_folder_positive    name=${folder name}
+    ${rename folder}    rename_folder    params.folderPath=${folder name}    params.newName=${folder name}renamed
+    ${check result}    check_folder_existed    expectCnt=1    fullname=${folder name}renamed    params.depth=-1
+    ${check result}    check_folder_existed    expectCnt=0    fullname=${folder name}    params.depth=-1
+    User Logout
+
+Folder - rename sub folder
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${delete all folder result}    delete_all_folder
+    ${time stamp}    Get Time    epoch
+    ${folder name}    Convert To String    ${time stamp}
+    ${create folder}    create_folder_positive    name=${folder name}
+    ${create nested folder}    create_folder_positive    name=${folder name}    parentPath=${folder name}
+    ${rename folder}    rename_folder    params.folderPath=${folder name}/${folder name}    params.newName=${folder name}renamed
+    ${check result}    check_folder_existed    expectCnt=1    fullname=${folder name}/${folder name}renamed    params.depth=-1
+    ${check result}    check_folder_existed    expectCnt=0    fullname=${folder name}/${folder name}    params.depth=-1
+    User Logout
+
+Mail - list
+    [Documentation]    注意字段local-send-date这类的，还有junk nojunk
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${list result}    list_mail    params.folderPath=INBOX
+    User Logout
+
+Mail - send To
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${result}    Empty Folder    folderPath=INBOX
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${sendMsgKW}    Send Mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=my msg    body=&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Strict//EN&quot; &quot;http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd&quot;&gt; &lt;html xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt; &lt;head&gt; &lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=UTF-8&quot; /&gt; &lt;/head&gt; &lt;body&gt;&amp;amp;lt;img src=&quot;http://172.20.0.78:8080/kiwi-octane/html/rte/resources/images/&quot;/&amp;amp;gt;&lt;/body&gt;&lt;/html&gt;    bodyType=html
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${check msgfetch}    Check Message By Subject    folderPath=INBOX    subject=my msg    expectCnt=1
+    User Logout
+
+Mail - send Cc/Bcc
+    User Login    username=${mail_cc}${common_domain}    password=${mail_password}
+    ${result}    Empty Folder    folderPath=INBOX
+    User Logout
+    User Login    username=${mail_bcc}${common_domain}    password=${mail_password}
+    ${result}    Empty Folder    folderPath=INBOX
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${send msg}    Send Mail    from=${common_from}${common_domain}    to=${common_to}${common_domain}    cc=${mail_cc}${common_domain}    bcc=${mail_bcc}${common_domain}    body=${mail_body}
+    ...    subject=${mail_subject}    priority=3
+    User Logout
+    User Login    username=${mail_cc}${common_domain}    password=${mail_password}
+    ${cc check msg header}    check_message_by_subject    folderPath=INBOX    subject=${mail_subject}    expectCnt=1
+    User Logout
+    User Login    username=${mail_bcc}${common_domain}    password=${mail_password}
+    ${Bcc check msg header}    check_message_by_subject    folderPath=INBOX    subject=${mail_subject}    expectCnt=1
+    User Logout
+
+Mail - simple search
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${result}    Empty Folder    folderPath=INBOX
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${sendMsgKW}    Send Mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=my msg    body=mmmmmmmmm,nnnnn
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${search result}    Search Message    params.terms=my msg    params.folderPaths=INBOX
+    ${search result}    Search Message    params.terms=${common_from}    params.folderPaths=INBOX
+    ${search result}    Search Message    params.terms=${common_to}    params.folderPaths=INBOX
+    ${search result}    Search Message    params.terms=nnnnn    params.folderPaths=INBOX
+    User Logout
+
+Mail - fetch
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${result}    Empty Folder    params.folderPath=INBOX
+    ${sendMsgKW}    Send Mail    params.to=${common_from}${common_domain}    params.from=${common_from}${common_domain}    params.subject=i am for fetch
+    ${mail id}    get_mail_id_by_subject    subject=i am for fetch    params.folderPath=INBOX
+    ${fetch result}    check_message_fetch_by_subject    params.messageUid=${mail id}    params.folderPath=INBOX    expectStr=i am for fetch
+    User Logout
+
+Mail - flag
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${result}    Empty Folder    folderPath=INBOX
+    ${sendMsgKW}    Send Mail    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=for flag test
+    ${mail id}    get_mail_id_by_subject    subject=for flag test    params.folderPath=INBOX
+    ${mail_id_list}    Create List    ${mail id}
+    ${flag Unread}    flag_mail    params.folderPath=INBOX    params.flag=seen    params.value=True    params.selection=${mail_id_list}
+    ${flag Flagged}    flag_mail    params.folderPath=INBOX    params.flag=flagged    params.value=True    params.selection=${mail_id_list}
+    ${check seen flag}    check_mail_flag    id=${mail id}    flag=seen    value=True    params.folderPath=INBOX
+    ${check flagged flag}    check_mail_flag    id=${mail id}    flag=flagged    value=True    params.folderPath=INBOX
+    ${flag Unread}    flag_mail    params.folderPath=INBOX    params.flag=seen    params.value=False    params.selection=@{mail_id_list}
+    ${flag Flagged}    flag_mail    params.folderPath=INBOX    params.flag=flagged    params.value=False    params.selection=@{mail_id_list}
+    ${check seen flag}    check_mail_flag    id=${mail id}    flag=seen    value=False    params.folderPath=INBOX
+    ${check flagged flag}    check_mail_flag    id=${mail id}    flag=flagged    value=False    params.folderPath=INBOX
+    User Logout
+
+Mail - mark a message as spam and not spam
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${empty inbox}    Empty Folder    folderPath=INBOX
+    ${empty spam}    Empty Folder    folderPath=Spam
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${sendMsgKW}    Send Mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=i am for spam    priority=3
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${mail id}    get_mail_id_by_subject    subject=i am for spam    params.folderPath=INBOX
+    ${mail id list}    create list    ${mail id}
+    ${report spam}    Report Message    params.folderPath=INBOX    params.destFolderPath=Spam    params.type=junk    params.selection=${mail id list}
+    ${check subject in spam}    check_message_header_subject    folderPath=Spam    subject=i am for spam
+    ${spam mail id}    get_mail_id_by_subject    subject=i am for spam    params.folderPath=Spam
+    ${spam id list}    create list    ${spam mail id}
+    ${report not spam}    Report Message    params.folderPath=Spam    params.type=notJunk    params.destFolderPath=INBOX    params.selection=${spam id list}
+    ${check subject in inbox}    check_message_header_subject    folderPath=INBOX    subject=i am for spam
+    User Logout
+
+Mail - save draft
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${result}    Empty Folder    folderPath=Drafts
+    ${save draft}    save_draft    from=${common_from}${common_domain}    bodyType=plain    subject=${mail_subject}    to=${common_to}${common_domain}
+    ${cc check msg header}    check_message_by_subject    params.folderPath=Drafts    subject=${mail_subject}    expectCnt=1
+    User Logout
+
+Mail - move on mail to Draft/Trash
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${result}    Empty Folder    folderPath=INBOX
+    ${result}    Empty Folder    folderPath=Drafts
+    ${result}    Empty Folder    folderPath=Trash
+    ${send msg}    Send Mail    from=${common_from}${common_domain}    to=${common_from}${common_domain}    body=${mail_body}    subject=${mail_subject}    priority=3
+    ${cc check msg header}    check_message_by_subject    params.folderPath=INBOX    subject=${mail_subject}    expectCnt=1
+    ${inbox move to drafts}    move_all_mail    params.folderPath=INBOX    params.destFolderPath=${draft_folder}    all=true
+    ${cc check msg header}    check_message_by_subject    params.folderPath=Drafts    subject=${mail_subject}    expectCnt=1
+    ${drafts move to trash}    move_all_mail    params.folderPath=Drafts    params.destFolderPath=${trash_folder}    all=true
+    ${cc check msg header}    check_message_by_subject    params.folderPath=Trash    subject=${mail_subject}    expectCnt=1
+    User Logout
+
+Mail - move all messages to trash folder
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${send msg1}    Send Mail    from=${common_from}${common_domain}    to=${common_from}${common_domain}    subject=${mail_subject}
+    sleep    5s
+    ${send msg2}    Send Mail    from=${common_from}${common_domain}    to=${common_from}${common_domain}    subject=${mail_subject}
+    sleep    5s
+    ${move to trash}    move_all_mail    params.folderPath=INBOX    params.destFolderPath=Trash    all=true
+    User Logout
+
+Mail - delete
+    [Documentation]    Save draft, Cc/Bcc, check msgheaderlistcheck, move to trash, delete mail
+    [Tags]    Mail
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${result}    Empty Folder    folderPath=INBOX
+    ${result}    Empty Folder    folderPath=Trash
+    ${send msg}    Send Mail    from=${common_from}${common_domain}    to=${common_from}${common_domain}    body=${mail_body}    subject=${mail_subject}    priority=3
+    ${mail id}    get_mail_id_by_subject    subject=${mail_subject}    params.folderPath=INBOX
+    ${mail_id_list}    Create List    ${mail id}
+    ${delete result}    delete_mail    params.folderPath=INBOX    params.selection=${mail_id_list}
+    ${check msg in trash}    check_message_by_subject    folderPath=Trash    subject=${mail_subject}    expectCnt=0
+    User Logout
+
+Mail - resource load - send mail with attachments
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${result}    Empty Folder    folderPath=INBOX
+    ${attachment}    upload_file    url=${resource_upload}    fname=300k.pdf horse.gif bitExcel.xlsx AddressSample3000.vcf
+    ${attach_param_1}    create_attachments_params    @resolver=Upload    id=${attachment}
+    ${attach_list}    create list    ${attach_param_1}
+    ${sendMsgKW}    Send Mail    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=${mail_subject}    params.attachments=${attach_list}
+
+Negative - Mail - resource load - send mail with big attachment
+    [Tags]    negative
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${result}    Empty Folder    folderPath=INBOX
+    ${attachment}    upload_file    url=${resource_upload}    fname=5M.file
+    ${attach_param_1}    create_attachments_params    @resolver=Upload    id=${attachment}
+    ${attach_list}    create list    ${attach_param_1}
+    ${error}    Run Keyword And Ignore Error    Send Mail    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=${mail_subject}    params.attachments=${attach_list}
+    ${expect error}    expect_error    res=${error}    expectStr=messageSizeExceeded
+
+Mail - sort by subject
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${result}    Empty Folder    folderPath=INBOX
+    ${send first msg}    Send Mail    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=    priority=3
+    ${send second msg}    Send Mail    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=1    priority=3
+    ${send third msg}    Send Mail    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=a    priority=3
+    ${send fourth msg}    Send Mail    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=A    priority=3
+    ${sort asc}    Sort Mail By Subject    params.sort.direction=ascending    folderPath=INBOX    params.sort.field=subject
+    ${sort desc}    Sort Mail By Subject    params.sort.direction=descending    folderPath=INBOX    params.sort.field=subject
+    User Logout
+
+Mail - sort by date
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${result}    Empty Folder    folderPath=INBOX
+    ${sendMsgKW}    Send Mail    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=    priority=3
+    sleep    60s
+    ${sendMsgKW}    Send Mail    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=1    priority=3
+    sleep    150s
+    ${sendMsgKW}    Send Mail    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=a    priority=3
+    ${sortResult}    Sort Mail By Date    params.sort.direction=ascending    folderPath=INBOX    params.sort.field=date
+    ${sortResult}    Sort Mail By Date    params.sort.direction=descending    folderPath=INBOX    params.sort.field=date
+    User Logout
+
+Mail - sort by flagged
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty inbox}    Empty Folder    folderPath=INBOX
+    ${send first msg}    Send Mail    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=flagged mail
+    ${mail id}    get_mail_id_by_subject    subject=flagged mail    params.folderPath=INBOX
+    ${mail_id_list}    Create List    ${mail id}
+    ${flag Flagged}    flag_mail    params.folderPath=INBOX    params.flag=flagged    params.value=true    params.selection=${mail_id_list}
+    ${send 2 msg}    Send Mail    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=no flag
+    ${send 3 msg}    Send Mail    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=flagged mail 1
+    ${mail id 1}    get_mail_id_by_subject    subject=flagged mail 1    params.folderPath=INBOX
+    ${mail_id_list_1}    Create List    ${mail id 1}
+    ${flag Flagged}    flag_mail    params.folderPath=INBOX    params.flag=flagged    params.value=true    params.selection=${mail_id_list_1}
+    ${sort asc}    Sort Mail By Flagged    params.sort.direction=descending    folderPath=INBOX    params.sort.field=flagged
+    ${sort asc}    Sort Mail By Flagged    params.sort.direction=ascending    folderPath=INBOX    params.sort.field=flagged
+    User Logout
+
+check for new(no thread)
+    [Documentation]    need uidnext?
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${result}    Empty Folder    folderPath=INBOX
+    ${sendMsgKW}    Send Mail    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=i am for new mail check
+    ${check result}    new_mail_check    folderPath=INBOX    expectStr=i am for new mail check
+    User Logout
+
+Mail - receipt - send read receipt
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${delete msg}    Run Keyword And Ignore Error    empty_folder    folderPath=INBOX
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${sendMsgKW}    send_mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=receipt test    priority=3    body=text body
+    ...    bodyType=plain    params.requestMdn=True
+    sleep    5
+    ${empty from folder}    Run Keyword And Ignore Error    empty_folder    folderPath=INBOX
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${mail id 1}    get_mail_id_by_subject    subject=receipt test    params.folderPath=INBOX
+    ${check result}    Check Read Receipt Msg    params.messageUid=${mail id 1}    params.folderPath=INBOX    params.format=plaintext    promptReturnReceipt=True
+    ${send receipt}    Send Receipt    uid=${mail id 1}    acknowledge=True    folderPath=INBOX
+    ${check result 1}    Check Read Receipt Msg    params.messageUid=${mail id 1}    params.folderPath=INBOX    params.format=plaintext    promptReturnReceipt=False
+    ${empty to folder}    Run Keyword And Ignore Error    empty_folder    params.folderPath=INBOX
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${check receipt in from folder}    check_message_by_str    expectCnt=1    expectStr=${read_receipt_str}    params.folderPath=INBOX
+    User Logout
+
+Mail - receipt - ignore read receipt
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${delete msg}    Run Keyword And Ignore Error    empty_folder    folderPath=INBOX
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${sendMsgKW}    send_mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=receipt test    priority=3    body=text body
+    ...    bodyType=plain    params.requestMdn=True
+    ${empty from folder}    Run Keyword And Ignore Error    empty_folder    folderPath=INBOX
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${mail id 2}    get_mail_id_by_subject    subject=receipt test    params.folderPath=INBOX
+    ${check result}    Check Read Receipt Msg    params.messageUid=${mail id 2}    params.folderPath=INBOX    params.format=plaintext    promptReturnReceipt=True
+    ${send result}    Send Receipt    uid=${mail id 2}    acknowledge=False    folderPath=INBOX
+    ${check result 1}    Check Read Receipt Msg    params.messageUid=${mail id 2}    params.folderPath=INBOX    params.format=plaintext    promptReturnReceipt=False
+    ${empty to folder}    Run Keyword And Ignore Error    empty_folder    params.folderPath=INBOX
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${check receipt in from folder}    check_message_by_str    params.folderPath=INBOX    expectStr=Return Receipt    expectCnt=0
+    User Logout
+
+Mail - receipt - no read receipt
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${delete msg}    Run Keyword And Ignore Error    empty_folder    folderPath=INBOX
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${sendMsgKW}    send_mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=no receipt test    priority=3    body=text body
+    ...    bodyType=plain
+    ${delete msg}    Run Keyword And Ignore Error    empty_folder    folderPath=INBOX
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${mail id 3}    get_mail_id_by_subject    subject=no receipt test    params.folderPath=INBOX
+    ${uid}    Check Read Receipt Msg    params.messageUid=${mail id 3}    params.folderPath=INBOX    params.format=plaintext    promptReturnReceipt=False
+    ${final empty to folder}    Run Keyword And Ignore Error    empty_folder    params.folderPath=INBOX
+    User Logout
+
+Mail - answered flag
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${result}    Empty Folder    folderPath=INBOX
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${sendMsgKW}    Send Mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=for answered flag test
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${mail id 1}    get_mail_id_by_subject    subject=for answered flag test    params.folderPath=INBOX
+    ${check result}    check_answered_flag_msg    params.folderPath=INBOX    answeredVal=False    uid=${mail id 1}
+    ${params_map_1}    makeHashField    int-uid=${mail id 1}    str-folderPath=INBOX
+    ${result}    Send Mail    to=${common_from}${common_domain}    from=${common_to}${common_domain}    subject=Re:for answered flag test    params.flagAnswered=${params_map_1}
+    ${check result}    check_answered_flag_msg    params.folderPath=INBOX    answeredVal=True    uid=${mail id 1}
+    User Logout
+
+Mail - forwarded flag
+    [Documentation]    add forwarded flag first for CPMS
+    ...
+    ...    imapflags add $Forwarded
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${result}    Empty Folder    folderPath=INBOX
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${sendMsgKW}    Send Mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=for forwarded flag test
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${mail id 1}    get_mail_id_by_subject    subject=for forwarded flag test    folderPath=INBOX
+    ${check result}    check_forwarded_flag_msg    params.folderPath=INBOX    forwardedVal=False    uid=${mail id 1}
+    ${params_map_1}    makeHashField    uid=${mail id 1}    str-folderPath=INBOX
+    ${send receipt}    Send Mail    to=${common_from}${common_domain}    from=${common_to}${common_domain}    subject=Re:for forwarded flag test    params.flagForwarded=${params_map_1}
+    ${check result}    check_forwarded_flag_msg    params.folderPath=INBOX    forwardedVal=True    uid=${mail id 1}
+    User Logout
+
+Mail - advanced search - search by subject - Inbox
+    [Documentation]    paul said this is not allowed,ui should control that
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${delete all folder result}    delete_all_folder
+    ${empty inbox}    Run Keyword And Ignore Error    empty_folder    folderPath=INBOX
+    ${empty drafts}    Run Keyword And Ignore Error    empty_folder    folderPath=${draft_folder}
+    ${empty sentmail}    Run Keyword And Ignore Error    empty_folder    folderPath=${sent_mail_folder}
+    ${empty spam}    Run Keyword And Ignore Error    empty_folder    folderPath=${spam_folder}
+    ${empty trash}    Run Keyword And Ignore Error    empty_folder    folderPath=${trash_folder}
+    ${sendMsgKW}    send_mail    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=iamin    body=text body
+    ${inbox-folder}    create list    INBOX
+    ${subject result}    Mail Advanced Search    expectedCnt=1    params.folderPaths=${inbox-folder}    params.subject=iamin
+    ${empty inbox}    Run Keyword And Ignore Error    empty_folder    folderPath=INBOX
+
+Mail - advanced search - search by mail body - Draft
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${delete all folder result}    delete_all_folder
+    ${empty inbox}    Run Keyword And Ignore Error    empty_folder    folderPath=INBOX
+    ${empty drafts}    Run Keyword And Ignore Error    empty_folder    folderPath=${draft_folder}
+    ${empty sentmail}    Run Keyword And Ignore Error    empty_folder    folderPath=${sent_mail_folder}
+    ${empty spam}    Run Keyword And Ignore Error    empty_folder    folderPath=${spam_folder}
+    ${empty trash}    Run Keyword And Ignore Error    empty_folder    folderPath=${trash_folder}
+    ${sendMsgKW}    send_mail    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=i am for body search    body=text body
+    ${folder path - inbox}    create list    INBOX
+    ${body result}    Mail Advanced Search    params.body=text body    expectedCnt=1    params.folderPaths=${folder path - inbox}
+    ${folder path - draft}    create list    ${draft_folder}
+    ${body result}    Mail Advanced Search    params.body=text body    expectedCnt=0    params.folderPaths=${folder path - draft}
+    User Logout
+
+Mail - advanced search - serach by sender - Sent
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${delete all folder result}    delete_all_folder
+    ${empty inbox}    Run Keyword And Ignore Error    empty_folder    folderPath=INBOX
+    ${empty drafts}    Run Keyword And Ignore Error    empty_folder    folderPath=${draft_folder}
+    ${empty sentmail}    Run Keyword And Ignore Error    empty_folder    folderPath=${sent_mail_folder}
+    ${empty spam}    Run Keyword And Ignore Error    empty_folder    folderPath=${spam_folder}
+    ${empty trash}    Run Keyword And Ignore Error    empty_folder    folderPath=${trash_folder}
+    ${sendMsgKW}    send_mail    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=i am for sender search    body=text body
+    ${folder}    create list    ${sent_mail_folder}
+    ${sender result}    Mail Advanced Search    params.sender=${common_from}    expectedCnt=1    params.folderPaths=${folder}
+    User Logout
+
+Mail - advanced search - search by recipient and allfolder
+    [Documentation]    todo : please delete account mail rules first
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${delete all folder result}    delete_all_folder
+    ${empty inbox}    Run Keyword And Ignore Error    empty_folder    folderPath=INBOX
+    ${empty drafts}    Run Keyword And Ignore Error    empty_folder    folderPath=${draft_folder}
+    ${empty sentmail}    Run Keyword And Ignore Error    empty_folder    folderPath=${sent_mail_folder}
+    ${empty spam}    Run Keyword And Ignore Error    empty_folder    folderPath=${spam_folder}
+    ${empty trash}    Run Keyword And Ignore Error    empty_folder    folderPath=${trash_folder}
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${sendMsgKW}    send_mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=i am for recipient search    body=text body
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${folder path - empty}    create list
+    ${recipient result}    Mail Advanced Search    params.recipient=${common_to}    expectedCnt=1    params.folderPaths=${folder path - empty}
+    User Logout
+
+Mail - advanced search - search by time range
+    [Documentation]    ${save no use device zone} Set Mail Prefs params.map.attr.user.timezone.UseDeviceTimeZone=false
+    ...
+    ...    this doesn't work at present
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty inbox}    Run Keyword And Ignore Error    empty_folder    folderPath=INBOX
+    ${set timezone}    set_timzone    zoneId=Asia/Chongqing
+    ${sendMsgKW}    send_mail    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=i am sent before    body=text body
+    sleep    10s
+    ${current_time}    Get Time    epoch
+    ${befor result}    Mail Advanced Search    params.before=${current_time}000    expectedCnt=1    params.folderPaths=INBOX
+    sleep    10s
+    ${sendMsgKW}    send_mail    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=i am sent after    body=text body
+    ${after result}    Mail Advanced Search    params.after=${current_time}000    expectedCnt=2    params.folderPaths=INBOX
+    User Logout
+
+Setting - General settings - empty trash folder when logout:true - MERCURY-489 Saving outgoingMessage False will raise internal error with log
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${sendMsgKW}    Send Mail    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=${mail_subject}
+    ${move to trash}    Run Keyword And Ignore Error    move_all_mail    params.folderPath=INBOX    params.destFolderPath=Trash    all=true
+    ${object}    makeHashField    str-saveOutgoingMessages=true    str-id=null    str-realName=null    str-autoCheckInterval=300    str-from=null
+    ...    str-replyTo=null    str-replyQuoting=null    str-imageBlockerOption=alwaysBlock    str-preferPlaintext=false    str-preferPlaintextEditor=null    str-playSound=null
+    ...    str-autoInsertSignature=true    str-spellcheckOnSend=null    str-requestReceiptWithNewMail=false    str-sendingReceipt=2    str-permanentDelete=null    str-showCheckmarks=null
+    ...    str-accountName=null    str-emptyTrashOnLogout=true    str-maxMessagesPerFetch=null    str-maxMessageSizePerFetch=null
+    ${set_prefs_id}    set_mail_prefs_id    params.object=${object}    url=${common_url}
+    ${mail count}    get_mail_count_by_folder    folderPath=Trash
+    Should Be True    ${mail count}>0    'Trash folder should not be empty!'
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${mail count}    get_mail_count_by_folder    folderPath=Trash
+    Should Be True    ${mail count}==0    'Trash folder is not empty!'
+    User Logout
+
+Setting - General settings - empty trash folder when logout:false
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${sendMsgKW}    Send Mail    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=${mail_subject}
+    ${move to trash}    Run Keyword And Ignore Error    move_all_mail    params.folderPath=INBOX    params.destFolderPath=Trash    all=true
+    ${object}    makeHashField    str-saveOutgoingMessages=true    str-id=null    str-realName=null    str-autoCheckInterval=300    str-from=null
+    ...    str-replyTo=null    str-replyQuoting=null    str-imageBlockerOption=alwaysBlock    str-preferPlaintext=false    str-preferPlaintextEditor=null    str-playSound=null
+    ...    str-autoInsertSignature=true    str-spellcheckOnSend=null    str-requestReceiptWithNewMail=false    str-sendingReceipt=2    str-permanentDelete=null    str-showCheckmarks=null
+    ...    str-accountName=null    str-emptyTrashOnLogout=false    str-maxMessagesPerFetch=null    str-maxMessageSizePerFetch=null
+    ${set_prefs_id}    set_mail_prefs_id    params.object=${object}    url=${common_url}
+    ${mail count}    get_mail_count_by_folder    folderPath=Trash
+    Should Be True    ${mail count}>0    'Trash folder should not be empty!'
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${mail count}    get_mail_count_by_folder    folderPath=Trash
+    Should Be True    ${mail count} > 0    'Trash folder is not empty!'
+    User Logout
+
+Setting - General settings - auto go to next msg after del
+    [Documentation]    this config doesn't work now(no difference between true and false in UI)
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${params_map_true}    makeHashField    str-attr.user.mail.disableReloadOnDelete=true
+    ${set_true}    Set Mail Prefs    params.map=${params_map_true}
+    ${params_map_false}    makeHashField    str-attr.user.mail.disableReloadOnDelete=false
+    ${set_false}    Set Mail Prefs    params.map=${params_map_false}
+    User Logout
+
+Setting - General settings - auto read first mail
+    [Documentation]    this config doesn't work now(no differenct between true and false on UI)
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${params_map_true}    makeHashField    str-attr.user.mail.readFirstMail=true
+    ${default prefs}    Set Mail Prefs    params.map=${params_map_true}
+    ${params_map_false}    makeHashField    str-attr.user.mail.readFirstMail=false
+    ${default prefs}    Set Mail Prefs    params.map=${params_map_false}
+    User Logout
+
+FUS-6335 : (CPMS)Mail - filter - single match condition(from) - copy
+    [Documentation]    conditon: from contains
+    ...    action:copy to spam
+    [Tags]    cpms
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${condition1}    makeCondition    type=from    matchtype=contains    value=${common_to}
+    ${conditoins}    Create List    ${condition1}
+    ${create result}    add_mail_filter    conditions=${conditoins}    action=copy    folder=Spam
+    ${empty inbox}    Empty Folder    name=INBOX
+    ${empty inbox}    Empty Folder    name=Spam
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${sendMsgKW}    Send Mail    to=${common_from}${common_domain}    from=${common_to}${common_domain}    subject=mail fitler:copy to spam
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${cc check msg header}    check_message_by_subject    folder=INBOX    subject=mail fitler:copy to spam    expectCnt=1
+    ${cc check msg header}    check_message_by_subject    folder=Spam    subject=mail fitler:copy to spam    expectCnt=1
+    ${empty result}    empty_mail_filter
+    User Logout
+
+FUS-6337 : (CPMS)Mail - filter - single match condition(cc) - mark as read
+    [Tags]    cpms
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${condition1}    makeCondition    type=cc    matchtype=contains    value=new.swisscom
+    ${conditoins}    Create List    ${condition1}
+    ${create result}    add_mail_filter    conditions=${conditoins}    action=markasread
+    ${empty inbox}    Empty Folder    name=INBOX
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${sendMsgKW}    Send Mail    to=${common_from}${common_domain}    from=${common_to}${common_domain}    cc=new.swisscom@yahoo.com    subject=test mail filter: mark as read
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${mail id}    get_mail_id_by_subject    subject=test mail filter: mark as read    folderPath=INBOX
+    ${check seen flag}    check_mail_flag    id=${mail id}    flag=seen    value=1
+    ${empty result}    empty_mail_filter
+    User Logout
+
+Mail - conversation list and check by thread count
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${empty to inbox}    Empty Folder    folderPath=INBOX
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty from inbox}    Empty Folder    folderPath=INBOX
+    ${subject title}    Get Time    epoch
+    ${send mail}    Send Mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=${subject title} - first
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${mail id in to}    get_mail_id_by_subject    subject=${subject title} - first    params.folderPath=INBOX
+    ${fetch result}    msg_fetch    params.messageUid=${mail id in to}    params.folderPath=INBOX
+    ${messageId}    get_res_value_by_key    res=${fetch result}    key=messageId
+    ${references}    get_res_value_by_key    res=${fetch result}    key=references
+    ${first reply mail}    Send Mail    to=${common_from}${common_domain}    from=${common_to}${common_domain}    subject=${subject title} - second    inReplyTo=${messageId}    references=${references}${messageId}
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${mail id in from}    get_mail_id_by_subject    subject=${subject title} - second    params.folderPath=INBOX
+    ${fetch result2}    msg_fetch    params.messageUid=${mail id in from}    params.folderPath=INBOX
+    ${messageId2}    get_res_value_by_key    res=${fetch result2}    key=messageId
+    ${references2}    get_res_value_by_key    res=${fetch result2}    key=references
+    ${sec reply mail}    Send Mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=${subject title} - third    inReplyTo=${messageId2}    references=${references}${messageId}
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${list result}    list_mail    params.folderPath=INBOX    params.thread=true
+    ${messageList}    get_res_value_by_key    res=${list result}    key=messages
+    ${check_list_cnt result}    check_list_cnt    list=${messageList}    exp_cnt=1
+    User Logout
+
+Mail - resource load - view message source simple msg
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${result}    Empty Folder    folderPath=INBOX
+    ${send mail}    Send Mail    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=view_resource_test
+    ${mail id}    get_mail_id_by_subject    subject=view_resource_test    params.folderPath=INBOX
+    ${view_resource}    resource_download_postReq_json    descriptor.folder=INBOX    descriptor.uid=${mail id}    url=${resource_load}    req_name=RESOURCE_DOWNLOAD_MSG_VIEWSOURCE    return_response=true
+    ${check results}    check_listString_from_res    res=${view_resource}    exp_list=view_resource_test
+
+Mail - thread list RPLY - check INBOX thread list count
+    [Tags]
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${empty to inbox}    Empty Folder    folderPath=INBOX
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty from inbox}    Empty Folder    folderPath=INBOX
+    ${subject title}    Get Time    epoch
+    ${send mail}    Send Mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=${subject title} - first
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${mail id in to}    get_mail_id_by_subject    subject=${subject title} - first    params.folderPath=INBOX
+    ${fetch result}    msg_fetch    params.messageUid=${mail id in to}    params.folderPath=INBOX
+    ${messageId}    get_res_value_by_key    res=${fetch result}    key=messageId
+    ${references}    get_res_value_by_key    res=${fetch result}    key=references
+    ${first reply mail}    Send Mail    to=${common_from}${common_domain}    from=${common_to}${common_domain}    subject=${subject title} - second    inReplyTo=${messageId}    references=${references}${messageId}
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${mail id in from}    get_mail_id_by_subject    subject=${subject title} - second    params.folderPath=INBOX
+    ${fetch result2}    msg_fetch    params.messageUid=${mail id in from}    params.folderPath=INBOX
+    ${messageId2}    get_res_value_by_key    res=${fetch result2}    key=messageId
+    ${references2}    get_res_value_by_key    res=${fetch result2}    key=references
+    ${sec reply mail}    Send Mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=${subject title} - third    inReplyTo=${messageId2}    references=${references}${messageId}
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${list result}    list_mail    params.folderPath=INBOX    params.thread=true
+    ${messageList}    get_res_value_by_key    res=${list result}    key=messages
+    ${messageListValue}    get_list_value    list=${messageList}    index=0
+    ${threadList}    get_res_value_by_key    res=${messageListValue}    key=thread
+    ${check_list_cnt result}    check_list_cnt    list=${threadList}    exp_cnt=1
+    User Logout
+
+Mail - thread list FWD - check INBOX thread list count
+    [Tags]
+    User Login    username=${mail_cc}${common_domain}    password=${mail_password}
+    ${empty to inbox}    Empty Folder    folderPath=INBOX
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty from inbox}    Empty Folder    folderPath=INBOX
+    ${subject title}    Get Time    epoch
+    ${send and cc mail}    Send Mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=${subject title} - first    cc=${mail_cc}${common_domain}
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${mail id in to}    get_mail_id_by_subject    subject=${subject title} - first    params.folderPath=INBOX
+    ${fetch result}    msg_fetch    params.messageUid=${mail id in to}    params.folderPath=INBOX
+    ${messageId}    get_res_value_by_key    res=${fetch result}    key=messageId
+    ${references}    get_res_value_by_key    res=${fetch result}    key=references
+    ${forward mail->cc}    Send Mail    to=${mail_cc}${common_domain}    from=${common_to}${common_domain}    subject=${subject title} - second    inReplyTo=${messageId}    references=${references}${messageId}
+    User Logout
+    User Login    username=${mail_cc}${common_domain}    password=${mail_password}
+    ${list result}    list_mail    params.folderPath=INBOX    params.thread=true
+    ${messageList}    get_res_value_by_key    res=${list result}    key=messages
+    ${messageListValue}    get_list_value    list=${messageList}    index=0
+    ${threadList}    get_res_value_by_key    res=${messageListValue}    key=thread
+    ${check_list_cnt result}    check_list_cnt    list=${threadList}    exp_cnt=1
+    User Logout
+
+Mail - thread list RPLY - check SENT ------ MERCURY-526 Message Thread - Send folder does not support thread list
+    [Tags]
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${empty to inbox}    Empty Folder    folderPath=INBOX
+    ${empty to sent}    Empty Folder    folderPath=${sent_mail_folder}
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty from inbox}    Empty Folder    folderPath=INBOX
+    ${empty from sent}    Empty Folder    folderPath=${sent_mail_folder}
+    ${subject title}    Get Time    epoch
+    ${send mail}    Send Mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=${subject title} - first
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${mail id in to}    get_mail_id_by_subject    subject=${subject title} - first    params.folderPath=INBOX
+    ${fetch result}    msg_fetch    params.messageUid=${mail id in to}    params.folderPath=INBOX
+    ${messageId}    get_res_value_by_key    res=${fetch result}    key=messageId
+    ${references}    get_res_value_by_key    res=${fetch result}    key=references
+    ${first reply mail}    Send Mail    to=${common_from}${common_domain}    from=${common_to}${common_domain}    subject=${subject title} - second    inReplyTo=${messageId}    references=${references}${messageId}
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${mail id in from}    get_mail_id_by_subject    subject=${subject title} - second    params.folderPath=INBOX
+    ${fetch result2}    msg_fetch    params.messageUid=${mail id in from}    params.folderPath=INBOX
+    ${messageId2}    get_res_value_by_key    res=${fetch result2}    key=messageId
+    ${references2}    get_res_value_by_key    res=${fetch result2}    key=references
+    ${sec reply mail}    Send Mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=${subject title} - third    inReplyTo=${messageId2}    references=${references2}${messageId2}
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${mail id in to2}    get_mail_id_by_subject    subject=${subject title} - third    params.folderPath=INBOX
+    ${fetch result3}    msg_fetch    params.messageUid=${mail id in to2}    params.folderPath=INBOX
+    ${messageId3}    get_res_value_by_key    res=${fetch result3}    key=messageId
+    ${references3}    get_res_value_by_key    res=${fetch result3}    key=references
+    ${third reply mail}    Send Mail    to=${common_from}${common_domain}    from=${common_to}${common_domain}    subject=${subject title} - forth    inReplyTo=${messageId3}    references=${references3}${messageId3}
+    sleep    3s
+    ${list result}    list_mail    params.folderPath=${sent_mail_folder}    params.thread=true
+    ${messageList}    get_res_value_by_key    res=${list result}    key=messages
+    ${messageListValue}    get_list_value    list=${messageList}    index=0
+    ${threadList}    get_res_value_by_key    res=${messageListValue}    key=thread
+    ${check_list_cnt result}    check_list_cnt    list=${threadList}    exp_cnt=1
+    User Logout
+
+Mail - thread list FWD - check SENT
+    [Tags]
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty from inbox}    Empty Folder    folderPath=${sent_mail_folder}
+    ${subject title}    Get Time    epoch
+    ${send mail}    Send Mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=${subject title} - first    cc=${mail_cc}${common_domain}
+    ${mail id in sent}    get_mail_id_by_subject    subject=${subject title} - first    params.folderPath=${sent_mail_folder}
+    ${fetch result}    msg_fetch    params.messageUid=${mail id in sent}    params.folderPath=${sent_mail_folder}
+    ${messageId}    get_res_value_by_key    res=${fetch result}    key=messageId
+    ${references}    get_res_value_by_key    res=${fetch result}    key=references
+    ${forward mail from sent}    Send Mail    to=${mail_cc}${common_domain}    from=${common_to}${common_domain}    subject=${subject title} - second    inReplyTo=${messageId}    references=${references}${messageId}
+    ${list result}    list_mail    params.folderPath=${sent_mail_folder}    params.thread=true
+    ${messageList}    get_res_value_by_key    res=${list result}    key=messages
+    ${messageListValue}    get_list_value    list=${messageList}    index=0
+    ${threadList}    get_res_value_by_key    res=${messageListValue}    key=thread
+    ${check_list_cnt result}    check_list_cnt    list=${threadList}    exp_cnt=1
+    User Logout
+
+Mail - thread list - move a thread from inbox to draft
+    [Documentation]    regressoin test MERCURY-502 Mail conversation - Check conversation messages from Trash/Sent will raise internal error
+    [Tags]
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${empty to inbox}    Empty Folder    folderPath=INBOX
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty from inbox}    Empty Folder    folderPath=INBOX
+    ${subject title}    Get Time    epoch
+    ${send mail}    Send Mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=${subject title} - first
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${mail id in to}    get_mail_id_by_subject    subject=${subject title} - first    params.folderPath=INBOX
+    ${fetch result}    msg_fetch    params.messageUid=${mail id in to}    params.folderPath=INBOX
+    ${messageId}    get_res_value_by_key    res=${fetch result}    key=messageId
+    ${references}    get_res_value_by_key    res=${fetch result}    key=references
+    ${first reply mail}    Send Mail    to=${common_from}${common_domain}    from=${common_to}${common_domain}    subject=${subject title} - second    inReplyTo=${messageId}    references=${references}${messageId}
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${mail id in from}    get_mail_id_by_subject    subject=${subject title} - second    params.folderPath=INBOX
+    ${fetch result2}    msg_fetch    params.messageUid=${mail id in from}    params.folderPath=INBOX
+    ${messageId2}    get_res_value_by_key    res=${fetch result2}    key=messageId
+    ${references2}    get_res_value_by_key    res=${fetch result2}    key=references
+    ${sec reply mail}    Send Mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=${subject title} - third    inReplyTo=${messageId2}    references=${references}${messageId}
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${list result}    list_mail    params.folderPath=INBOX    params.thread=true
+    ${mail id in to2}    get_mail_id_by_subject    subject=${subject title} - third    params.folderPath=INBOX
+    ${messageList}    get_res_value_by_key    res=${list result}    key=messages
+    ${check_list_cnt result}    check_list_cnt    list=${messageList}    exp_cnt=1
+    Log    Precondition passed, there is a msg thread in Inbox
+    ${selectionList}    create list    ${mail id in to}    ${mail id in to2}
+    ${inbox move to drafts}    move_mail    params.folderPath=INBOX    params.destFolderPath=${draft_folder}    params.selection=${selectionList}
+
+Mail - thread list - move a thread from inbox to sent
+    [Documentation]    regressoin test MERCURY-502 Mail conversation - Check conversation messages from Trash/Sent will raise internal error
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${empty to inbox}    Empty Folder    folderPath=INBOX
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty from inbox}    Empty Folder    folderPath=INBOX
+    ${subject title}    Get Time    epoch
+    ${send mail}    Send Mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=${subject title} - first
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${mail id in to}    get_mail_id_by_subject    subject=${subject title} - first    params.folderPath=INBOX
+    ${fetch result}    msg_fetch    params.messageUid=${mail id in to}    params.folderPath=INBOX
+    ${messageId}    get_res_value_by_key    res=${fetch result}    key=messageId
+    ${references}    get_res_value_by_key    res=${fetch result}    key=references
+    ${first reply mail}    Send Mail    to=${common_from}${common_domain}    from=${common_to}${common_domain}    subject=${subject title} - second    inReplyTo=${messageId}    references=${references}${messageId}
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${mail id in from}    get_mail_id_by_subject    subject=${subject title} - second    params.folderPath=INBOX
+    ${fetch result2}    msg_fetch    params.messageUid=${mail id in from}    params.folderPath=INBOX
+    ${messageId2}    get_res_value_by_key    res=${fetch result2}    key=messageId
+    ${references2}    get_res_value_by_key    res=${fetch result2}    key=references
+    ${sec reply mail}    Send Mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=${subject title} - third    inReplyTo=${messageId2}    references=${references}${messageId}
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${empty to sent folder}    Empty Folder    folderPath=${sent_mail_folder}
+    ${list result}    list_mail    params.folderPath=INBOX    params.thread=true
+    ${mail id in to2}    get_mail_id_by_subject    subject=${subject title} - third    params.folderPath=INBOX
+    ${messageList}    get_res_value_by_key    res=${list result}    key=messages
+    ${check_list_cnt result}    check_list_cnt    list=${messageList}    exp_cnt=1
+    Log    Precondition passed, there is a msg thread in Inbox
+    ${selectionList}    create list    ${mail id in to}    ${mail id in to2}
+    ${inbox move to drafts}    move_mail    params.folderPath=INBOX    params.destFolderPath=${sent_mail_folder}    params.selection=${selectionList}
+
+Setting - external account - check external account mail send mail
+    [Tags]
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${empty result}    Empty External Account
+    ${test result}    Test External Account Succ    params.account.username=new.swisscom@yahoo.com    params.account.password=laszlo123
+    ${creat_external_accounts}    Add External Account    params.object.username=new.swisscom@yahoo.com    params.object.password=laszlo123
+    ${external account id}    Get External Account Id    username=new.swisscom@yahoo.com
+    ${send msg}    Send Mail    from=new.swisscom@yahoo.com    to=new.swisscom@yahoo.com    body=${mail_body}    subject=${mail_subject}    priority=3
+    ...    params.accountId=${external account id}
+    User Logout
+
+upload - mytest
+    [Tags]    excluded
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${file_clear}    clear_all
+    ${file_crc}    Get_File_Crc    fname=bitExcel.xlsx
+    ${file_size}    Get_File_Size    fname=bitExcel.xlsx
+    ${file_1}    makeHashField    str-crc=${file_crc}    str-fileName=bitExcel.xlsx    str-tempId=0    str-size=${file_size}
+    ${file list}    create list    ${file_1}
+    ${file_id }    get_fileid_by_prepare_upload    params.files=${file list}    tempId=0
+    ${upload}    file_upload_postReq_json    url=${resource_load}    fname=bitExcel.xlsx    fileId=${file_id }    crc=${file_crc}
+
+Upload - get config
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${result }    get_config
+    User Logout
+
+Upload - upload file
+    [Documentation]    clear_all
+    ...    clear_file
+    ...    get_progress
+    ...
+    ...    seem work incorrectly.
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${file_clear}    clear_all
+    ${file_crc}    Get_File_Crc    fname=bitExcel.xlsx
+    ${file_size}    Get_File_Size    fname=bitExcel.xlsx
+    ${file_1}    makeHashField    str-crc=${file_crc}    str-fileName=bitExcel.xlsx    str-tempId=0    str-size=${file_size}
+    ${file list}    create list    ${file_1}
+    ${file_id }    get_fileid_by_prepare_upload    params.files=${file list}    tempId=0
+    ${upload_result}    upload_file_test    fileId=${file_id }    crc=${file_crc}    fname=bitExcel.xlsx    uploadPath=${common_upload_url}
+    ${file_id_list}    create list    ${file_id }
+    ${progress_result_1}    get_progress    params.fileIds=${file_id_list}
+    sleep    3s
+    ${progress_result_2}    get_progress    params.fileIds=${file_id_list}
+    ${clear result}    clear_file    fileId=${file_id }
+    User Logout
+
+Mail - thread search - search subject in INBOX thread preview mode
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${empty to inbox}    Empty Folder    folderPath=INBOX
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty from inbox}    Empty Folder    folderPath=INBOX
+    ${subject title}    Get Time    epoch
+    ${send mail}    Send Mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=${subject title} - first
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${mail id in to}    get_mail_id_by_subject    subject=${subject title} - first    params.folderPath=INBOX
+    ${fetch result}    msg_fetch    params.messageUid=${mail id in to}    params.folderPath=INBOX
+    ${messageId}    get_res_value_by_key    res=${fetch result}    key=messageId
+    ${references}    get_res_value_by_key    res=${fetch result}    key=references
+    ${first reply mail}    Send Mail    to=${common_from}${common_domain}    from=${common_to}${common_domain}    subject=${subject title} - second    inReplyTo=${messageId}    references=${references}${messageId}
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${mail id in from}    get_mail_id_by_subject    subject=${subject title} - second    params.folderPath=INBOX
+    ${fetch result2}    msg_fetch    params.messageUid=${mail id in from}    params.folderPath=INBOX
+    ${messageId2}    get_res_value_by_key    res=${fetch result2}    key=messageId
+    ${references2}    get_res_value_by_key    res=${fetch result2}    key=references
+    ${sec reply mail}    Send Mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=${subject title} - third    inReplyTo=${messageId2}    references=${references}${messageId}
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${preview_map}    makeHashField    str-attr.user.FirstName=${common_from}${common_domain}    str-attr.user.LastName=${common_from}${common_domain}    str-attr.user.mail.ViewMode=previewright,conversationOn
+    ${set_prefs_id}    set_prefs_id    params.map=${preview_map}    url=${common_url}
+    ${subject-first}    Mail Advanced Search    expectedCnt=1    params.folderPaths=INBOX    params.subject=first
+    ${subject-third}    Mail Advanced Search    expectedCnt=1    params.folderPaths=INBOX    params.subject=third
+    ${subject common}    Mail Advanced Search    expectedCnt=2    params.folderPaths=INBOX    params.subject=${subject title}
+    User Logout
+
+Mail - thread search - search subject in SENT thread no-preview mode
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty from inbox}    Empty Folder    folderPath=${sent_mail_folder}
+    ${subject title}    Get Time    epoch
+    ${send mail}    Send Mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=${subject title} - first    cc=${mail_cc}${common_domain}
+    ${mail id in sent}    get_mail_id_by_subject    subject=${subject title} - first    params.folderPath=${sent_mail_folder}
+    ${fetch result}    msg_fetch    params.messageUid=${mail id in sent}    params.folderPath=${sent_mail_folder}
+    ${messageId}    get_res_value_by_key    res=${fetch result}    key=messageId
+    ${references}    get_res_value_by_key    res=${fetch result}    key=references
+    ${forward mail from sent}    Send Mail    to=${mail_cc}${common_domain}    from=${common_to}${common_domain}    subject=${subject title} - second    inReplyTo=${messageId}    references=${references}${messageId}
+    ${preview_map}    makeHashField    str-attr.user.FirstName=${common_from}${common_domain}    str-attr.user.LastName=${common_from}${common_domain}    str-attr.user.mail.ViewMode=nopreview,conversationOn
+    ${set_prefs_id}    set_prefs_id    params.map=${preview_map}    url=${common_url}
+    ${subject-first}    Mail Advanced Search    expectedCnt=1    params.folderPaths=${sent_mail_folder}    params.subject=first
+    ${subject-second}    Mail Advanced Search    expectedCnt=1    params.folderPaths=${sent_mail_folder}    params.subject=second
+    ${subject common}    Mail Advanced Search    expectedCnt=2    params.folderPaths=${sent_mail_folder}    params.subject=${subject title}
+
+Mail - thread search - search body in INBOX thread no-preview mode
+    [Tags]
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${empty to inbox}    Empty Folder    folderPath=INBOX
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty from inbox}    Empty Folder    folderPath=INBOX
+    ${subject title}    Get Time    epoch
+    ${send mail}    Send Mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=${subject title} - first    body=text body first
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${mail id in to}    get_mail_id_by_subject    subject=${subject title} - first    params.folderPath=INBOX
+    ${fetch result}    msg_fetch    params.messageUid=${mail id in to}    params.folderPath=INBOX
+    ${messageId}    get_res_value_by_key    res=${fetch result}    key=messageId
+    ${references}    get_res_value_by_key    res=${fetch result}    key=references
+    ${first reply mail}    Send Mail    to=${common_from}${common_domain}    from=${common_to}${common_domain}    subject=${subject title} - second    inReplyTo=${messageId}    references=${references}${messageId}
+    ...    body=text body second
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${mail id in from}    get_mail_id_by_subject    subject=${subject title} - second    params.folderPath=INBOX
+    ${fetch result2}    msg_fetch    params.messageUid=${mail id in from}    params.folderPath=INBOX
+    ${messageId2}    get_res_value_by_key    res=${fetch result2}    key=messageId
+    ${references2}    get_res_value_by_key    res=${fetch result2}    key=references
+    ${sec reply mail}    Send Mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=${subject title} - third    inReplyTo=${messageId2}    references=${references}${messageId}
+    ...    body=text body third
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${preview_map}    makeHashField    str-attr.user.FirstName=${common_from}${common_domain}    str-attr.user.LastName=${common_from}${common_domain}    str-attr.user.mail.ViewMode=previewright,conversationOn
+    ${set_prefs_id}    set_prefs_id    params.map=${preview_map}    url=${common_url}
+    ${search-first}    Mail Advanced Search    expectedCnt=1    params.folderPaths=INBOX    params.body=body first
+    ${search-third}    Mail Advanced Search    expectedCnt=1    params.folderPaths=INBOX    params.body=body third
+    ${search-common}    Mail Advanced Search    expectedCnt=2    params.folderPaths=INBOX    params.body=body
+    User Logout
+
+Mail - thread search - search sender/recipient in sent/inbox in preview mode
+    [Tags]
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${empty to inbox}    Empty Folder    folderPath=INBOX
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty from inbox}    Empty Folder    folderPath=${sent_mail_folder}
+    ${subject title}    Get Time    epoch
+    ${send mail}    Send Mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=${subject title} - first    body=text body first
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${mail id in to}    get_mail_id_by_subject    subject=${subject title} - first    params.folderPath=INBOX
+    ${fetch result}    msg_fetch    params.messageUid=${mail id in to}    params.folderPath=INBOX
+    ${messageId}    get_res_value_by_key    res=${fetch result}    key=messageId
+    ${references}    get_res_value_by_key    res=${fetch result}    key=references
+    ${first reply mail}    Send Mail    to=${common_from}${common_domain}    from=${common_to}${common_domain}    subject=${subject title} - second    inReplyTo=${messageId}    references=${references}${messageId}
+    ...    body=text body second
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${mail id in from}    get_mail_id_by_subject    subject=${subject title} - second    params.folderPath=INBOX
+    ${fetch result2}    msg_fetch    params.messageUid=${mail id in from}    params.folderPath=INBOX
+    ${messageId2}    get_res_value_by_key    res=${fetch result2}    key=messageId
+    ${references2}    get_res_value_by_key    res=${fetch result2}    key=references
+    ${sec reply mail}    Send Mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=${subject title} - third    inReplyTo=${messageId2}    references=${references}${messageId}
+    ...    body=text body third
+    ${preview_map}    makeHashField    str-attr.user.FirstName=${common_from}${common_domain}    str-attr.user.LastName=${common_from}${common_domain}    str-attr.user.mail.ViewMode=previewright,conversationOn
+    ${set_prefs_id}    set_prefs_id    params.map=${preview_map}    url=${common_url}
+    ${search-sender}    Mail Advanced Search    expectedCnt=2    params.folderPaths=${sent_mail_folder}    params.sender=${common_from}${common_domain}
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${preview_map}    makeHashField    str-attr.user.FirstName=${common_from}${common_domain}    str-attr.user.LastName=${common_from}${common_domain}    str-attr.user.mail.ViewMode=previewbelow,conversationOn
+    ${set_prefs_id}    set_prefs_id    params.map=${preview_map}    url=${common_url}
+    ${search-recipient}    Mail Advanced Search    expectedCnt=2    params.folderPaths=INBOX    params.recipient=${common_to}${common_domain}
+    User Logout
+
+-------Mail - upload big attachment and get progress
+    [Tags]    excluded
+    ${login}    thread_login    username=${common_from}${common_domain}    password=${mail_password}
+    Log    Prepare upload
+    ${file_clear}    clear_all
+    ${file_crc}    Get_File_Crc    fname=400k.file
+    ${file_size}    Get_File_Size    fname=400k.file
+    ${file_1}    makeHashField    str-crc=${file_crc}    str-fileName=400k.file    str-tempId=0    str-size=${file_size}
+    ${file list}    create list    ${file_1}
+    ${file_id }    get_fileid_by_prepare_upload    params.files=${file list}    tempId=0
+    ${file_id_list}    create list    ${file_id }
+    Log    build threads
+    ${num}    build_function    function=upload_file_test    fileId=${file_id }    crc=${file_crc}    fname=400k.file    uploadPath=${common_upload_url}
+    ${num}    build_function    function=get_progress    params.fileIds=${file_id_list}
+    ${num}    build_function    function=get_progress    params.fileIds=${file_id_list}
+    ${num}    build_function    function=get_progress    params.fileIds=${file_id_list}
+    Log    start threads
+    ${thread_status}    run_all_function_threads
+    ${clear result}    clear_globalThreads
+
+Mail - thread sort - sort subject in INBOX
+    [Tags]
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${empty to inbox}    Empty Folder    folderPath=INBOX
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty from inbox}    Empty Folder    folderPath=INBOX
+    ${subject title}    Get Time    epoch
+    ${send mail}    Send Mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=${subject title} - first
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${mail id in to}    get_mail_id_by_subject    subject=${subject title} - first    params.folderPath=INBOX
+    ${fetch result}    msg_fetch    params.messageUid=${mail id in to}    params.folderPath=INBOX
+    ${messageId}    get_res_value_by_key    res=${fetch result}    key=messageId
+    ${references}    get_res_value_by_key    res=${fetch result}    key=references
+    ${first reply mail}    Send Mail    to=${common_from}${common_domain}    from=${common_to}${common_domain}    subject=${subject title} - second    inReplyTo=${messageId}    references=${references}${messageId}
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${mail id in from}    get_mail_id_by_subject    subject=${subject title} - second    params.folderPath=INBOX
+    ${fetch result2}    msg_fetch    params.messageUid=${mail id in from}    params.folderPath=INBOX
+    ${messageId2}    get_res_value_by_key    res=${fetch result2}    key=messageId
+    ${references2}    get_res_value_by_key    res=${fetch result2}    key=references
+    ${sec reply mail}    Send Mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=${subject title} - third    inReplyTo=${messageId2}    references=${references}${messageId}
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${preview_map}    makeHashField    str-attr.user.FirstName=${common_from}${common_domain}    str-attr.user.LastName=${common_from}${common_domain}    str-attr.user.mail.ViewMode=previewright,conversationOn
+    ${set_prefs_id}    set_prefs_id    params.map=${preview_map}    url=${common_url}
+    ${sort asc}    Sort Mail By Subject    params.sort.direction=ascending    folderPath=INBOX    params.sort.field=subject
+    ${sort desc}    Sort Mail By Subject    params.sort.direction=descending    folderPath=INBOX    params.sort.field=subject
+    User Logout
+
+Mail - thread sort - sort subject in SENT
+    [Tags]
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty from inbox}    Empty Folder    folderPath=${sent_mail_folder}
+    ${subject title}    Get Time    epoch
+    ${send mail}    Send Mail    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=${subject title} - first    cc=${mail_cc}${common_domain}
+    ${mail id in sent}    get_mail_id_by_subject    subject=${subject title} - first    params.folderPath=${sent_mail_folder}
+    ${fetch result}    msg_fetch    params.messageUid=${mail id in sent}    params.folderPath=${sent_mail_folder}
+    ${messageId}    get_res_value_by_key    res=${fetch result}    key=messageId
+    ${references}    get_res_value_by_key    res=${fetch result}    key=references
+    ${forward mail from sent}    Send Mail    to=${mail_cc}${common_domain}    from=${common_to}${common_domain}    subject=${subject title} - second    inReplyTo=${messageId}    references=${references}${messageId}
+    ${preview_map}    makeHashField    str-attr.user.FirstName=${common_from}${common_domain}    str-attr.user.LastName=${common_from}${common_domain}    str-attr.user.mail.ViewMode=nopreview,conversationOn
+    ${set_prefs_id}    set_prefs_id    params.map=${preview_map}    url=${common_url}
+    ${sort asc}    Sort Mail By Subject    params.sort.direction=ascending    folderPath=${sent_mail_folder}    params.sort.field=subject
+    ${sort desc}    Sort Mail By Subject    params.sort.direction=descending    folderPath=${sent_mail_folder}    params.sort.field=subject
+
+Mail - resource load - preview mail attachment
+    [Tags]
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${result}    Empty Folder    folderPath=INBOX
+    ${attachment}    upload_file    url=${resource_upload}    fname=1k.txt
+    ${attach_param_1}    create_attachments_params    @resolver=Upload    id=${attachment}
+    ${attach_list}    create list    ${attach_param_1}
+    ${sendMsgKW}    Send Mail    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=${mail_subject}    params.attachments=${attach_list}
+    ${mail id}    get_mail_id_by_subject    subject=${mail_subject}    params.folderPath=INBOX
+    ${view_resource}    resource_download_postReq_json    descriptor.folder=INBOX    descriptor.uid=${mail id}    url=${resource_load}    req_name=RESOURCE_DOWNLOAD_MSG_VIEWSOURCE    return_response=true
+    ...    inline=true
+    ${expect_str}    expect_str    res=${view_resource}    expectStr=Content-Disposition: attachment; filename
+
+reply one of msg from thread will be included in thread
+    [Tags]    excluded

@@ -1,0 +1,15 @@
+工具：
+fiddler + fiddlercertmaker.zip(抓移动端设备)
+charles
+wireshark
+chrome -> advanced rest client
+firefox -> postman
+curl
+wget
+
+Python 三方库:
+requests 发post请求和处理session
+xlwt 和 xlrd
+pytz 处理时区转换
+Crypto 加密解密验证文件完整性
+poster

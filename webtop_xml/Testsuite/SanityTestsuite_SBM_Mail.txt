@@ -1,0 +1,568 @@
+*** Settings ***
+Documentation     This suite cover all related webtop API by functional steps
+Resource          ../Libs/resource-otosan_MAIL.txt
+Resource          ../Libs/resource-otosan_EMAS.txt
+Library           ../Libs/CalendarLib.py    ${common_url}
+Library           ../Libs/PrefsLib.py    ${common_url}
+Library           ../Libs/MailLib.py    ${common_url}
+Library           ../Libs/CommonLib.py    ${common_url}
+Library           ../Libs/SpecialDataLib.py    ${common_url}
+Library           ../Libs/ContactLib.py    ${common_url}
+Library           ../Libs/SessionTokenLib.py    ${common_url}
+Library           ../Libs/MultiThreadLib.py    ${common_url}
+
+*** Test Cases ***
+FUS-3153#Mail message - Send mail with big attachment
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${attachment}    Upload File    url=${common_upload_url}    fname=1M.file
+    ${sendMsgKW}    Send Message    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=${mail_subject}    priority=3    attachment=true
+    Sleep    5s
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${result}    Preview Attachments    url=${mail_get_attach_url}    folder=INBOX
+    User Logout
+
+FUS-3152#Mail message - Send mail with attachments and preview the attachments
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${attachment}    Upload File    url=${common_upload_url}    fname=${file_name}
+    ${sendMsgKW}    Send Message    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=${mail_subject}    priority=3    attachment=true
+    Sleep    5s
+    ${result}    Preview Attachments    url=${mail_get_attach_url}    folder=INBOX
+    User Logout
+
+FUS-3149#Mail message - Send, check, open, flag, search a message
+    [Documentation]    Send message, check msgfetch, flag as Unread and Flagged message, report as spam
+    [Tags]    Mail
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${sendMsgKW}    Send Message    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=${mail_subject}    priority=3
+    ${search result}    Search Message    text=${sendMsgKW}    folders=INBOX
+    ${check msgfetch}    Check Message Fetch    folder=INBOX
+    ${getmsg}    Open Message    folder=INBOX    hostport=${mail_vieweml}
+    ${search result}    Search Message    text=${sendMsgKW}    folders=Inbox    timeUnit=days    delta=5
+    ${flag Unread}    Flag Message    folder=INBOX    flag=seen    value=0
+    ${flag Flagged}    Flag Message    folder=INBOX    flag=flagged    value=1
+    User Logout
+
+FUS-3150#Mail message - Mark a message as spam and not spam
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${sendMsgKW}    Send Message    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=${mail_subject}    priority=3
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${report spam}    Report Message    folder=INBOX    dstfolder=Spam
+    ${check subject in spam}    check_message_header_subject    folder=Spam
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${report not spam}    Report Message    folder=Spam
+    ${check subject in inbox}    check_message_header_subject    folder=INBOX
+    User Logout
+
+FUS-3151#Mail message - Save draft, To/Cc/Bcc, check msg header, move, delete
+    [Documentation]    Save draft, Cc/Bcc, check msgheaderlistcheck, move to trash, delete message
+    [Tags]    Mail
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${save draft}    Save Message As Draft    from=${common_from}${common_domain}    bodytype=plain
+    ${send msg}    Send Message    from=${common_from}${common_domain}    to=${common_to}${common_domain}    cc=${mail_cc}${common_domain}    bcc=${mail_bcc}${common_domain}    mailBody=${mail_body}
+    ...    subject=${mail_subject}    priority=3
+    User Logout
+    User Login    username=${mail_cc}${common_domain}    password=${mail_password}
+    ${cc check msg header}    Check Message Header    folder=INBOX
+    User Logout
+    User Login    username=${mail_bcc}${common_domain}    password=${mail_password}
+    ${Bcc check msg header}    Check Message Header    folder=INBOX
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${To check msg header}    Check Message Header    folder=INBOX
+    ${move to trash}    Move Message    folder=INBOX    dstfolder=Trash    all=true
+    ${delete msg}    Delete Message
+    User Logout
+
+FUS-3154#Mail message - move all messages to trash folder
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${send msg1}    Send Message    from=${common_from}${common_domain}    to=${common_from}${common_domain}    subject=${mail_subject}    priority=3
+    sleep    5s
+    ${send msg2}    Send Message    from=${common_from}${common_domain}    to=${common_from}${common_domain}    subject=${mail_subject}    priority=3
+    sleep    5s
+    ${move to trash}    Move Message    folder=INBOX    dstfolder=Trash    all=true
+    User Logout
+
+FUS-3155#Mail message - print preview
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${send}    Send Message    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=${mail_subject}
+    ${print preview}    print preview message    folder=INBOX
+    User Logout
+
+FUS-3156#Mail folder - create, rename, move to trash, delete
+    [Documentation]    create, rename, move to trash, delete folder
+    [Tags]    Mail Folder
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${create folder}    Create Folder
+    ${rename folder}    Rename Folder
+    ${move folder}    Move Folder    target=Trash    all=true
+    ${delete folder}    Delete Folder
+    User Logout
+
+FUS-3157#Mail folder - create, move to folder, empty trash
+    [Documentation]    create, move to trash folder, empty trash folder
+    [Tags]    Mail Folder
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${create folder}    Create Folder
+    ${move folder}    Move Folder    target=Trash
+    ${result}    Empty Folder    name=Trash
+    User Logout
+
+FUS-3158#preference - Mail - General settings, Sendformat Rich
+    [Documentation]    Back to default prefs first, then set one action and check
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${default prefs}    Set Mail Prefs    setDefault=true
+    ${sendFormat rich}    Set Mail Prefs    prefsName=attr.user.mail.SendFormat    prefsValue=rich
+    User Logout
+
+FUS-3159#preference - Mail - General settings, AutoSaveDraftFlag
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${default prefs}    Set Mail Prefs    setDefault=true
+    ${autoSaveDraft true}    Set Mail Prefs    prefsName=attr.user.mail.AutoSaveDraftFlag    prefsValue=true
+    User Logout
+
+FUS-3160#preference - Mail - General settings, SaveToDraftsInterval
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${default prefs}    Set Mail Prefs    setDefault=true
+    ${saveDraftInterval 60}    Set Mail Prefs    prefsName=attr.user.mail.SaveToDraftsInterval    prefsValue=60
+    User Logout
+
+FUS-3161#preference - Mail - General settings, outgoing, check interval and reply quoting settings
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${3prefs}    outgoing_checkinverval_replyquote
+    ${3prefs}    outgoing_checkinverval_replyquote    saveOutgoingMessages=true    replyQuoting=true    autoCheckInterval=1800
+    User Logout
+
+FUS-3162#preference - Mail - General settings, ReplyPrefix
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${default prefs}    Set Mail Prefs    setDefault=true
+    ${replyPrefix >}    Set Mail Prefs    prefsName=attr.user.mail.ReplyPrefix    prefsValue=&gt;
+    User Logout
+
+FUS-3163#preference - Mail - General settings, autoCreateContact
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${default prefs}    Set Mail Prefs    setDefault=true
+    ${autoCreateContact true}    Set Mail Prefs    prefsName=autoCreateContact    prefsValue=true
+    User Logout
+
+FUS-3164#preference - Mail - General settings,TimeDisplayFormat
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${default prefs}    Set Mail Prefs    setDefault=true
+    ${TimeDisplayFormat short}    Set Mail Prefs    prefsName=attr.user.mail.TimeDisplayFormat    prefsValue=short
+    User Logout
+
+FUS-3165#preference - Mail - General settings,readFirstMail
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${default prefs}    Set Mail Prefs    setDefault=true
+    ${readFirstMail}    Set Mail Prefs    prefsName=attr.user.mail.readFirstMail    prefsValue=true
+    User Logout
+
+FUS-3167#Preference - Mai - Set and Del signature
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${plain}    Set Signature    type=text    position=below    isDefault=true    text=ffvsfs
+    ${html}    Set Signature    type=html    position=below    isDefault=true
+    User Logout
+
+FUS-3168#Preference - Mail- add block sender and test for the block function
+    [Documentation]    Send, check fetch, block, send again, check fetch again
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${send msg}    Send Message    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=${mail_subject}
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${msgfetch}    Check Message Fetch    folder=INBOX
+    ${block sender}    Add Block Sender    sender=${common_from}${common_domain}
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${send msg again}    Send Message    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=${mail_subject}
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${msgfetch again}    Check Message Fetch    folder=INBOX    needBlocked=True
+    User Logout
+
+FUS-3169#Preference - Mail - add, list and remove blocksender(s)
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${block sender}    Add Block Sender    sender=bs1.a@rwchinoki05.owmessaging.com
+    ${block sender}    Add Block Sender    sender=bs2.b${common_domain}
+    ${block sender}    Add Block Sender    sender=bs3.c${common_domain}
+    ${list result}    List Blocksenders
+    ${remove result}    Remove Blocksenders
+    ${remove result}    Remove Blocksenders    all=true
+    User Logout
+
+FUS-3170#Preference - Mail- add safe sender and test for the safe send function
+
+FUS-3171#Preference - Mail - add, list and remove safe sender(s)
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${safe sender1}    Add Safe Sender    sender=bs1.a@rwchinoki05.owmessaging.com
+    ${safe sender2}    Add Safe Sender    sender=ss2${common_domain}
+    ${safe sender3}    Add Safe Sender    sender=ss3${common_domain}
+    ${safesender List}    List Safesenders
+    ${remove all}    Remove Safesenders    all=true
+    User Logout
+
+FUS-3172#Preference - Mail - Auto forward
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${auto fwd}    Auto Forward    email=${mail_cc}${common_domain}    keepCopy=true    enabled=true    sendAsAttachment=false
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${send msg}    Send Message    from=${common_from}${common_domain}    to=${common_to}${common_domain}    mailBody=${mail_body}    subject=${mail_subject}    priority=3
+    User Logout
+    User Login    username=${mail_cc}${common_domain}    password=${mail_password}
+    ${Cc check msg header}    Check Message Header    folder=INBOX
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${check msgfetch}    Check Message Header    folder=INBOX
+    User Logout
+
+FUS-3173#Preference - Mail - test for disposable address function
+    Fail    [Disposable function not ready for script]
+
+FUS-3174#Preference - Mail - add, list, delete disposable address
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${enable}    enable_disposable_address    maxNumAliases=10
+    ${add}    Add Disposable address    n=3    domain=${common_domain}
+    ${list}    List Disposable address
+    ${del 1}    Delete Disposable address
+    ${list}    List Disposable address
+    ${del all}    Delete Disposable address    all=true
+    User Logout
+
+FUS-3175#Preference - Mail - block image settings in different ways, add a trust sender
+    [Documentation]    0 - Always allow images, 1 - Always block images, 2 - Always allow images from contacts in address book, 3 - Always allow images except when tagged as spam or in spam folder
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${0}    Save Image Blocker    method=0
+    ${1}    Save Image Blocker    method=1
+    ${1}    Save Image Blocker    method=1
+    ${trust}    Trust Image Sender    trust=${common_from}${common_domain}
+    ${2}    Save Image Blocker    method=2
+    ${3}    Save Image Blocker    method=2
+
+FUS-3176#Preference - Mail - test image blocker, always allow image
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${0}    Save Image Blocker    method=0
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${r}    Send With Img    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=${mail_subject}    priority=3    smileFace=${mail_faceImg}
+    ...    faceIcon=2
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${check}    Check Message Fetch    kw=${r}    folder=INBOX    html=full
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${r}    Send With Img    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=${mail_subject}    priority=3    smileFace=${mail_faceImg}
+    ...    faceIcon=2
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${check}    Check Message Fetch    kw=${r}    folder=INBOX    html=full
+    User Logout
+
+FUS-3177#Preference - Mail - test image blocker, always block
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${1}    Save Image Blocker    method=1
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${r}    Send With Img    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=${mail_subject}    priority=3    smileFace=${mail_faceImg}
+    ...    faceIcon=8
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${msgfetch again}    Check Message Fetch    folder=INBOX    html=full    blockImg=true
+    User Logout
+
+FUS-3178#Preference - Mail - test image blocker, always block, add trust sender
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${trust}    Trust Image Sender    trust=${common_from}${common_domain}
+    ${1}    Save Image Blocker    method=1
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${r}    Send With Img    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=${mail_subject}    priority=3    smileFace=${mail_faceImg}
+    ...    faceIcon=8
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${msgfetch again}    Check Message Fetch    kw=${r}    folder=INBOX    html=full    showImg=true
+    User Logout
+
+FUS-3180#Preference - Mail - test image blocker, allow images from contacts in address book
+    sso_login    username=${emas_to}
+    ${use default PAB}    Use addressbook    defaultPAB=true
+    ${only lastname}    Create Basic Contact    firstName=${emas_from}    needMoreInfo=true
+    ${add home mail}    Set More Info    label=home    type=lzEmail    value=${emas_from}${common_domain}
+    ${more info contact}    Send Save Contact    withmoreInfo=true
+    ${0}    Save Image Blocker    method=2
+    User Logout
+    sso_login    username=${emas_from}
+    ${r}    Send With Img    to=${emas_to}${common_domain}    from=${emas_from}${common_domain}    subject=${mail_subject}    priority=3    smileFace=${mail_faceImg}
+    ...    faceIcon=7
+    User Logout
+    sso_login    username=${emas_to}
+    ${check}    Check Message Fetch    kw=${r}    folder=INBOX    html=full    showImg=true
+    User Logout
+    sso_login    username=${emas_cc}
+    ${r}    Send With Img    to=${emas_to}${common_domain}    from=${emas_cc}${common_domain}    subject=${mail_subject}    priority=3    smileFace=${mail_faceImg}
+    ...    faceIcon=7
+    User Logout
+    sso_login    username=${emas_to}
+    ${check}    Check Message Fetch    folder=INBOX    html=full    blockImg=true
+    User Logout
+
+FUS-3181#Preference - Profile
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${profile settings}    Set Profile    fistName=test    lastName=vvn    mailAddress=${common_to}${common_domain}    userMoblie=123456789000
+    User Logout
+
+FUS-3182#Preference - All Languages
+    [Documentation]    Set all values and test current settings value for each API
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${set languages}    Set Languages
+    User Logout
+
+FUS-3183#Preference - All Timeformats
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${set timeformats}    Set Timeformats
+    User Logout
+
+FUS-3184#Preference - All Date formats
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${set dateformats}    Set Dateformats
+    User Logout
+
+FUS-3185#Preference - All Timezones
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${set timezones}    Set Timezones
+    User Logout
+
+FUS-3204#Mail folder - max folder nested depth
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${move folder}    Run Keyword And Ignore Error    Move Folder    target=Trash
+    ${empty folder result}    Run Keyword And Ignore Error    Empty Folder
+    ${create max nested layer folder result}    Run Keyword And Continue On Failure    Create MaxNestedLayer Folder    folderDepth=${folder_nested_depth}
+    ${move folder to trash}    Run Keyword And Ignore Error    Move Folder    target=Trash
+    ${empty folder result}    Run Keyword And Ignore Error    Empty Folder    name=Trash
+    User Logout
+
+FUS-3205#Mail message - sort by subject
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${move to trash}    Run Keyword And Ignore Error    Move Message    folder=INBOX    dstfolder=Trash    all=true
+    ${sendMsgKW}    Send Message    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=    priority=3
+    ${sendMsgKW}    Send Message    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=1    priority=3
+    ${sendMsgKW}    Send Message    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=a    priority=3
+    ${sendMsgKW}    Send Message    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=A    priority=3
+    ${sort result}    Sort Mail By Subject    sortorder=ASC    folder=INBOX
+    ${sort result}    Sort Mail By Subject    sortorder=DESC    folder=INBOX
+    ${move to trash}    Move Message    folder=INBOX    dstfolder=Trash    all=true
+    User Logout
+
+FUS-3206#Mail message - sort by date
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${sendMsgKW}    Send Message    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=    priority=3
+    sleep    60s
+    ${sendMsgKW}    Send Message    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=1    priority=3
+    sleep    150s
+    ${sendMsgKW}    Send Message    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=a    priority=3
+    ${sortResult}    Sort Mail By Date    sortorder=ASC    folder=INBOX
+    ${sortResult}    Sort Mail By Date    sortorder=DESC    folder=INBOX
+    ${move to trash}    Move Message    folder=INBOX    dstfolder=Trash    all=true
+    User Logout
+
+FUS-3207#Mail message - sort by from
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${move to trash}    Run Keyword And Ignore Error    Move Message    folder=INBOX    dstfolder=Trash    all=true
+    ${sendMsgKW}    Send Message    to=${common_to}${common_domain}    from=${common_to}${common_domain}    subject=${mail_subject}    priority=3
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${sendMsgKW}    Send Message    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=${mail_subject}    priority=3
+    User Logout
+    User Login    username=${mail_cc}${common_domain}    password=${mail_password}
+    ${sendMsgKW}    Send Message    to=${common_to}${common_domain}    from=${mail_cc}${common_domain}    subject=${mail_subject}    priority=3
+    User Logout
+    User Login    username=${mail_bcc}${common_domain}    password=${mail_password}
+    ${sendMsgKW}    Send Message    to=${common_to}${common_domain}    from=${mail_bcc}${common_domain}    subject=${mail_subject}    priority=3
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${sortResult}    Sort Mail By From    sortorder=ASC    folder=INBOX
+    ${sortResult}    Sort Mail By From    sortorder=DESC    folder=INBOX
+    ${move to trash}    Run Keyword And Ignore Error    Move Message    folder=INBOX    dstfolder=Trash    all=true
+    User Logout
+
+FUS-3234#Preference - Timezone - check HK time with real time run from msgHeader/msgFetch response
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${set timezones}    Set Timezones    specific=Asia/Shanghai
+    ${sendMsgKW}    Send Message    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=${mail_subject}    priority=3
+    ${MsgHeader}    Check Message Header    folder=INBOX
+    ${check msg header}    check_hk_time    fieldName=local-sent-date    format=%Y%m%dT%H%M%S    folder=INBOX    response=msgheaderlistResp
+    ${msgfetch}    Check Message Fetch    folder=INBOX
+    ${check msg fetch}    check_hk_time    fieldName=local-sent-date    format=%Y%m%dT%H%M%S    folder=INBOX    response=msgFetchResp
+    User Logout
+
+FUS-3246#Preference - Timezone - check msgheaderlist based on HK zone on send/received fields of all timezones
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${timezones}    Set Timezones    specific=Asia/Hong_Kong
+    ${sendMsgKW}    Send Message    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=${mail_subject}    priority=3
+    ${MsgHeader}    Check Message Header    folder=INBOX
+    ${hk ts}    Get HK Timestamp    folder=INBOX    stampName=sent-date    response=msgheaderlistResp
+    ${exp}    expt_all_timezones    format=%Y%m%dT%H%M%S
+    ${check sent datetime}    check_time_zones    folder=INBOX    fieldName=local-sent-date    function=check_message_header    response=msgheaderlistResp
+    ${hk ts}    Get HK Timestamp    folder=INBOX    stampName=received-date    response=msgheaderlistResp
+    ${exp}    expt_all_timezones    format=%Y%m%dT%H%M%S
+    ${check sent datetime}    check_time_zones    folder=INBOX    fieldName=local-received-date    function=check_message_header    response=msgheaderlistResp
+    User Logout
+
+FUS-3278#Preference - Timezone - check msgFetchRes based on HK zone on send/received fields of all timezones
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${timezones}    Set Timezones    specific=Asia/Hong_Kong
+    ${sendMsgKW}    Send Message    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=${mail_subject}    priority=3
+    ${MsgHeader}    Check Message Header    folder=INBOX
+    ${msgfetch}    Check Message Fetch    folder=INBOX
+    ${hk ts}    Get HK Timestamp    folder=INBOX    stampName=sent-date    response=msgFetchResp
+    ${exp}    expt_all_timezones    format=%Y%m%dT%H%M%S
+    ${check sent datetime}    check_time_zones    folder=INBOX    fieldName=local-sent-date    response=msgFetchResp    function=check_message_fetch
+    ${hk ts}    Get HK Timestamp    folder=INBOX    stampName=received-date    response=msgFetchResp
+    ${exp}    expt_all_timezones    format=%Y%m%dT%H%M%S
+    ${check sent datetime}    check_time_zones    folder=INBOX    fieldName=local-received-date    response=msgFetchResp    function=check_message_fetch
+    User Logout
+
+FUS-3280#Preference - Timezone - check vmsgheaderlistResp based on HK zone on send/received fields of all timezones
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${timezones}    Set Timezones    specific=Asia/Hong_Kong
+    ${sendMsgKW}    Send Message    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=${mail_subject}    priority=3
+    ${search result}    Search Message    text=${sendMsgKW}    folders=INBOX
+    ${hk ts}    Get HK Timestamp    folder=INBOX    stampName=sent-date    response=vmsgheaderlistResp
+    ${exp}    expt_all_timezones    format=%Y%m%dT%H%M%S
+    ${check sent datetime}    check_time_zones    folder=INBOX    fieldName=local-sent-date    response=vmsgheaderlistResp    function=search_message    text=${sendMsgKW}
+    ${hk ts}    Get HK Timestamp    folder=INBOX    stampName=received-date    response=vmsgheaderlistResp
+    ${exp}    expt_all_timezones    format=%Y%m%dT%H%M%S
+    ${check sent datetime}    check_time_zones    folder=INBOX    fieldName=local-received-date    response=vmsgheaderlistResp    function=search_message    text=${sendMsgKW}
+    User Logout
+
+FUS-3282#Preference - Timezone - check saveMsgResp based on HK zone on send/received fields of all timezones
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${timezones}    Set Timezones    specific=Asia/Hong_Kong
+    ${save draft}    Save Message As Draft    from=${common_from}${common_domain}    bodytype=plain
+    ${hk ts}    Get HK Timestamp    folder=INBOX    stampName=sent-date    response=saveMsgResp
+    ${exp}    expt_all_timezones    format=%Y%m%dT%H%M%S
+    ${check sent datetime}    check_time_zones    folder=INBOX    fieldName=local-sent-date    response=saveMsgResp    function=save_message_as_draft    from=${common_from}${common_domain}
+    ...    bodytype=plain
+    ${hk ts}    Get HK Timestamp    folder=INBOX    stampName=received-date    response=saveMsgResp
+    ${exp}    expt_all_timezones    format=%Y%m%dT%H%M%S
+    ${check received datetime}    check_time_zones    folder=INBOX    fieldName=local-received-date    response=saveMsgResp    function=save_message_as_draft    from=${common_from}${common_domain}
+    ...    bodytype=plain
+    User Logout
+
+FUS-3300#Mail message - advanced search
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty inbox}    Run Keyword And Ignore Error    empty_folder    name=INBOX
+    ${empty drafts}    Run Keyword And Ignore Error    empty_folder    name=Drafts
+    ${empty sentmail}    Run Keyword And Ignore Error    empty_folder    name=SentMail
+    ${empty spam}    Run Keyword And Ignore Error    empty_folder    name=Spam
+    ${empty trash}    Run Keyword And Ignore Error    empty_folder    name=Trash
+    ${sendMsgKW}    Send Msg For Search    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=iamindraft    priority=3    body=text body
+    ...    bodytype=plain
+    ${move to draft}    Move Message    folder=INBOX    dstfolder=Drafts    all=true
+    ${subject result}    Mail Advanced Search    subject=iamindraft    expectedCnt=1    folders=Drafts
+    ${body result}    Mail Advanced Search    body=text body    expectedCnt=1    folders=Drafts
+    ${sender result}    Mail Advanced Search    sender=${common_from}    expectedCnt=1    folders=Drafts
+    ${recipient result}    Mail Advanced Search    recipient=${common_from}    expectedCnt=1    folders=Drafts
+    ${current_time}    Get Time    epoch
+    ${result}    Mail Advanced Search    before=${current_time}000    expectedCnt=1    folders=Drafts
+    ${sendMsgKW}    Send Msg For Search    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=iaminsentmail    priority=3    body=text body
+    ...    bodytype=plain
+    ${move to SentMail}    Move Message    folder=INBOX    dstfolder=SentMail    all=true
+    ${result}    Mail Advanced Search    after=${current_time}000    expectedCnt=1    folders=SentMail
+    ${result}    Mail Advanced Search    subject=iaminsentmail    expectedCnt=1    folders=SentMail
+    ${sendMsgKW}    Send Msg For Search    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=iaminspam    priority=3    body=text body
+    ...    bodytype=plain
+    ${move to Spam}    Move Message    folder=INBOX    dstfolder=Spam    all=true
+    ${result}    Mail Advanced Search    subject=iaminspam    expectedCnt=1    folders=Spam
+    ${sendMsgKW}    Send Msg For Search    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=iamintrash    priority=3    body=text body
+    ...    bodytype=plain
+    ${move to Trash}    Move Message    folder=INBOX    dstfolder=Trash    all=true
+    ${result}    Mail Advanced Search    subject=iamintrash    expectedCnt=1    folders=Trash
+    ${sendMsgKW}    Send Msg For Search    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=iaminfolder1    priority=3    body=text body
+    ...    bodytype=plain
+    ${create folder}    Create Folder For Search    name=Folder1
+    ${move to Folder1}    Move Message    folder=INBOX    dstfolder=Folder1    all=true
+    ${result}    Mail Advanced Search    subject=iaminfolder1    expectedCnt=1    folders=Folder1
+    ${sendMsgKW}    Send Msg For Search    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=iaminfolder2    priority=3    body=text body
+    ...    bodytype=plain
+    ${create folder}    Create Folder For Search    name=Folder2    parent=Folder1
+    ${move to Folder2}    Move Message    folder=INBOX    dstfolder=Folder1/Folder2    all=true
+    ${search in folder2}    Mail Advanced Search    subject=iaminfolder2    expectedCnt=1    folders=Folder1/Folder2
+    ${search in folder1}    Mail Advanced Search    subject=iaminfolder2    expectedCnt=1    folders=Folder1
+    ${sendMsgKW}    Send Msg For Search    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=iamininbox    priority=3    body=text body
+    ...    bodytype=plain
+    ${result}    Mail Advanced Search    subject=iamininbox    expectedCnt=1    folders=INBOX
+    ${result}    Mail Advanced Search    sender=${common_from}    expectedCnt=7    folders=
+    ${result}    Mail Advanced Search    subject=noexisted    expectedCnt=0    folders=
+    ${empty inbox}    Run Keyword And Ignore Error    empty_folder    name=INBOX
+    ${empty drafts}    Run Keyword And Ignore Error    empty_folder    name=Drafts
+    ${empty sentmail}    Run Keyword And Ignore Error    empty_folder    name=SentMail
+    ${empty spam}    Run Keyword And Ignore Error    empty_folder    name=Spam
+    ${empty trash}    Run Keyword And Ignore Error    empty_folder    name=Trash
+    User Logout
+
+FUS-3301#Mail message - receipt:read, deliver
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${delete msg}    Run Keyword And Ignore Error    empty_folder    name=INBOX
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${delete msg}    Run Keyword And Ignore Error    empty_folder    name=INBOX
+    ${sendMsgKW}    Send Msg For Receipt    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=receipt test    priority=3    body=text body
+    ...    bodytype=plain    notifyOptions=SUCCESS    returnReceipt=true
+    sleep    10
+    ${check result}    Check Msg Subject Cnt    expectCnt=1    subjectStr=Mail System Delivery Report    folder=INBOX
+    ${delete msg}    Run Keyword And Ignore Error    empty_folder    name=INBOX
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${uid}    Check Read Receipt Msg    expectCnt=1    folder=INBOX    html=text    receiptVal=1
+    ${send result}    Send Receipt    uid=${uid}
+    ${uid}    Check Read Receipt Msg    expectCnt=1    folder=INBOX    html=text    receiptVal=0
+    ${delete msg}    Run Keyword And Ignore Error    empty_folder    name=INBOX
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${check result}    Check Msg Subject Cnt    expectCnt=1    subjectStr=Return Receipt    folder=INBOX
+    ${delete msg}    Run Keyword And Ignore Error    empty_folder    name=INBOX
+    ${sendMsgKW}    Send Msg For Receipt    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=receipt test    priority=3    body=text body
+    ...    bodytype=plain    notifyOptions=SUCCESS    returnReceipt=true
+    ${delete msg}    Run Keyword And Ignore Error    empty_folder    name=INBOX
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${uid}    Check Read Receipt Msg    expectCnt=1    folder=INBOX    html=text    receiptVal=1
+    ${send result}    Ignore Receipt    uid=${uid}
+    ${uid}    Check Read Receipt Msg    expectCnt=1    folder=INBOX    html=text    receiptVal=0
+    ${delete msg}    Run Keyword And Ignore Error    empty_folder    name=INBOX
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${uid}    Check Read Receipt Msg    expectCnt=0    folder=INBOX    html=text
+    ${sendMsgKW}    Send Msg For Receipt    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=no receipt test    priority=3    body=text body
+    ...    bodytype=plain
+    sleep    5
+    ${check result}    Check Msg Subject Cnt    expectCnt=0    folder=INBOX
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${uid}    Check Read Receipt Msg    expectCnt=1    folder=INBOX    html=text    receiptVal=0
+    ${delete msg}    Run Keyword And Ignore Error    empty_folder    name=INBOX
+    User Logout
+
+FUS-4979#preference - Mail - setting:empty trash folder when logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${sendMsgKW}    Send Message    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=${mail_subject}    priority=3
+    ${move to trash}    Run Keyword And Ignore Error    Move Message    folder=INBOX    dstfolder=Trash    all=true
+    ${set result}    Set Empty Folder Logout    emptyTrashOnLogout=true
+    ${mail count}    List Mail By Folder    folder=Trash
+    Should Be True    ${mail count}>0    'Trash folder should not be empty!'
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${mail count}    List Mail By Folder    folder=Trash
+    Should Be True    ${mail count}==0    'Trash folder is not empty!'
+    User Logout
+
+FUS-3203#preference - Mail - signature max number
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${result}    Run Keyword And Continue On Failure    Create MaxCnt Signature    maxCnt=${max_signature}
+    Remove All Singature
+    User Logout
+
+test
+    User Login    username=webtop10${common_domain}    password=${mail_password}
+    ${move to trash}    Move Message    folder=INBOX    dstfolder=Trash    all=true
+    User Logout

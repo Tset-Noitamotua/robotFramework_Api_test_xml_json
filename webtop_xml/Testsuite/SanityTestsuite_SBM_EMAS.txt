@@ -1,0 +1,223 @@
+*** Settings ***
+Documentation     This suite cover all related webtop API by functional steps
+Resource          ../Libs/resource-otosan_EMAS.txt
+Library           ../Libs/CalendarLib.py    ${common_url}
+Library           ../Libs/PrefsLib.py    ${common_url}
+Library           ../Libs/MailLib.py    ${common_url}
+Library           ../Libs/CommonLib.py    ${common_url}
+Library           ../Libs/SpecialDataLib.py    ${common_url}
+Library           ../Libs/ContactLib.py    ${common_url}
+Library           ../Libs/SessionTokenLib.py    ${common_url}
+Library           ../Libs/MultiThreadLib.py    ${common_url}
+
+*** Test Cases ***
+FUS-3186#Contact - create PAB, list PAB, delete PAB(s)
+    User Login    username=${emas_from}    password=${mail_password}
+    ${create PAB1}    Create addressbook
+    ${create PAB2}    Create addressbook
+    ${listPAB}    list addressbook
+    ${delete PAB}    delete addressbook
+    ${listPAB}    list addressbook
+    ${delete all}    delete_addressbook    all=true
+    User Logout
+
+FUS-3189#Contact - create ( in default PAB) simple contact and another with more info contact
+    User Login    username=${emas_from}    password=${mail_password}
+    ${use default PAB}    Use addressbook    defaultPAB=true
+    ${only lastname}    Create Basic Contact    lastName=${emas_from}_lname
+    ${basic contact}    Send Save Contact
+    ${result}    Check Contact    id=${basic contact}
+    ${Basic info}    Create Basic Contact    firstName=${emas_from}_fname    needMoreInfo=true
+    ${add work mail}    Set More Info    label=work    type=lzEmail    value=${emas_to}${common_domain}
+    ${add home mail}    Set More Info    label=home    type=lzEmail    value=${emas_from}${common_domain}
+    ${add home mobile}    Set More Info    label=home    type=lzPhone_mobile    value=234
+    ${addbirthday}    Set More Info    label=birthday    type=lzPersonal    value=20140709
+    ${more info contact}    Send Save Contact    withmoreInfo=true
+    ${result}    Check Contact    id=${more info contact}
+    User Logout
+
+FUS-3190#Contact - create ( in user-created PAB) simple contact and another with more info contact
+    User Login    username=${emas_from}    password=${mail_password}
+    ${listPAB}    list addressbook
+    ${delete all}    delete_addressbook    all=true
+    ${create PAB2}    Create addressbook
+    ${use user PAB}    Use addressbook    userPAB=true
+    ${only lastname}    Create Basic Contact    lastName=${emas_from}_lname
+    ${basic contact}    Send Save Contact
+    ${check basic}    Check Contact    id=${basic contact}
+    ${Basic info}    Create Basic Contact    firstName=${emas_from}_fname    needMoreInfo=true
+    ${add work mail}    Set More Info    label=work    type=lzEmail    value=${emas_to}${common_domain}
+    ${add home mail}    Set More Info    label=home    type=lzEmail    value=${emas_from}${common_domain}
+    ${add home mobile}    Set More Info    label=home    type=lzPhone_mobile    value=234
+    ${more info contact}    Send Save Contact    withmoreInfo=true
+    ${check full}    Check Contact    id=${more info contact}
+    User Logout
+
+FUS-3191#Contact - update for latest created contact
+    User Login    username=${emas_from}    password=${mail_password}
+    ${listPAB}    list addressbook
+    ${delete all}    delete_addressbook    all=true
+    ${create PAB2}    Create addressbook
+    ${use default PAB}    Use addressbook    userPAB=true
+    ${only lastname}    Create Basic Contact    lastName=lname    firstName=fname
+    ${basic contact}    Send Save Contact
+    ${update}    update_contact    newFirstName=newnewnew    needMoreInfo=true
+    ${add work mail}    Set More Info    label=work    type=lzEmail    value=${emas_to}${common_domain}
+    ${add home mail}    Set More Info    label=home    type=lzEmail    value=${emas_from}${common_domain}
+    ${add home mobile}    Set More Info    label=home    type=lzPhone_mobile    value=234
+    ${more info contact}    Send Save Contact    updatemoreInfo=true
+    ${check full}    Check Contact    id=${more info contact}
+    User Logout
+
+FUS-3194#Contact - delete one contact from default PAB, all contacts from user created PAB
+    User Login    username=${emas_from}    password=${mail_password}
+    ${use default PAB}    Use addressbook    defaultPAB=true
+    ${only lastname}    Create Basic Contact    lastName=${emas_from}_lname
+    ${basic contact}    Send Save Contact
+    ${create userPAB}    Create addressbook
+    ${use default PAB}    Use addressbook    userPAB=true
+    ${only lastname}    Create Basic Contact    firstName=${emas_from}_fname
+    ${basic contact}    Send Save Contact
+    ${use default PAB}    Use addressbook    userPAB=true
+    ${only lastname}    Create Basic Contact    lastName=${emas_from}_lname
+    ${basic contact}    Send Save Contact
+    ${delete one contacts}    Delete Contacts    defaultPAB=true
+    ${delete all contacts}    Delete Contacts    userPAB=true    all=true
+    User Logout
+
+FUS-3195#Contact - search contact
+    User Login    username=${emas_from}    password=${mail_password}
+    ${use default PAB}    Use addressbook    defaultPAB=true
+    ${Basic info}    Create Basic Contact    firstName=fname    needMoreInfo=true
+    ${add work mail}    Set More Info    label=work    type=lzEmail    value=${emas_to}${common_domain}
+    ${more info contact}    Send Save Contact    withmoreInfo=true
+    ${search workmail}    search_sort_contact    keywords=${emas_to}${common_domain}
+    ${search firstname}    search_sort_contact    keywords=fname
+    User Logout
+
+FUS-3196#Contact - sort contact
+    [Documentation]    kargs['keywords'] -> keywords for search, \ \ \ kargs['sort'] -> 'firstName ASC', 'firstName DESC', 'lastName ASC', 'lastName DESC', 'email ASC', 'email DESC' '''
+    User Login    username=${emas_from}    password=${mail_password}
+    ${use default PAB}    Use addressbook    defaultPAB=true
+    ${only lastname}    Create Basic Contact    lastName=a_lastname
+    ${basic contact}    Send Save Contact
+    ${only lastname}    Create Basic Contact    lastName=0_lname
+    ${basic contact}    Send Save Contact
+    ${only lastname}    Create Basic Contact    lastName=_lname
+    ${basic contact}    Send Save Contact
+    ${lastName ASC}    search_sort_contact    sort=lastName ASC
+    ${lastName DESC}    search_sort_contact    sort=lastName DESC
+    User Logout
+
+FUS-3197#Contact - merge for dup contacts - previewed, merged and updated, dup contacts deleted
+    User Login    username=${emas_from}    password=${mail_password}
+    ${use default PAB}    Use addressbook    defaultPAB=true
+    ${only lastname}    Create Basic Contact    firstName=fname
+    ${basic contact}    Send Save Contact
+    ${Basic info}    Create Basic Contact    firstName=fname    needMoreInfo=true
+    ${add work mail}    Set More Info    label=work    type=lzEmail    value=${emas_to}${common_domain}
+    ${add home mail}    Set More Info    label=home    type=lzEmail    value=${emas_from}${common_domain}
+    ${add home mobile}    Set More Info    label=home    type=lzPhone_mobile    value=234
+    ${more info contact}    Send Save Contact    withmoreInfo=true
+    ${result}    list_contact_dup    defaultPAB=ture
+    ${get contacts}    Get Contacts Merge    fromDup=true
+    User Logout
+
+FUS-3198#Contact - merge for created contacts - previewed, merged and updated, dup contacts deleted
+    User Login    username=${emas_from}    password=${mail_password}
+    ${use default PAB}    Use addressbook    userPAB=true
+    ${only lastname}    Create Basic Contact    lastName=lname    firstName=fname
+    ${basic contact}    Send Save Contact
+    ${only lastname}    Create Basic Contact    lastName=lname
+    ${basic contact}    Send Save Contact
+    ${only lastname}    Create Basic Contact    lastName=lname
+    ${basic contact}    Send Save Contact
+    ${get contacts}    Get Contacts Merge
+    User Logout
+
+FUS-3199#Contact - set autosuggest on, create an autosuggest contact and check suggest by keyword
+    sso_login    username=08032897305
+    ${set on}    Run Keyword And Ignore Error    Set Autosuggest Onoff    on=true
+    ${create}    Create Autocomplete    address=${emas_to}${common_domain}
+    ${filter}    Go Suggest And Check    kw=${emas_to}    check=true
+    User Logout
+
+FUS-3200#Contact - delete auto-complete contact(s)
+    sso_login    username=${emas_from}
+    ${address1}    Create Autocomplete    address=${emas_to}${common_domain}
+    ${address2}    Create Autocomplete    address=${emas_cc}${common_domain}
+    ${address3}    Create Autocomplete    address=${emas_bcc}${common_domain}
+    ${list}    list_autocomplete
+    ${delete}    delete_autocomplete
+    ${list}    list_autocomplete
+    ${delete}    delete_autocomplete    all=true
+    User Logout
+
+FUS-3201#Contact - Import and Export CSV/VCF conact on default/user-created PAB
+    User Login    username=${emas_from}    password=${mail_password}
+    ${fid_csv}    Upload File    url=${common_upload_url}    fname=csv_contact.csv
+    ${fid_vcard}    Upload File    url=${common_upload_url}    fname=vcard_contact.vcf
+    ${use default PAB}    Use addressbook    defaultPAB=true
+    ${result1}    Import Contact    fid=${fid_csv}
+    ${as csv}    Export Contact    dlname=savedCsv.csv    url=${contact_export}
+    ${create PAB1}    Create addressbook
+    ${use default PAB}    Use addressbook    userPAB=true
+    ${result2}    Import Contact    fid=${fid_vcard}
+    ${as csv}    Export Contact    dlname=savedCsv.csv    url=${contact_export}
+    User Logout
+
+FUS-3202#Mail/Conact - send a contact as vCard, check cVard in attachment
+    User Login    username=${emas_from}    password=${mail_password}
+    ${use default PAB}    Use addressbook    defaultPAB=true
+    ${only lastname}    Create Basic Contact    firstName=aaaVcardFirstname
+    ${basic contact}    Send Save Contact
+    ${list}    List Contacts    defaultPAB=true
+    ${send vcard}    Send Vcard    to=${emas_from}${common_domain}    from=${emas_from}${common_domain}    subject=${mail_subject}    priority=3    bodytype=plain
+    ${check vcard}    Check vcard    url=${mail_get_attach_url}
+    User Logout
+
+FUS-3210#Contact - autosuggest filter rules
+    sso_login    username=${emas_from}
+    ${set on}    Set Autosuggest Onoff    on=true
+    ${delete all contacts}    Run Keyword And Ignore Error    Delete Contacts    defaultPAB=true    all=true
+    ${delete result}    Run Keyword And Ignore Error    Delete All AutoCMPLTContact
+    ${create autocomplete}    Create Autocomplete    address=efgh@hijk.lmn
+    ${check result 1}    Check AutoCMPLTContact Filter    filter=e    expectCnt=1    expectFld=efgh@hijk.lmn
+    ${check result 2}    Check AutoCMPLTContact Filter    filter= \ \ \ \ e    expectCnt=1    expectFld=efgh@hijk.lmn
+    ${check result 3}    Check AutoCMPLTContact Filter    filter=ef    expectCnt=1    expectFld=efgh@hijk.lmn
+    ${check result 4}    Check AutoCMPLTContact Filter    filter=e f    expectCnt=1    expectFld=efgh@hijk.lmn
+    ${check result 5}    Check AutoCMPLTContact Filter    filter= e m    expectCnt=1    expectFld=efgh@hijk.lmn
+    ${check result 6}    Check AutoCMPLTContact Filter    filter=z    expectCnt=0    expectFld=efgh@hijk.lmn
+    ${create basic contact}    create_basic_contact    firstName=firstname    lastName=lastname    middleName=middlename
+    ${check result 9}    Check AutoCMPLTContact Filter    filter=first    expectCnt=0
+    ${check result 10}    Check AutoCMPLTContact Filter    filter=last    expectCnt=0
+    ${check result 11}    Check AutoCMPLTContact Filter    filter=middle    expectCnt=0
+    ${create contact}    Create Basic Contact    firstName=fullcontactname    needMoreInfo=true
+    ${add work mail}    Set More Info    label=work    type=lzEmail    value=work@test.com
+    ${add home mail}    Set More Info    label=home    type=lzEmail    value=home@test.com
+    ${add home mobile}    Set More Info    label=home    type=lzPhone_mobile    value=15111777777
+    ${more info contact}    Send Save Contact    withmoreInfo=true
+    ${check result 12}    Check AutoCMPLTContact Filter    filter=work    expectCnt=1    expectFld=work@test.com
+    ${check result 13}    Check AutoCMPLTContact Filter    filter=home    expectCnt=1    expectFld=work@test.com
+    ${delete all contacts}    Run Keyword And Ignore Error    Delete Contacts    defaultPAB=true    all=true
+    ${delete result}    Run Keyword And Ignore Error    Delete All AutoCMPLTContact
+    User Logout
+
+FUS-3209#Contact - check auto suggestion duplication
+    sso_login    username=08032897305
+    ${list}    list_autocomplete
+    ${delete}    delete_autocomplete
+    ${create1}    Create Autocomplete    address=${emas_to}${common_domain}
+    ${create2}    Create Autocomplete    address=${emas_to}${common_domain}
+    ${filter}    Go Suggest And Check    kw=${emas_to}
+    ${check dup}    check_suggest_duplication    suggestNumber=1
+    ${list}    list_autocomplete
+    ${delete}    delete_autocomplete
+    User Logout
+
+testSSO
+    sso_login    username=08032897305
+    ${set on}    Run Keyword And Ignore Error    Set Autosuggest Onoff    on=true
+    ${create}    Create Autocomplete    address=${emas_to}${common_domain}
+    ${filter}    Go Suggest And Check    kw=${emas_to}    check=true
+    User Logout

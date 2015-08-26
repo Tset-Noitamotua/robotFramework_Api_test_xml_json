@@ -1,0 +1,35 @@
+Mail --
+send message title, message body
+save draft title, draft body
+upload file: file name, file content for preview
+create folder, rename folder
+set signature, text and html format
+disposable address name
+set auto reply
+
+
+Contact --
+create addressbook name
+create group name
+contact basic info
+set more info
+search_sort_contact
+
+Calendar --
+create calendar
+update calendar
+event summary
+event location
+event description
+create task group
+update task group
+create task
+update task
+advanced search
+
+Settings --
+profile first and last name
+
+
+
+

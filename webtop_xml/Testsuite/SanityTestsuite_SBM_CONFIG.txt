@@ -1,0 +1,58 @@
+*** Settings ***
+Documentation     This suite cover all related webtop API by functional steps
+Resource          ../Libs/resource-otosan_MAIL.txt
+Library           ../Libs/CalendarLib.py    ${common_url}
+Library           ../Libs/PrefsLib.py    ${common_url}
+Library           ../Libs/MailLib.py    ${common_url}
+Library           ../Libs/CommonLib.py    ${common_url}
+Library           ../Libs/SpecialDataLib.py    ${common_url}
+Library           ../Libs/ContactLib.py    ${common_url}
+Library           ../Libs/SessionTokenLib.py    ${common_url}
+Library           ../Libs/MultiThreadLib.py    ${common_url}
+
+*** Test Cases ***
+
+FUS-4567#Session session valid,token expired
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${session_token}    Api Call Emptyfolder    name=INBOX    host=${HostPort}
+    ${result}    Make Expired Token    expiry=${token_expiry_hour}    host=${HostPort}
+    ${session_token}    Api Call Emptyfolder    name=INBOX    host=${HostPort}
+    User logout
+
+FUS-4568#Session session expired,token valid
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${old_session_id}    Api Call Emptyfolder    name=INBOX    host=${HostPort}
+    ${result}    Make Expired Session    host=${HostPort}
+    ${new_session_id}    Api Call Emptyfolder    name=INBOX    host=${HostPort}
+    Should Be True    '${old_session_id}'!='${new_session_id}'    'session is refreshed'
+    User Logout
+
+FUS-4569#Session session valid, token valid
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${old_session_id}    Api Call Emptyfolder    name=INBOX    host=${HostPort}
+    sleep    5
+    ${new_session_id}    Api Call Emptyfolder    name=INBOX    host=${HostPort}
+    Should Be True    '${old_session_id}'=='${new_session_id}'    'sessions are same'
+    User Logout
+
+FUS-4570#Session session expired, token expired
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${old_session_id}    Api Call Emptyfolder    name=INBOX    host=${HostPort}
+    ${result}    Make Expired Token    expiry=${token_expiry_hour}    host=${HostPort}
+    ${result}    Make Expired Session    host=${HostPort}
+    ${new_session_id}    Api Call Emptyfolder    name=INBOX    host=${HostPort}
+    Should Be True    '${new_session_id}'=='AUTHENTICATION_REQUIRED'    'both token and session are invalid,need to login.'
+    User Logout
+
+FUS-4975#Request throttling - sameIP sameUser-amount / time limit and block duration test
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${send}    request_rateSender    amount=11
+    ${limiter}    request_rateLimiter    ms=3000
+    ${test_blockDuration}    block_duration    duration=10
+    User Logout
+
+FUS-4976#Request throttling - sameIP differentUsers-amount / time limit and block duration test
+    ${build threads for users}    build_multithread    username=webtope2e    domain=@openwave.com    password=p    amount=11
+    ${start run}    start_threads    ms=2000
+
+

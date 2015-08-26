@@ -1,0 +1,1368 @@
+*** Settings ***
+Documentation     This suite cover all related webtop API by functional steps
+Library           ../baseapi/Login.py    ${login_url}
+Library           ../testcase/ContactLib.py    ${common_url}
+Library           ../testcase/MailLib.py    ${common_url}
+Library           ../baseapi/Login_sso.py    ${common_url}
+Library           ../testcase/PrefsLib.py    ${common_url}
+Library           ../testcase/CalendarLib.py    ${common_url}
+Library           ../testcase/FileUploadLib.py    ${common_url}
+Library           ../testcase/GlobalHelper.py
+
+*** Test Cases ***
+address book - list and list Type
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${list}    list_addressbook
+    ${list types}    list_addressbook_types
+    User Logout
+
+address book - create PAB
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${timestamp}    Get Time    epoch
+    ${address name}    Convert To String    ${timestamp}
+    ${create result}    create_addressbook    params.object.name=${address name}
+    ${result id}    check_created_id_by_name    name=${address name}    res=${create result}
+    ${empty addr result}    empty_addressbook
+
+address book - delete and empty PAB
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${timestamp}    Get Time    epoch
+    ${address name}    Convert To String    ${timestamp}
+    ${create result}    create_addressbook    params.object.name=${address name}
+    ${result id}    check_created_id_by_name    name=${address name}    res=${create result}
+    ${del result}    del_addressbook    params.ids=${result id}
+    ${empty addressbook}    empty_addressbook
+
+address book - rename
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty addressbook}    empty_addressbook
+    ${timestamp}    Get Time    epoch
+    ${address name}    Convert To String    ${timestamp}
+    ${create result}    create_addressbook    params.object.name=${address name}
+    ${result id}    check_created_id_by_name    name=${address name}    res=${create result}
+    ${update result}    update_addressbook    params.object.name=${address name}_updated    params.object.id=${result id}
+    ${list after updated}    list_addressbook
+    ${check result for original name}    get_id_list_by_name    name=${address name}    expectCnt=0    res=${list after updated}
+    ${check result for new name}    get_id_list_by_name    name=${address name}_updated    expectCnt=1    res=${list after updated}
+    ${empty addressbook}    empty_addressbook
+
+address book - get
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${timestamp}    Get Time    epoch
+    ${address name}    Convert To String    ${timestamp}
+    ${create result}    create_addressbook    params.object.name=${address name}
+    ${result id}    check_created_id_by_name    name=${address name}    res=${create result}
+    ${get}    get_addressbook    params.id=${result id}
+
+addressbook - delete empty trash
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${delete empty trash}    delete_empty_trash
+
+contact - group - create (user PAB)
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${timestamp}    Get Time    epoch
+    ${address name}    Convert To String    ${timestamp}
+    ${create result}    create_addressbook    params.object.name=${address name}
+    ${result id}    check_created_id_by_name    name=${address name}    res=${create result}
+    ${group create result}    create_group    params.addressBookId=${result id}    params.group.name=${address name}newGroup
+    ${group id}    check_created_id_by_name    name=${address name}newGroup    res=${group create result}
+
+contact - group - add group email (user PAB)
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty addressbook}    empty_addressbook
+    ${timestamp}    Get Time    epoch
+    ${address name}    Convert To String    ${timestamp}
+    ${create result}    create_addressbook    params.object.name=${address name}
+    ${addr id}    check_created_id_by_name    name=${address name}    res=${create result}
+    ${group create result}    create_group    params.addressBookId=${addr id}    params.group.name=${addr id}newGroup
+    ${group id}    check_created_id_by_name    name=${addr id}newGroup    res=${group create result}
+    ${email list}    create_utf8_list    ${common_from}${common_domain}
+    ${add group email result}    add_contact_group_email    addressBookId=${addr id}    groupId=${group id}    emails=${email list}
+    ${empty addressbook}    empty_addressbook
+
+contact - group - del group email (user PAB)
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty addressbook}    empty_addressbook
+    ${create result}    create_addressbook    params.object.name=addr4_group_email
+    ${addr id}    check_created_id_by_name    name=addr4_group_email    res=${create result}
+    ${group create result}    create_group    params.addressBookId=${addr id}    params.group.name=${addr id}newGroup
+    ${group id}    check_created_id_by_name    name=${addr id}newGroup    res=${group create result}
+    ${email list}    create_utf8_list    ${common_from}${common_domain}    ${common_to}${common_domain}
+    ${add group email result}    add_contact_group_email    params.addressBookId=${addr id}    params.groupId=${group id}    params.emails=${email list}
+    ${get group}    get_group    params.addressBookId=${addr id}    params.groupId=${group id}
+    ${check result}    check_result_item    emails=${common_from}${common_domain} ${common_to}${common_domain}    res=${get group}
+
+contact - group - rename (user PAB)
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${create result}    create_addressbook    params.object.name=newAddr
+    ${addr id}    get_addressbook_id_by_name    name=newAddr
+    ${group create result}    create_group    params.addressBookId=${addr id}    params.group.name=group-forRename
+    ${group id}    check_created_id_by_name    name=group-forRename    res=${group create result}
+    ${rename result}    rename_group    params.addressBookId=${addr id}    params.groupId=${group id}    params.newName=group-forRename-renamed
+    ${get group result}    get_group    params.addressBookId=${addr id}    params.groupId=${group id}
+    ${check renamed group}    check_created_id_by_name    name=group-forRename-renamed    res=${get group result}
+    ${empty addressbook}    empty_addressbook
+
+contact - group - delete (user PAB)
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${timestamp}    Get Time    epoch
+    ${address name}    Convert To String    ${timestamp}
+    ${create result}    create_addressbook    params.object.name=${address name}
+    ${addr id}    check_created_id_by_name    name=${address name}    res=${create result}
+    ${group create result}    create_group    params.addressBookId=${addr id}    params.group.name=${address name}newGroup
+    ${group id}    check_created_id_by_name    name=${address name}newGroup    res=${group create result}
+    ${group list}    Create List    ${group id}
+    ${del group res}    del_group    params.addressBookId=${addr id}    params.groupIds=${group list}
+    ${empty addressbook}    empty_addressbook
+
+contact - group - get group (default PAB)
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${timestamp}    Get Time    epoch
+    ${timestampname}    Convert To String    ${timestamp}
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${group create result}    create_group    params.addressBookId=${addr id}    params.group.name=${timestampname}newGroup
+    ${group id}    check_created_id_by_name    name=${timestampname}newGroup    res=${group create result}
+    ${get group}    get_group    params.addressBookId=${addr id}    params.groupId=${group id}
+
+contact - create contact (default PAB)
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${work mail}    makeContactField    label=work    type=lzEmail    value=work@test.com    primary=false
+    ${home mail}    makeContactField    label=home    type=lzEmail    value=home@test.com    primary=false
+    ${contact fields}    Create List    ${work mail}    ${home mail}
+    ${contact info json}    make_contact    @type=Contact    firstName=testFirst    lastName=testLast    email=${common_from}${common_domain}    fields=${contact fields}
+    ${create contact res}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json}
+    ${result id}    check_created_id_by_name    firstName=testFirst    res=${create contact res}
+
+contact - get contact (default PAB)
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${work mail}    makeContactField    label=work    type=lzEmail    value=work@test.com    primary=false
+    ${home mail}    makeContactField    label=home    type=lzEmail    value=home@test.com    primary=false
+    ${contact fields}    Create List    ${work mail}    ${home mail}
+    ${contact info json}    make_contact    @type=Contact    firstName=testFirst    lastName=testLast    email=${common_from}${common_domain}    fields=${contact fields}
+    ${create contact res}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json}
+    ${result id}    check_created_id_by_name    firstName=testFirst    res=${create contact res}
+    ${contact id list}    Create List    ${result id}
+    ${get_contact}    get_contacts    params.addressBookId=${addr id}    params.ids=${contact id list}
+
+contact - delete contacts (default PAB)
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${contact info json1}    make_contact    @type=Contact    firstName=testFirst1    lastName=testLast    email=${common_from}${common_domain}
+    ${create contact res1}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json1}
+    ${contact info json2}    make_contact    @type=Contact    firstName=testFirst2    lastName=testLast    email=${common_from}${common_domain}
+    ${create contact res2}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json2}
+    ${result id1}    check_created_id_by_name    firstName=testFirst1    res=${create contact res1}
+    ${result id2}    check_created_id_by_name    firstName=testFirst2    res=${create contact res2}
+    ${contact id list}    Create List    ${result id1}    ${result id2}
+    ${del result}    del_contact    params.addressBookId=${addr id}    params.contactIds=${contact id list}
+
+contact - add contact to group (default PAB)
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    Log    create a contact
+    ${contact info json1}    make_contact    @type=Contact    firstName=testFirst1    lastName=testLast    email=${common_from}${common_domain}
+    ${create contact res1}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json1}
+    ${result id1}    check_created_id_by_name    firstName=testFirst1    res=${create contact res1}
+    ${contact id list}    Create List    ${result id1}
+    Log    create a group, add group contact, check group conatct
+    ${group create result}    create_group    params.addressBookId=${addr id}    params.group.name=newGroup_forAddContact
+    ${group id}    check_created_id_by_name    name=newGroup_forAddContact    res=${group create result}
+    ${add group contact}    add_group_contact    params.addressBookId=${addr id}    params.groupId=${group id}    params.contactIds=${contact id list}
+    ${check cnt}    check_contact_in_group_by_name    params.addressBookId=${addr id}    params.groupId=${group id}    contactL=${contact id list}    expectCnt=1
+
+contact group - create group with existed contact
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${work mail}    makeContactField    label=work    type=lzEmail    value=work@test.com    primary=false
+    ${home mail}    makeContactField    label=home    type=lzEmail    value=home@test.com    primary=false
+    ${contact fields}    Create List    ${work mail}    ${home mail}
+    ${contact info json}    make_contact    @type=Contact    firstName=testFirst    lastName=takeInto_NewGroup    email=${common_from}${common_domain}    fields=${contact fields}
+    ${create contact res}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json}
+    ${contact id}    check_created_id_by_name    firstName=testFirst    res=${create contact res}
+    ${contact}    makeContactField    @type=Contact    id=${contact id}
+    ${contacts_list}    Create List    ${contact}
+    ${group create result}    create_group    params.addressBookId=${addr id}    params.group.name=${addr id}newGroup    params.group.contacts=${contacts_list}
+
+contact - delete contact from group (default PAB)
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    Log    create a contact
+    ${contact info json1}    make_contact    @type=Contact    firstName=testFirst1    lastName=testLast    email=${common_from}${common_domain}
+    ${create contact res1}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json1}
+    ${result id1}    check_created_id_by_name    firstName=testFirst1    res=${create contact res1}
+    ${contact info json2}    make_contact    @type=Contact    firstName=testFirst2    lastName=testLast    email=${common_from}${common_domain}
+    ${create contact res2}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json1}
+    ${result id2}    check_created_id_by_name    firstName=testFirst1    res=${create contact res2}
+    ${contact id list}    Create List    ${result id1}    ${result id2}
+    Log    create a group, add group conatct, check group contact
+    ${group create result}    create_group    params.addressBookId=${addr id}    params.group.name=newGroup_forAddContact
+    ${group id}    check_created_id_by_name    name=newGroup_forAddContact    res=${group create result}
+    ${add group contact}    add_group_contact    params.addressBookId=${addr id}    params.groupId=${group id}    params.contactIds=${contact id list}
+    ${check cnt}    check_contact_in_group_by_name    params.addressBookId=${addr id}    params.groupId=${group id}    contactL=${contact id list}    expectCnt=2
+    Log    check del group contact
+    ${del group conatct}    del_group_contact    params.addressBookId=${addr id}    params.groupId=${group id}    params.contactIds=${contact id list}
+    ${check cnt}    check_contact_in_group_by_name    params.addressBookId=${addr id}    params.groupId=${group id}    contactL=${contact id list}    expectCnt=0
+
+contact - delete contact (defult PAB)
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${make contact}    make_contact    @type=Contact    firstName=testFirst1    lastName=testLast    email=${common_from}${common_domain}
+    ${create contact}    create_contact    params.addressBookId=${addr id}    params.contact=${make contact}
+    ${check created id}    check_created_id_by_name    firstName=testFirst1    res=${create contact}
+    ${contacts id list}    Create List    ${check created id}
+    ${del contact result}    del_contact    params.addressBookId=${addr id}    params.contactIds=${contacts id list}
+
+contact - list contacts and list all contacts (default PAB)
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${make contact}    make_contact    @type=Contact    firstName=simple1    lastName=testLast    email=${common_from}${common_domain}
+    ${create contact}    create_contact    params.addressBookId=${addr id}    params.contact=${make contact}
+    ${check created id}    check_created_id_by_name    firstName=simple1    res=${create contact}
+    ${list contact}    list_contact    params.addressBookId=${addr id}
+    ${list all contact}    list_all_contact
+
+contact - sort contact - descending first name (default PAB)
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${list contact}    list_contact    params.addressBookId=${addr id}
+    ${setup empty contact}    empty_contact_or_group_from_list    res=${list contact}    findWhat=contact_group    addr_id=${addr id}
+    ${make contact1}    make_contact    @type=Contact    firstName=aaafirst    lastName=samelast    email=${common_from}${common_domain}
+    ${create contact1}    create_contact    params.addressBookId=${addr id}    params.contact=${make contact1}
+    ${make contact2}    make_contact    @type=Contact    firstName=bbbfirst    lastName=samelast    email=${common_from}${common_domain}
+    ${create contact2}    create_contact    params.addressBookId=${addr id}    params.contact=${make contact2}
+    ${list sort condition}    list_sort_condition    lastName=ascending    firstName=descending
+    ${list contact}    list_contact    params.addressBookId=${addr id}    params.sort=${list sort condition}
+    ${check order result}    check_order    res=${list contact}    order=firstName DESC
+    ${empty contact}    empty_contact_or_group_from_list    res=${list contact}    findWhat=contact    addr_id=${addr id}
+
+contact - sort contact - ascending last name (default PAB)
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${list contact}    list_contact    params.addressBookId=${addr id}
+    ${setup empty contact}    empty_contact_or_group_from_list    res=${list contact}    findWhat=contact_group    addr_id=${addr id}
+    ${make contact1}    make_contact    @type=Contact    firstName=samefirst    lastName=111last    email=${common_from}${common_domain}
+    ${create contact1}    create_contact    params.addressBookId=${addr id}    params.contact=${make contact1}
+    ${make contact2}    make_contact    @type=Contact    firstName=samefirst    lastName=222last    email=${common_from}${common_domain}
+    ${create contact2}    create_contact    params.addressBookId=${addr id}    params.contact=${make contact2}
+    ${list sort condition}    list_sort_condition    lastName=ascending    firstName=ascending
+    ${list contact}    list_contact    params.addressBookId=${addr id}    params.sort=${list sort condition}
+    ${check order result}    check_order    res=${list contact}    order=lastName ASC
+    ${empty contact}    empty_contact_or_group_from_list    res=${list contact}    findWhat=contact    addr_id=${addr id}
+
+conatct - delete conatcts and groups from addressbook list
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${list contact}    list_contact    params.addressBookId=${addr id}
+    ${empty contact}    empty_contact_or_group_from_list    res=${list contact}    findWhat=contact group    addr_id=${addr id}
+
+contact - delete contacts and groups from all addressbooks list
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${list all contact}    list_all_contact
+    ${empty contact}    empty_contact_or_group_from_list_all    res=${list all contact}    findWhat=contact group
+
+contact - update contact to have more fields (default PAB)
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${contact info json1}    make_contact    @type=Contact    firstName=testFirst1    lastName=testLast    email=${common_from}${common_domain}
+    ${create contact res1}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json1}
+    ${created id}    check_created_id_by_name    firstName=testFirst1    res=${create contact res1}
+    ${work mail}    makeContactField    label=work    type=lzEmail    value=work@test.com    primary=false
+    ${home mail}    makeContactField    label=home    type=lzEmail    value=home@test.com    primary=false
+    ${contact fields}    Create List    ${work mail}    ${home mail}
+    ${contact info json}    make_contact    id=${created id}    @type=Contact    firstName=testFirst1-updated    lastName=testLast    email=${common_from}${common_domain}
+    ...    fields=${contact fields}
+    ${create contact res}    update_contact    params.addressBookId=${addr id}    params.contact=${contact info json}
+    ${result id}    check_created_id_by_name    firstName=testFirst1-updated    res=${create contact res}
+
+contact - get index for contact - by lastName (default PAB)
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${list contact}    list_contact    params.addressBookId=${addr id}
+    ${empty contact}    empty_contact_or_group_from_list    res=${list contact}    findWhat=contact group    addr_id=${addr id}
+    ${TypeFilter list}    create_utf8_list    contact
+    Log    create contact, check get index A
+    ${contact info json1}    make_contact    @type=Contact    firstName=testFirst1    lastName=aLastName    email=${common_from}${common_domain}
+    ${create contact res1}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json1}
+    ${get index1}    contact_get_index    params.addressBookId=${addr id}    params.typeFilter=${TypeFilter list}    field=lastName
+    ${check_get_index1}    check_get_index    res=${get index1}    a=1
+    Log    create contact, check get index A and B
+    ${contact info json2}    make_contact    @type=Contact    firstName=testFirst1    lastName=bLastName    email=${common_from}${common_domain}
+    ${create contact res2}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json2}
+    ${get index2}    contact_get_index    params.addressBookId=${addr id}    params.typeFilter=${TypeFilter list}    field=lastName
+    ${check_get_index2}    check_get_index    res=${get index2}    a=1    b=1
+    Log    create contact, check get index A,B and #
+    ${contact info json3}    make_contact    @type=Contact    firstName=testFirst1    lastName=123LastName    email=${common_from}${common_domain}
+    ${create contact res3}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json3}
+    ${get index3}    contact_get_index    params.addressBookId=${addr id}    params.typeFilter=${TypeFilter list}    field=lastName
+    ${check_get_index3}    check_get_index    res=${get index3}    a=1    b=1    other=1
+
+contact - get index for contact - by firstName - 10 special chars A
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${list contact}    list_contact    params.addressBookId=${addr id}
+    ${empty contact}    empty_contact_or_group_from_list    res=${list contact}    findWhat=contact group    addr_id=${addr id}
+    ${TypeFilter list}    create_utf8_list    contact
+    ${contact info json1}    make_contact    @type=Contact    firstName=~firstName    lastName=testLast    email=${common_from}${common_domain}
+    ${create contact res1}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json1}
+    ${contact info json2}    make_contact    @type=Contact    firstName=!firstName    lastName=testLast    email=${common_from}${common_domain}
+    ${create contact res2}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json2}
+    ${contact info json3}    make_contact    @type=Contact    firstName=@firstName    lastName=testLast    email=${common_from}${common_domain}
+    ${create contact res3}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json3}
+    ${contact info json4}    make_contact    @type=Contact    firstName=#firstName    lastName=testLast    email=${common_from}${common_domain}
+    ${create contact res4}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json4}
+    ${contact info json5}    make_contact    @type=Contact    firstName=$firstName    lastName=testLast    email=${common_from}${common_domain}
+    ${create contact res5}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json5}
+    ${contact info json6}    make_contact    @type=Contact    firstName=%firstName    lastName=testLast    email=${common_from}${common_domain}
+    ${create contact res6}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json6}
+    ${contact info json7}    make_contact    @type=Contact    firstName=^firstName    lastName=testLast    email=${common_from}${common_domain}
+    ${create contact res7}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json7}
+    ${contact info json8}    make_contact    @type=Contact    firstName=&firstName    lastName=testLast    email=${common_from}${common_domain}
+    ${create contact res8}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json8}
+    ${contact info json9}    make_contact    @type=Contact    firstName=*firstName    lastName=testLast    email=${common_from}${common_domain}
+    ${create contact res9}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json9}
+    ${contact info json10}    make_contact    @type=Contact    firstName=(firstName)    lastName=testLast    email=${common_from}${common_domain}
+    ${create contact res10}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json10}
+    ${get index}    contact_get_index    params.addressBookId=${addr id}    params.typeFilter=${TypeFilter list}    field=firstName
+    ${check_get_index}    check_get_index    res=${get index}    other=10
+
+contact - get index for contact - by firstName - 10 special chars B
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${list contact}    list_contact    params.addressBookId=${addr id}
+    ${empty contact}    empty_contact_or_group_from_list    res=${list contact}    findWhat=contact group    addr_id=${addr id}
+    ${TypeFilter list}    create_utf8_list    contact
+    ${contact info json1}    make_contact    @type=Contact    firstName=[firstName]    lastName=testLast    email=${common_from}${common_domain}
+    ${create contact res1}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json1}
+    ${contact info json2}    make_contact    @type=Contact    firstName=}{firstName}    lastName=testLast    email=${common_from}${common_domain}
+    ${create contact res2}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json2}
+    ${contact info json3}    make_contact    @type=Contact    firstName=+firstName    lastName=testLast    email=${common_from}${common_domain}
+    ${create contact res3}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json3}
+    ${contact info json4}    make_contact    @type=Contact    firstName=-firstName    lastName=testLast    email=${common_from}${common_domain}
+    ${create contact res4}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json4}
+    ${contact info json5}    make_contact    @type=Contact    firstName=_firstName    lastName=testLast    email=${common_from}${common_domain}
+    ${create contact res5}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json5}
+    ${contact info json6}    make_contact    @type=Contact    firstName==firstName    lastName=testLast    email=${common_from}${common_domain}
+    ${create contact res6}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json6}
+    ${contact info json7}    make_contact    @type=Contact    firstName=|firstName    lastName=testLast    email=${common_from}${common_domain}
+    ${create contact res7}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json7}
+    ${contact info json8}    make_contact    @type=Contact    firstName=`firstName    lastName=testLast    email=${common_from}${common_domain}
+    ${create contact res8}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json8}
+    ${contact info json9}    make_contact    @type=Contact    firstName=;firstName    lastName=testLast    email=${common_from}${common_domain}
+    ${create contact res9}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json9}
+    ${contact info json10}    make_contact    @type=Contact    firstName=:firstName    lastName=testLast    email=${common_from}${common_domain}
+    ${create contact res10}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json10}
+    ${get index}    contact_get_index    params.addressBookId=${addr id}    params.typeFilter=${TypeFilter list}    field=firstName
+    ${check_get_index}    check_get_index    res=${get index}    other=10
+
+contact - get index for contact - by firstName - 8 special chars C
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${list contact}    list_contact    params.addressBookId=${addr id}
+    ${empty contact}    empty_contact_or_group_from_list    res=${list contact}    findWhat=contact group    addr_id=${addr id}
+    ${TypeFilter list}    create_utf8_list    contact
+    ${contact info json1}    make_contact    @type=Contact    firstName='firstName'    lastName=testLast    email=${common_from}${common_domain}
+    ${create contact res1}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json1}
+    ${contact info json2}    make_contact    @type=Contact    firstName=&quot;firstName&quot;    lastName=testLast    email=${common_from}${common_domain}
+    ${create contact res2}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json2}
+    ${contact info json3}    make_contact    @type=Contact    firstName=<firstName>    lastName=testLast    email=${common_from}${common_domain}
+    ${create contact res3}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json3}
+    ${contact info json4}    make_contact    @type=Contact    firstName=,firstName    lastName=testLast    email=${common_from}${common_domain}
+    ${create contact res4}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json4}
+    ${contact info json5}    make_contact    @type=Contact    firstName=.firstName    lastName=testLast    email=${common_from}${common_domain}
+    ${create contact res5}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json5}
+    ${contact info json6}    make_contact    @type=Contact    firstName=?firstName    lastName=testLast    email=${common_from}${common_domain}
+    ${create contact res6}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json6}
+    ${contact info json7}    make_contact    @type=Contact    firstName=/firstName    lastName=testLast    email=${common_from}${common_domain}
+    ${create contact res7}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json7}
+    ${contact info json8}    make_contact    @type=Contact    firstName=`firstName    lastName=testLast    email=${common_from}${common_domain}
+    ${create contact res8}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json8}
+    ${get index}    contact_get_index    params.addressBookId=${addr id}    params.typeFilter=${TypeFilter list}    field=firstName
+    ${check_get_index}    check_get_index    res=${get index}    other=8
+
+contact - get index for contact by empty field - first / last name
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${list contact}    list_contact    params.addressBookId=${addr id}
+    ${empty contact}    empty_contact_or_group_from_list    res=${list contact}    findWhat=contact group    addr_id=${addr id}
+    ${TypeFilter list}    create_utf8_list    contact
+    ${contact info json1}    make_contact    @type=Contact    firstName=    lastName=testLast    email=${common_from}${common_domain}
+    ${create contact res1}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json1}
+    ${get index}    contact_get_index    params.addressBookId=${addr id}    params.typeFilter=${TypeFilter list}    field=firstName
+    ${check_get_index}    check_get_index    res=${get index}    other=1
+    ${contact info json2}    make_contact    @type=Contact    firstName=testFirst    lastName=    email=${common_from}${common_domain}
+    ${create contact res2}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json2}
+    ${get index}    contact_get_index    params.addressBookId=${addr id}    params.typeFilter=${TypeFilter list}    field=lastName
+    ${check_get_index}    check_get_index    res=${get index}    other=1
+
+contact - get index for group (user PAB)
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty addressbook}    empty_addressbook
+    ${create result}    create_addressbook    params.object.name=addr_GroupIndex
+    ${addr id}    check_created_id_by_name    name=addr_GroupIndex    res=${create result}
+    ${TypeFilter list}    create_utf8_list    group
+    Log    create group - Agroup, Bgroup,Cgroup
+    ${group create result1}    create_group    params.addressBookId=${addr id}    params.group.name=Agroup
+    ${group create result2}    create_group    params.addressBookId=${addr id}    params.group.name=Bgroup
+    ${group create result3}    create_group    params.addressBookId=${addr id}    params.group.name=Cgroup
+    ${get index1}    contact_get_index    params.addressBookId=${addr id}    params.typeFilter=${TypeFilter list}
+    ${check_get_index1}    check_get_index    res=${get index1}    a=1    b=1    c=1
+    Log    create group - number group
+    ${group create result4}    create_group    params.addressBookId=${addr id}    params.group.name=123group
+    ${get index2}    contact_get_index    params.addressBookId=${addr id}    params.typeFilter=${TypeFilter list}
+    ${check_get_index2}    check_get_index    res=${get index2}    other=1    a=1    b=1    c=1
+
+contact - get index for group - 10 special chars A (user PAB)
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty addressbook}    empty_addressbook
+    ${create result}    create_addressbook    params.object.name=addr_GroupIndex
+    ${addr id}    check_created_id_by_name    name=addr_GroupIndex    res=${create result}
+    ${TypeFilter list}    create_utf8_list    group
+    ${group create result1}    create_group    params.addressBookId=${addr id}    params.group.name=~group
+    ${get index1}    contact_get_index    params.addressBookId=${addr id}    params.typeFilter=${TypeFilter list}
+    ${check_get_index1}    Run Keyword And Continue On Failure    check_get_index    res=${get index1}    other=1
+    ${group create result2}    create_group    params.addressBookId=${addr id}    params.group.name=!group
+    ${get index2}    contact_get_index    params.addressBookId=${addr id}    params.typeFilter=${TypeFilter list}
+    ${check_get_index2}    Run Keyword And Continue On Failure    check_get_index    res=${get index2}    other=2
+    ${group create result3}    create_group    params.addressBookId=${addr id}    params.group.name=@group
+    ${get index3}    contact_get_index    params.addressBookId=${addr id}    params.typeFilter=${TypeFilter list}
+    ${check_get_index3}    Run Keyword And Continue On Failure    check_get_index    res=${get index3}    other=3
+    ${group create result4}    create_group    params.addressBookId=${addr id}    params.group.name=#group
+    ${get index4}    contact_get_index    params.addressBookId=${addr id}    params.typeFilter=${TypeFilter list}
+    ${check_get_index4}    Run Keyword And Continue On Failure    check_get_index    res=${get index4}    other=4
+    ${group create result5}    create_group    params.addressBookId=${addr id}    params.group.name=$group
+    ${get index5}    contact_get_index    params.addressBookId=${addr id}    params.typeFilter=${TypeFilter list}
+    ${check_get_index5}    Run Keyword And Continue On Failure    check_get_index    res=${get index5}    other=5
+    ${group create result6}    create_group    params.addressBookId=${addr id}    params.group.name=%group
+    ${get index6}    contact_get_index    params.addressBookId=${addr id}    params.typeFilter=${TypeFilter list}
+    ${check_get_index6}    Run Keyword And Continue On Failure    check_get_index    res=${get index6}    other=6
+    ${group create result7}    create_group    params.addressBookId=${addr id}    params.group.name=^group
+    ${get index7}    contact_get_index    params.addressBookId=${addr id}    params.typeFilter=${TypeFilter list}
+    ${check_get_index7}    Run Keyword And Continue On Failure    check_get_index    res=${get index7}    other=7
+    ${group create result8}    create_group    params.addressBookId=${addr id}    params.group.name=&group
+    ${get index8}    contact_get_index    params.addressBookId=${addr id}    params.typeFilter=${TypeFilter list}
+    ${check_get_index8}    Run Keyword And Continue On Failure    check_get_index    res=${get index8}    other=8
+    ${group create result9}    create_group    params.addressBookId=${addr id}    params.group.name=*group
+    ${get index9}    contact_get_index    params.addressBookId=${addr id}    params.typeFilter=${TypeFilter list}
+    ${check_get_index9}    Run Keyword And Continue On Failure    check_get_index    res=${get index9}    other=9
+    ${group create result10}    create_group    params.addressBookId=${addr id}    params.group.name=(group
+    ${get index10}    contact_get_index    params.addressBookId=${addr id}    params.typeFilter=${TypeFilter list}
+    ${check_get_index10}    Run Keyword And Continue On Failure    check_get_index    res=${get index10}    other=10
+
+contact - get index for group - 10 special chars B (user PAB)
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty addressbook}    empty_addressbook
+    ${create result}    create_addressbook    params.object.name=addr_GroupIndex
+    ${addr id}    check_created_id_by_name    name=addr_GroupIndex    res=${create result}
+    ${TypeFilter list}    create_utf8_list    group
+    ${group create result1}    create_group    params.addressBookId=${addr id}    params.group.name=---group
+    ${get index1}    contact_get_index    params.addressBookId=${addr id}    params.typeFilter=${TypeFilter list}
+    ${check_get_index1}    Run Keyword And Continue On Failure    check_get_index    res=${get index1}    other=1
+    ${group create result2}    create_group    params.addressBookId=${addr id}    params.group.name=+group
+    ${get index2}    contact_get_index    params.addressBookId=${addr id}    params.typeFilter=${TypeFilter list}
+    ${check_get_index2}    Run Keyword And Continue On Failure    check_get_index    res=${get index2}    other=2
+    ${group create result3}    create_group    params.addressBookId=${addr id}    params.group.name==group
+    ${get index3}    contact_get_index    params.addressBookId=${addr id}    params.typeFilter=${TypeFilter list}
+    ${check_get_index3}    Run Keyword And Continue On Failure    check_get_index    res=${get index3}    other=3
+    ${group create result4}    create_group    params.addressBookId=${addr id}    params.group.name=_group
+    ${get index4}    contact_get_index    params.addressBookId=${addr id}    params.typeFilter=${TypeFilter list}
+    ${check_get_index4}    Run Keyword And Continue On Failure    check_get_index    res=${get index4}    other=4
+    ${group create result5}    create_group    params.addressBookId=${addr id}    params.group.name=[group]
+    ${get index5}    contact_get_index    params.addressBookId=${addr id}    params.typeFilter=${TypeFilter list}
+    ${check_get_index5}    Run Keyword And Continue On Failure    check_get_index    res=${get index5}    other=5
+    ${group create result6}    create_group    params.addressBookId=${addr id}    params.group.name=}{group}
+    ${get index6}    contact_get_index    params.addressBookId=${addr id}    params.typeFilter=${TypeFilter list}
+    ${check_get_index6}    Run Keyword And Continue On Failure    check_get_index    res=${get index6}    other=6
+    ${group create result7}    create_group    params.addressBookId=${addr id}    params.group.name=`group`
+    ${get index7}    contact_get_index    params.addressBookId=${addr id}    params.typeFilter=${TypeFilter list}
+    ${check_get_index7}    Run Keyword And Continue On Failure    check_get_index    res=${get index7}    other=7
+    ${group create result8}    create_group    params.addressBookId=${addr id}    params.group.name=|group|
+    ${get index8}    contact_get_index    params.addressBookId=${addr id}    params.typeFilter=${TypeFilter list}
+    ${check_get_index8}    Run Keyword And Continue On Failure    check_get_index    res=${get index8}    other=8
+    ${group create result9}    create_group    params.addressBookId=${addr id}    params.group.name=;group
+    ${get index9}    contact_get_index    params.addressBookId=${addr id}    params.typeFilter=${TypeFilter list}
+    ${check_get_index9}    Run Keyword And Continue On Failure    check_get_index    res=${get index9}    other=9
+    ${group create result10}    create_group    params.addressBookId=${addr id}    params.group.name=:group
+    ${get index10}    contact_get_index    params.addressBookId=${addr id}    params.typeFilter=${TypeFilter list}
+    ${check_get_index10}    Run Keyword And Continue On Failure    check_get_index    res=${get index10}    other=10
+
+contact - get index for group - 8 special chars C (user PAB)
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty addressbook}    empty_addressbook
+    ${create result}    create_addressbook    params.object.name=addr_GroupIndex
+    ${addr id}    check_created_id_by_name    name=addr_GroupIndex    res=${create result}
+    ${TypeFilter list}    create_utf8_list    group
+    ${group create result1}    create_group    params.addressBookId=${addr id}    params.group.name='group'
+    ${get index1}    contact_get_index    params.addressBookId=${addr id}    params.typeFilter=${TypeFilter list}
+    ${check_get_index1}    Run Keyword And Continue On Failure    check_get_index    res=${get index1}    other=1
+    ${group create result2}    create_group    params.addressBookId=${addr id}    params.group.name="group"
+    ${get index2}    contact_get_index    params.addressBookId=${addr id}    params.typeFilter=${TypeFilter list}
+    ${check_get_index2}    Run Keyword And Continue On Failure    check_get_index    res=${get index2}    other=2
+    ${group create result3}    create_group    params.addressBookId=${addr id}    params.group.name=<group>
+    ${get index3}    contact_get_index    params.addressBookId=${addr id}    params.typeFilter=${TypeFilter list}
+    ${check_get_index3}    Run Keyword And Continue On Failure    check_get_index    res=${get index3}    other=3
+    ${group create result4}    create_group    params.addressBookId=${addr id}    params.group.name=,group
+    ${get index4}    contact_get_index    params.addressBookId=${addr id}    params.typeFilter=${TypeFilter list}
+    ${check_get_index4}    Run Keyword And Continue On Failure    check_get_index    res=${get index4}    other=4
+    ${group create result5}    create_group    params.addressBookId=${addr id}    params.group.name=..group
+    ${get index5}    contact_get_index    params.addressBookId=${addr id}    params.typeFilter=${TypeFilter list}
+    ${check_get_index5}    Run Keyword And Continue On Failure    check_get_index    res=${get index5}    other=5
+    ${group create result6}    create_group    params.addressBookId=${addr id}    params.group.name=/group//
+    ${get index6}    contact_get_index    params.addressBookId=${addr id}    params.typeFilter=${TypeFilter list}
+    ${check_get_index6}    Run Keyword And Continue On Failure    check_get_index    res=${get index6}    other=6
+    ${group create result7}    create_group    params.addressBookId=${addr id}    params.group.name=?group?
+    ${get index7}    contact_get_index    params.addressBookId=${addr id}    params.typeFilter=${TypeFilter list}
+    ${check_get_index7}    Run Keyword And Continue On Failure    check_get_index    res=${get index7}    other=7
+    ${group create result8}    create_group    params.addressBookId=${addr id}    params.group.name=123group
+    ${get index8}    contact_get_index    params.addressBookId=${addr id}    params.typeFilter=${TypeFilter list}
+    ${check_get_index8}    Run Keyword And Continue On Failure    check_get_index    res=${get index8}    other=8
+
+contact - dup check - check dup by firstName and lastName (default PAB)
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${list contact}    list_contact    params.addressBookId=${addr id}
+    ${empty contact}    empty_contact_or_group_from_list    res=${list contact}    findWhat=contact group    addr_id=${addr id}
+    ${contact info json1}    make_contact    @type=Contact    firstName=dup_first    lastName=dup_last
+    ${create contact res1}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json1}
+    ${id1}    check_created_id_by_name    firstName=dup_first    res=${create contact res1}
+    ${contact info json2}    make_contact    @type=Contact    firstName=dup_first    lastName=dup_last
+    ${create contact res2}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json2}
+    ${id2}    check_created_id_by_name    firstName=dup_first    res=${create contact res2}
+    ${list dup result}    list_contact_dups    params.addressBookId=${addr id}
+    ${check_dups_by_ids}    check_dups_by_ids    res=${list dup result}    ids=${id1},${id2}
+
+contact - dup check - deny creating dup contact (default PAB)
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${list contact}    list_contact    params.addressBookId=${addr id}
+    ${empty contact}    empty_contact_or_group_from_list    res=${list contact}    findWhat=contact    addr_id=${addr id}
+    ${contact info json1}    make_contact    @type=Contact    firstName=create_dup_first    lastName=create_dup_last
+    ${create contact res1}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json1}    params.checkForDuplicates=True
+    ${contact info json2}    make_contact    @type=Contact    firstName=create_dup_first    lastName=create_dup_last
+    ${error}    Run Keyword And Ignore Error    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json1}    params.checkForDuplicates=True
+    ${expect error}    expect_error    res=${error}    expectStr=contacts.duplicate
+
+contact - dup check - major fields same - email phone company last/firstname
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${list contact}    list_contact    params.addressBookId=${addr id}
+    ${empty contact}    empty_contact_or_group_from_list    res=${list contact}    findWhat=contact    addr_id=${addr id}
+    Log    create contact 1
+    ${work mail}    makeContactField    label=work    type=lzEmail    value=work@test.com    primary=false
+    ${phone mobile}    makeContactField    label=home    type=lzPhone_mobile    value=15111777777    primary=false
+    ${contact fields}    Create List    ${work mail}    ${phone mobile}    ${phone mobile}
+    ${contact info json}    make_contact    @type=Contact    firstName=testFirst    lastName=testLast    fields=${contact fields}
+    ${create contact res}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json}
+    Log    create contact 2
+    ${contact info json2}    make_contact    @type=Contact    firstName=testFirst    lastName=testLast    fields=${contact fields}
+    ${create contact res2}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json2}
+    ${list dup result}    list_contact_dups    params.addressBookId=${addr id}
+    ${check_dup_cnt}    check_dup_cnt    res=${list dup result}    expectCnt=2
+
+contact - dup check - other fields same - work/home email diff
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${list contact}    list_contact    params.addressBookId=${addr id}
+    ${empty contact}    empty_contact_or_group_from_list    res=${list contact}    findWhat=contact    addr_id=${addr id}
+    Log    create contact 1
+    ${middle name}    makeContactField    label=middlename    type=lzHeader    value=mi1    primary=false
+    ${nick name}    makeContactField    label=nickname    type=lzHeader    value=nick    primary=false
+    ${home mail}    makeContactField    label=home    type=lzEmail    value=home@test.com    primary=false
+    ${phone mobile}    makeContactField    label=home    type=lzPhone_mobile    value=15111777777    primary=false
+    ${birth day}    makeContactField    label=birthday    type=lzPersonal    value=19801111    primary=false
+    ${contact fields}    Create List    ${home mail}    ${phone mobile}    ${middle name}    ${nick name}    ${birth day}
+    ${contact info json}    make_contact    @type=Contact    firstName=testFirst    lastName=testLast    fields=${contact fields}
+    ${create contact res}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json}
+    Log    create contact 2
+    ${middle name2}    makeContactField    label=middlename    type=lzHeader    value=mi1    primary=false
+    ${nick name2}    makeContactField    label=nickname    type=lzHeader    value=nick    primary=false
+    ${work mail2}    makeContactField    label=work    type=lzEmail    value=work@test.com    primary=false
+    ${phone mobile2}    makeContactField    label=home    type=lzPhone_mobile    value=15111777777    primary=false
+    ${birth day2}    makeContactField    label=birthday    type=lzPersonal    value=19801111    primary=false
+    ${contact fields2}    Create List    ${work mail2}    ${phone mobile2}    ${middle name2}    ${nick name2}    ${birth day2}
+    ${contact info json2}    make_contact    @type=Contact    firstName=testFirst    lastName=testLast    fields=${contact fields2}
+    ${create contact res2}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json2}
+    ${list dup result}    list_contact_dups    params.addressBookId=${addr id}
+    ${check_dup_cnt}    check_dup_cnt    res=${list dup result}    expectCnt=0
+
+contact - dup check - other fields same - home mobile diff
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${list contact}    list_contact    params.addressBookId=${addr id}
+    ${empty contact}    empty_contact_or_group_from_list    res=${list contact}    findWhat=contact    addr_id=${addr id}
+    Log    create contact 1
+    ${middle name}    makeContactField    label=middlename    type=lzHeader    value=mi1    primary=false
+    ${nick name}    makeContactField    label=nickname    type=lzHeader    value=nick    primary=false
+    ${work mail}    makeContactField    label=work    type=lzEmail    value=work@test.com    primary=false
+    ${home mail}    makeContactField    label=home    type=lzEmail    value=home@test.com    primary=false
+    ${phone mobile}    makeContactField    label=home    type=lzPhone_mobile    value=15111777777    primary=false
+    ${birth day}    makeContactField    label=birthday    type=lzPersonal    value=19801111    primary=false
+    ${contact fields}    Create List    ${work mail}    ${home mail}    ${phone mobile}    ${middle name}    ${nick name}
+    ...    ${birth day}
+    ${contact info json}    make_contact    @type=Contact    firstName=testFirst    lastName=testLast    fields=${contact fields}
+    ${create contact res}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json}
+    Log    create contact 2
+    ${middle name2}    makeContactField    label=middlename    type=lzHeader    value=mi1    primary=false
+    ${nick name2}    makeContactField    label=nickname    type=lzHeader    value=nick    primary=false
+    ${work mail2}    makeContactField    label=work    type=lzEmail    value=work@test.com    primary=false
+    ${home mail2}    makeContactField    label=home    type=lzEmail    value=home@test.com    primary=false
+    ${phone mobile2}    makeContactField    label=home    type=lzPhone_mobile    value=152228888888    primary=false
+    ${birth day2}    makeContactField    label=birthday    type=lzPersonal    value=19801111    primary=false
+    ${contact fields2}    Create List    ${work mail2}    ${home mail2}    ${phone mobile2}    ${middle name2}    ${nick name2}
+    ...    ${birth day2}
+    ${contact info json2}    make_contact    @type=Contact    firstName=testFirst    lastName=testLast    fields=${contact fields2}
+    ${create contact res2}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json2}
+    ${list dup result}    list_contact_dups    params.addressBookId=${addr id}
+    ${check_dup_cnt}    check_dup_cnt    res=${list dup result}    expectCnt=2
+
+contact - dup check - other fields same - last name diff
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${list contact}    list_contact    params.addressBookId=${addr id}
+    ${empty contact}    empty_contact_or_group_from_list    res=${list contact}    findWhat=contact    addr_id=${addr id}
+    Log    create contact 1
+    ${middle name}    makeContactField    label=middlename    type=lzHeader    value=mi1    primary=false
+    ${nick name}    makeContactField    label=nickname    type=lzHeader    value=nick    primary=false
+    ${work mail}    makeContactField    label=work    type=lzEmail    value=work@test.com    primary=false
+    ${home mail}    makeContactField    label=home    type=lzEmail    value=home@test.com    primary=false
+    ${phone mobile}    makeContactField    label=home    type=lzPhone_mobile    value=15111777777    primary=false
+    ${birth day}    makeContactField    label=birthday    type=lzPersonal    value=19801111    primary=false
+    ${contact fields}    Create List    ${work mail}    ${home mail}    ${phone mobile}    ${middle name}    ${nick name}
+    ...    ${birth day}
+    ${contact info json}    make_contact    @type=Contact    firstName=testFirst    lastName=testLast    fields=${contact fields}
+    ${create contact res}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json}
+    Log    create contact 2
+    ${contact info json2}    make_contact    @type=Contact    firstName=testFirst    lastName=testLast22    fields=${contact fields}
+    ${create contact res2}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json2}
+    ${list dup result}    list_contact_dups    params.addressBookId=${addr id}
+    ${check_dup_cnt}    check_dup_cnt    res=${list dup result}    expectCnt=0
+
+contact - dup check - other fields same - first name diff
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${list contact}    list_contact    params.addressBookId=${addr id}
+    ${empty contact}    empty_contact_or_group_from_list    res=${list contact}    findWhat=contact    addr_id=${addr id}
+    Log    create contact 1
+    ${middle name}    makeContactField    label=middlename    type=lzHeader    value=mi1    primary=false
+    ${nick name}    makeContactField    label=nickname    type=lzHeader    value=nick    primary=false
+    ${work mail}    makeContactField    label=work    type=lzEmail    value=work@test.com    primary=false
+    ${home mail}    makeContactField    label=home    type=lzEmail    value=home@test.com    primary=false
+    ${phone mobile}    makeContactField    label=home    type=lzPhone_mobile    value=15111777777    primary=false
+    ${birth day}    makeContactField    label=birthday    type=lzPersonal    value=19801111    primary=false
+    ${contact fields}    Create List    ${work mail}    ${home mail}    ${phone mobile}    ${middle name}    ${nick name}
+    ...    ${birth day}
+    ${contact info json}    make_contact    @type=Contact    firstName=testFirst    lastName=testLast    fields=${contact fields}
+    ${create contact res}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json}
+    Log    create contact 2
+    ${contact info json2}    make_contact    @type=Contact    firstName=testFirst22    lastName=testLast    fields=${contact fields}
+    ${create contact res2}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json2}
+    ${list dup result}    list_contact_dups    params.addressBookId=${addr id}
+    ${check_dup_cnt}    check_dup_cnt    res=${list dup result}    expectCnt=0
+
+contact - dup check - other fields same - company diff
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${list contact}    list_contact    params.addressBookId=${addr id}
+    ${empty contact}    empty_contact_or_group_from_list    res=${list contact}    findWhat=contact    addr_id=${addr id}
+    Log    create contact 1
+    ${middle name}    makeContactField    label=middlename    type=lzHeader    value=mi1    primary=false
+    ${nick name}    makeContactField    label=nickname    type=lzHeader    value=nick    primary=false
+    ${work mail}    makeContactField    label=work    type=lzEmail    value=work@test.com    primary=false
+    ${home mail}    makeContactField    label=home    type=lzEmail    value=home@test.com    primary=false
+    ${phone mobile}    makeContactField    label=home    type=lzPhone_mobile    value=15111777777    primary=false
+    ${birth day}    makeContactField    label=birthday    type=lzPersonal    value=19801111    primary=false
+    ${position}    makeContactField    label=title    type=lzHeader    value=position    primary=false
+    ${department}    makeContactField    label=department    type=lzHeader    value=department    primary=false
+    ${company}    makeContactField    label=company    type=lzHeader    value=company    primary=false
+    ${contact fields}    Create List    ${work mail}    ${home mail}    ${phone mobile}    ${middle name}    ${nick name}
+    ...    ${birth day}    ${position}    ${department}    ${company}
+    ${contact info json}    make_contact    @type=Contact    firstName=testFirst    lastName=testLast    fields=${contact fields}
+    ${create contact res}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json}
+    Log    create contact 2
+    ${position2}    makeContactField    label=title    type=lzHeader    value=position2    primary=false
+    ${department2}    makeContactField    label=department    type=lzHeader    value=department2    primary=false
+    ${company2}    makeContactField    label=company    type=lzHeader    value=company2    primary=false
+    ${contact fields2}    Create List    ${work mail}    ${home mail}    ${phone mobile}    ${middle name}    ${nick name}
+    ...    ${birth day}    ${position2}    ${department2}    ${company2}
+    ${contact info json2}    make_contact    @type=Contact    firstName=testFirst    lastName=testLast    fields=${contact fields2}
+    ${create contact res2}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json2}
+    Log    list dup
+    ${list dup result}    list_contact_dups    params.addressBookId=${addr id}
+    ${check_dup_cnt}    check_dup_cnt    res=${list dup result}    expectCnt=0
+
+contact - dup check - listNewDuplicates by ids
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${list contact}    list_contact    params.addressBookId=${addr id}
+    ${empty contact}    empty_contact_or_group_from_list    res=${list contact}    findWhat=contact group    addr_id=${addr id}
+    ${contact info json1}    make_contact    @type=Contact    firstName=dup_first    lastName=dup_last
+    ${create contact res1}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json1}
+    ${id1}    check_created_id_by_name    firstName=dup_first    res=${create contact res1}
+    ${contact info json2}    make_contact    @type=Contact    firstName=dup_first    lastName=dup_last
+    ${create contact res2}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json2}
+    ${id2}    check_created_id_by_name    firstName=dup_first    res=${create contact res2}
+    ${id list}    Create List    ${id1}    ${id2}
+    ${list dup result}    list_contact_new_dups    params.addressBookId=${addr id}    params.contactIds=${id list}
+    ${check list result}    check_dups_by_ids    ids=${id1},${id2}    res=${list dup result}
+
+contact - search - filter by fake keyword, unique first/last, common keyword of both contacts
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${list contact}    list_contact    params.addressBookId=${addr id}
+    ${setup empty contact}    empty_contact_or_group_from_list    res=${list contact}    findWhat=contact_group    addr_id=${addr id}
+    ${make contact1}    make_contact    @type=Contact    firstName=keywordfirst    lastName=uniquelast
+    ${create contact1}    create_contact    params.addressBookId=${addr id}    params.contact=${make contact1}
+    ${make contact2}    make_contact    @type=Contact    firstName=extrafirst    lastName=extralast
+    ${create contact2}    create_contact    params.addressBookId=${addr id}    params.contact=${make contact2}
+    Log    filter by wrong keywork
+    ${list filtered contact}    list_contact    params.addressBookId=${addr id}    params.filter=fake
+    ${check_cnt_result}    Run Keyword And Continue On Failure    expect_results_cnt_from_res    res=${list filtered contact}    cnt=0    middle_key=results
+    Log    filter by first name
+    ${list filtered contact2}    list_contact    params.addressBookId=${addr id}    params.filter=k
+    ${check_cnt_result2}    Run Keyword And Continue On Failure    expect_results_cnt_from_res    res=${list filtered contact2}    cnt=1    middle_key=results
+    Log    filter by last name
+    ${list filtered contact3}    list_contact    params.addressBookId=${addr id}    params.filter=u
+    ${check_cnt_result3}    Run Keyword And Continue On Failure    expect_results_cnt_from_res    res=${list filtered contact3}    cnt=1    middle_key=results
+
+contact - search - filter by multi keywords - same conatct same field, same contact diff fields, diff conatcts
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${list contact}    list_contact    params.addressBookId=${addr id}
+    ${setup empty contact}    empty_contact_or_group_from_list    res=${list contact}    findWhat=contact_group    addr_id=${addr id}
+    ${make contact1}    make_contact    @type=Contact    firstName=keyword first    lastName=unique last
+    ${create contact1}    create_contact    params.addressBookId=${addr id}    params.contact=${make contact1}
+    ${make contact2}    make_contact    @type=Contact    firstName=extra    lastName=extra
+    ${create contact2}    create_contact    params.addressBookId=${addr id}    params.contact=${make contact2}
+    Log    filter by multi words of one contact
+    ${list filtered contact}    list_contact    params.addressBookId=${addr id}    params.filter=keyword first
+    ${check_cnt_result}    Run Keyword And Continue On Failure    expect_results_cnt_from_res    res=${list filtered contact}    cnt=1    middle_key=results
+    Log    filter by multi words of two conatct
+    ${list filtered contact2}    list_contact    params.addressBookId=${addr id}    params.filter=keyword unique
+    ${check_cnt_result2}    Run Keyword And Continue On Failure    expect_results_cnt_from_res    res=${list filtered contact2}    cnt=1    middle_key=results
+    Log    filter by multi words of two conatct
+    ${list filtered contact3}    list_contact    params.addressBookId=${addr id}    params.filter=key extra
+    ${check_cnt_result3}    Run Keyword And Continue On Failure    expect_results_cnt_from_res    res=${list filtered contact3}    cnt=2    middle_key=results
+
+contact - search - filter by mail - fake keyword, unique keyword and common keyword of both contacts
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${list contact}    list_contact    params.addressBookId=${addr id}
+    ${empty contact}    empty_contact_or_group_from_list    res=${list contact}    findWhat=contact    addr_id=${addr id}
+    Log    create contact 1
+    ${home mail}    makeContactField    label=home    type=lzEmail    value=uniquehome@test.com    primary=false
+    ${contact fields}    Create List    ${home mail}
+    ${contact info json}    make_contact    @type=Contact    firstName=testFirst    lastName=testLast    fields=${contact fields}
+    ${create contact res}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json}
+    ${home mail2}    makeContactField    label=home    type=lzEmail    value=extraaddr@test.com    primary=false
+    ${contact fields2}    Create List    ${home mail2}
+    ${contact info json2}    make_contact    @type=Contact    firstName=testFirst    lastName=testLast    fields=${contact fields2}
+    ${create contact res2}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json2}
+    Log    filter by mail
+    ${list filtered contact}    list_contact    params.addressBookId=${addr id}    params.filter=fake
+    ${check_cnt_result}    Run Keyword And Continue On Failure    expect_results_cnt_from_res    res=${list filtered contact}    cnt=0    middle_key=results
+    ${list filtered contact2}    list_contact    params.addressBookId=${addr id}    params.filter=unique
+    ${check_cnt_result2}    Run Keyword And Continue On Failure    expect_results_cnt_from_res    res=${list filtered contact2}    cnt=1    middle_key=results
+    ${list filtered contact3}    list_contact    params.addressBookId=${addr id}    params.filter=extraa
+    ${check_cnt_result3}    Run Keyword And Continue On Failure    expect_results_cnt_from_res    res=${list filtered contact3}    cnt=1    middle_key=results
+    ${list filtered contact4}    list_contact    params.addressBookId=${addr id}    params.filter=test
+    ${check_cnt_result4}    Run Keyword And Continue On Failure    expect_results_cnt_from_res    res=${list filtered contact4}    cnt=2    middle_key=results
+
+contact - search - filter by middle,nick name, home mobile,birthday, address
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${list contact}    list_contact    params.addressBookId=${addr id}
+    ${empty contact}    empty_contact_or_group_from_list    res=${list contact}    findWhat=contact    addr_id=${addr id}
+    Log    create contact
+    ${middle name}    makeContactField    label=middlename    type=lzHeader    value=middlename    primary=false
+    ${nick name}    makeContactField    label=nickname    type=lzHeader    value=nickname    primary=false
+    ${phone mobile}    makeContactField    label=home    type=lzPhone_mobile    value=15111777777    primary=false
+    ${birth day}    makeContactField    label=birthday    type=lzPersonal    value=19801111    primary=false
+    ${street}    makeContactField    label=street    type=lzAddress_home    value=stree test    primary=false
+    ${contact fields}    Create List    ${phone mobile}    ${middle name}    ${nick name}    ${birth day}    ${street}
+    ${contact info json}    make_contact    @type=Contact    firstName=testFirst    lastName=testLast    fields=${contact fields}
+    ${create contact res}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json}
+    Log    filter by middle name
+    ${list filtered contact}    list_contact    params.addressBookId=${addr id}    params.filter=middle
+    ${check_cnt_result}    Run Keyword And Continue On Failure    expect_results_cnt_from_res    res=${list filtered contact}    cnt=0    middle_key=results
+    ${list filtered contact2}    list_contact    params.addressBookId=${addr id}    params.filter=nick
+    ${check_cnt_result2}    Run Keyword And Continue On Failure    expect_results_cnt_from_res    res=${list filtered contact2}    cnt=0    middle_key=results
+    ${list filtered contact3}    list_contact    params.addressBookId=${addr id}    params.filter=151
+    ${check_cnt_result3}    Run Keyword And Continue On Failure    expect_results_cnt_from_res    res=${list filtered contact3}    cnt=0    middle_key=results
+    ${list filtered contact4}    list_contact    params.addressBookId=${addr id}    params.filter=1980
+    ${check_cnt_result4}    Run Keyword And Continue On Failure    expect_results_cnt_from_res    res=${list filtered contact4}    cnt=0    middle_key=results
+    ${list filtered contact5}    list_contact    params.addressBookId=${addr id}    params.filter=street
+    ${check_cnt_result5}    Run Keyword And Continue On Failure    expect_results_cnt_from_res    res=${list filtered contact5}    cnt=0    middle_key=results
+
+conatct - merge preview for home mobile and birthday (user PAB)
+    [Documentation]    MERCURY-476 Contact merge preview - (home)mobile and birthday cannot be combined to one contact
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty addressbook}    empty_addressbook
+    ${create result}    create_addressbook    params.object.name=Addr4MergePreview
+    ${addr id}    check_created_id_by_name    name=Addr4MergePreview    res=${create result}
+    ${list contact}    list_contact    params.addressBookId=${addr id}
+    ${empty contact}    empty_contact_or_group_from_list    res=${list contact}    findWhat=contact group    addr_id=${addr id}
+    ${home mobile}    makeContactField    label=home    type=lzPhone_mobile    value=15111777777    primary=false
+    ${contact fields1}    Create List    ${home mobile}
+    ${contact info json1}    make_contact    @type=Contact    firstName=dup_first    lastName=dup_last    fields=${contact fields1}
+    ${create contact res1}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json1}
+    ${id1}    check_created_id_by_name    firstName=dup_first    res=${create contact res1}
+    ${birth day}    makeContactField    label=birthday    type=lzPersonal    value=19801111    primary=false
+    ${contact fields2}    Create List    ${birth day}
+    ${contact info json2}    make_contact    @type=Contact    firstName=dup_first    lastName=dup_last    fields=${contact fields2}
+    ${create contact res2}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json2}
+    ${id2}    check_created_id_by_name    firstName=dup_first    res=${create contact res2}
+    ${id list}    Create List    ${id1}    ${id2}
+    ${merge_preview result}    merge_preview    params.addressBookId=${addr id}    params.contactIds=${id list}
+    ${check_merge_preview_fields}    check_merge_preview_dup_fields    fields=${contact fields1}+${contact fields2}    res=${merge_preview result}
+
+contact - merge preview for 5 major fields contain could and couldn't dup fields (default PAB)
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${list contact}    list_contact    params.addressBookId=${addr id}
+    ${empty contact}    empty_contact_or_group_from_list    res=${list contact}    findWhat=contact    addr_id=${addr id}
+    Log    create contact 1
+    ${work mail1}    makeContactField    label=work    type=lzEmail    value=work1@test.com    primary=false
+    ${phone mobile1}    makeContactField    label=home    type=lzPhone_mobile    value=15111777777    primary=false
+    ${position1}    makeContactField    label=title    type=lzHeader    value=position1    primary=false
+    ${department1}    makeContactField    label=department    type=lzHeader    value=department1    primary=false
+    ${company1}    makeContactField    label=company    type=lzHeader    value=company1    primary=false
+    ${contact fields1}    Create List    ${work mail1}    ${phone mobile1}    ${position1}    ${department1}    ${company1}
+    ${contact info json1}    make_contact    @type=Contact    firstName=testFirst1    lastName=testLast1    fields=${contact fields1}
+    ${create contact res1}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json1}
+    ${id1}    check_created_id_by_name    firstName=testFirst1    res=${create contact res1}
+    Log    create contact 2
+    ${work mail2}    makeContactField    label=work    type=lzEmail    value=work2@test.com    primary=false
+    ${phone mobile2}    makeContactField    label=home    type=lzPhone_mobile    value=15111888888    primary=false
+    ${position2}    makeContactField    label=title    type=lzHeader    value=position2    primary=false
+    ${department2}    makeContactField    label=department    type=lzHeader    value=department2    primary=false
+    ${company2}    makeContactField    label=company    type=lzHeader    value=company2    primary=false
+    ${contact fields2}    Create List    ${work mail2}    ${phone mobile2}    ${position2}    ${department2}    ${company2}
+    ${contact info json2}    make_contact    @type=Contact    firstName=testFirst2    lastName=testLast2    fields=${contact fields2}
+    ${create contact res2}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json2}
+    ${id2}    check_created_id_by_name    firstName=testFirst2    res=${create contact res2}
+    Log    merge preview, check major and fields
+    ${id list}    Create List    ${id1}    ${id2}
+    ${merge_preview result}    merge_preview    params.addressBookId=${addr id}    params.contactIds=${id list}
+    ${check_merge_preview_fields}    check_merge_preview_dup_fields    fields=${contact fields1}+${contact fields2}    res=${merge_preview result}
+    ${check_merge_preview_no_dup_field}    check_merge_preview_no_dup_field    fields=${position1}+${department1}+${company1}    notes=testFirst2+testLast2+position2+department2+company2    res=${merge_preview result}
+
+contact - merge for all no-dup fields - first/last/middle/nick name and 3 company fields
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${list contact}    list_contact    params.addressBookId=${addr id}
+    ${empty contact}    empty_contact_or_group_from_list    res=${list contact}    findWhat=contact    addr_id=${addr id}
+    Log    create contact 1
+    ${middle name1}    makeContactField    label=middlename    type=lzHeader    value=mid1    primary=false
+    ${nick name1}    makeContactField    label=nickname    type=lzHeader    value=nick1    primary=false
+    ${position1}    makeContactField    label=title    type=lzHeader    value=position1    primary=false
+    ${department1}    makeContactField    label=department    type=lzHeader    value=department1    primary=false
+    ${company1}    makeContactField    label=company    type=lzHeader    value=company1    primary=false
+    ${contact fields1}    Create List    ${position1}    ${department1}    ${company1}    ${middle name1}    ${nick name1}
+    ${contact info json1}    make_contact    @type=Contact    firstName=testFirst1    lastName=testLast1    fields=${contact fields1}
+    ${create contact res1}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json1}
+    ${id1}    check_created_id_by_name    firstName=testFirst1    res=${create contact res1}
+    Log    create contact 2
+    ${middle name2}    makeContactField    label=middlename    type=lzHeader    value=mid2    primary=false
+    ${nick name2}    makeContactField    label=nickname    type=lzHeader    value=nick2    primary=false
+    ${position2}    makeContactField    label=title    type=lzHeader    value=position2    primary=false
+    ${department2}    makeContactField    label=department    type=lzHeader    value=department2    primary=false
+    ${company2}    makeContactField    label=company    type=lzHeader    value=company2    primary=false
+    ${contact fields2}    Create List    ${position2}    ${department2}    ${company2}    ${middle name2}    ${nick name2}
+    ${contact info json2}    make_contact    @type=Contact    firstName=testFirst2    lastName=testLast2    fields=${contact fields2}
+    ${create contact res2}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json2}
+    ${id2}    check_created_id_by_name    firstName=testFirst2    res=${create contact res2}
+    Log    merge preview, check major and fields
+    ${id list}    Create List    ${id1}    ${id2}
+    ${merge_preview result}    merge_preview    params.addressBookId=${addr id}    params.contactIds=${id list}
+    ${check_merge_preview_no_dup_field}    check_merge_preview_no_dup_field    fields=${middle name1}+${nick name1}+${position1}+${department1}+${company1}    notes=testFirst2+testLast2+position2+department2+company2    res=${merge_preview result}
+
+contact - merge all dup and check - home mobile diff (default PAB)
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty addressbook}    empty_addressbook
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${list all contact}    list_all_contact
+    ${empty contact}    empty_contact_or_group_from_list_all    res=${list all contact}    findWhat=contact group
+    Log    create contact 1
+    ${middle name}    makeContactField    label=middlename    type=lzHeader    value=mi1    primary=false
+    ${nick name}    makeContactField    label=nickname    type=lzHeader    value=nick    primary=false
+    ${work mail}    makeContactField    label=work    type=lzEmail    value=work@test.com    primary=false
+    ${home mail}    makeContactField    label=home    type=lzEmail    value=home@test.com    primary=false
+    ${phone mobile}    makeContactField    label=home    type=lzPhone_mobile    value=15111777777    primary=false
+    ${contact fields}    Create List    ${work mail}    ${home mail}    ${phone mobile}    ${middle name}    ${nick name}
+    ${contact info json}    make_contact    @type=Contact    firstName=testFirst    lastName=testLast    fields=${contact fields}
+    ${create contact res}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json}
+    ${id1}    check_created_id_by_name    firstName=testFirst    res=${create contact res}
+    Log    create contact 2
+    ${middle name2}    makeContactField    label=middlename    type=lzHeader    value=mi1    primary=false
+    ${nick name2}    makeContactField    label=nickname    type=lzHeader    value=nick    primary=false
+    ${work mail2}    makeContactField    label=work    type=lzEmail    value=work@test.com    primary=false
+    ${home mail2}    makeContactField    label=home    type=lzEmail    value=home@test.com    primary=false
+    ${phone mobile2}    makeContactField    label=home    type=lzPhone_mobile    value=152228888888    primary=false
+    ${contact fields2}    Create List    ${work mail2}    ${home mail2}    ${phone mobile2}    ${middle name2}    ${nick name2}
+    ${contact info json2}    make_contact    @type=Contact    firstName=testFirst    lastName=testLast    fields=${contact fields2}
+    ${create contact res2}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json2}
+    ${id2}    check_created_id_by_name    firstName=testFirst    res=${create contact res2}
+    Log    check dup and check merged dup
+    ${id list}    Create List    ${id1}    ${id2}
+    ${merge_preview result}    merge_preview    params.addressBookId=${addr id}    params.contactIds=${id list}
+    ${merge_all_dup}    merge_all_dup    params.addressBookId=${addr id}
+    ${list after merged result}    list_all_contact
+    ${check merge all dup result}    check_list_contact_afterMerge_byPreview    mergePreview=${merge_preview result}    listMerge=${list after merged result}
+
+contact - autosuggest and check by id - firstname/lastname/email (default PAB)
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty addressbook}    empty_addressbook
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${list contact}    list_contact    params.addressBookId=${addr id}
+    ${empty contact}    empty_contact_or_group_from_list    res=${list contact}    findWhat=contact_group    addr_id=${addr id}
+    Log    create contact 1
+    ${home mail}    makeContactField    label=home    type=lzEmail    value=home@test.com    primary=false
+    ${contact fields}    Create List    ${home mail}
+    ${contact info json}    make_contact    @type=Contact    firstName=firstname1Filter    lastName=lastname1Filter    fields=${contact fields}
+    ${create contact res}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json}
+    ${id1}    check_created_id_by_name    firstName=firstname1Filter    res=${create contact res}
+    Log    create contact 2
+    ${home mail2}    makeContactField    label=work    type=lzEmail    value=work@test.com    primary=false
+    ${contact fields2}    Create List    ${home mail2}
+    ${contact info json2}    make_contact    @type=Contact    firstName=firstname2Filter    lastName=lastname2Filter    fields=${contact fields2}
+    ${create contact res2}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json2}
+    ${id2}    check_created_id_by_name    firstName=firstname2Filter    res=${create contact res2}
+    Log    check auto suggestions by ids
+    ${id list}    Create List    ${id1}    ${id2}
+    ${suggest by first name}    Run Keyword And Continue On Failure    check_auto_suggest    ids=${id list}    params.filter=firstname
+    ${suggest by first name1}    Run Keyword And Continue On Failure    check_auto_suggest    ids=${id1}    params.filter=firstname1
+    ${suggest by last name}    Run Keyword And Continue On Failure    check_auto_suggest    ids=${id list}    params.filter=lastname
+    ${suggest by last name2}    Run Keyword And Continue On Failure    check_auto_suggest    ids=${id2}    params.filter=lastname2
+    ${suggest by home mail}    Run Keyword And Continue On Failure    check_auto_suggest    ids=${id1}    params.filter=home
+
+contact - autosuggest by 2to4 multiple keywords in same/diff contact, existed/non-existed keywords
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty addressbook}    empty_addressbook
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${list contact}    list_contact    params.addressBookId=${addr id}
+    ${empty contact}    empty_contact_or_group_from_list    res=${list contact}    findWhat=contact_group    addr_id=${addr id}
+    Log    create contact 1
+    ${home mail}    makeContactField    label=home    type=lzEmail    value=home@test.com    primary=false
+    ${contact fields}    Create List    ${home mail}
+    ${contact info json}    make_contact    @type=Contact    firstName=firstname1Filter    lastName=lastname1Filter    fields=${contact fields}
+    ${create contact res}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json}
+    ${id1}    check_created_id_by_name    firstName=firstname1Filter    res=${create contact res}
+    Log    create contact 2
+    ${home mail2}    makeContactField    label=work    type=lzEmail    value=work@test.com    primary=false
+    ${contact fields2}    Create List    ${home mail2}
+    ${contact info json2}    make_contact    @type=Contact    firstName=firstname2Filter    lastName=lastname2Filter    fields=${contact fields2}
+    ${create contact res2}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json2}
+    ${id2}    check_created_id_by_name    firstName=firstname2Filter    res=${create contact res2}
+    Log    check auto suggestions by ids
+    ${id list}    Create List    ${id1}    ${id2}
+    ${id1 by 2 keywords accross iff fields}    Run Keyword And Continue On Failure    check_auto_suggest    ids=${id1}    params.filter=firstname1 ho
+    ${id1id2 by 2 keywords of same field}    Run Keyword And Continue On Failure    check_auto_suggest    ids=${id list}    params.filter=ho wo
+    ${id1 by 2 keywords of existed/non-existed keywords}    Run Keyword And Continue On Failure    check_auto_suggest    ids=${id1}    params.filter=firstname1 nonexisted
+    ${id1id2 by 3 keywords of existed/non-existed keywords}    Run Keyword And Continue On Failure    check_auto_suggest    ids=${id list}    params.filter=first key1 key2
+    ${id1id2 by 4 keywords of existed/non-existed keywords}    Run Keyword And Continue On Failure    check_auto_suggest    ids=${id list}    params.filter=firstname1 key1 key2 work
+
+cotnact - autosuggest by non-existed keyword, by numbers and by all special characters
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty addressbook}    empty_addressbook
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${list contact}    list_contact    params.addressBookId=${addr id}
+    ${empty contact}    empty_contact_or_group_from_list    res=${list contact}    findWhat=contact_group    addr_id=${addr id}
+    Log    create contact 1
+    ${home mail}    makeContactField    label=home    type=lzEmail    value=0123456789home@test.com    primary=false
+    ${contact fields}    Create List    ${home mail}
+    ${contact info json}    make_contact    @type=Contact    firstName=first~!@#$%name    lastName=last^&*()name    fields=${contact fields}
+    ${create contact res}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json}
+    ${id1}    check_created_id_by_name    firstName=first~!@#$%name    res=${create contact res}
+    Log    create contact 2
+    ${home mail2}    makeContactField    label=work    type=lzEmail    value=work,./<>?@test.com    primary=false
+    ${contact fields2}    Create List    ${home mail2}
+    ${contact info json2}    make_contact    @type=Contact    firstName=first[]{};':&quot;name    lastName=last,./<>?name    fields=${contact fields2}
+    ${create contact res2}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json2}
+    ${id2}    check_created_id_by_name    firstName=first[]{};':&quot;name    res=${create contact res2}
+    Log    check auto suggestions by ids
+    ${id list}    Create List    ${id1}    ${id2}
+    ${non-id by non-exitsted keyword}    Run Keyword And Continue On Failure    check_auto_suggest    ids=    params.filter=fake_keyword
+    ${id1 by numbers in email}    Run Keyword And Continue On Failure    check_auto_suggest    ids=${id1}    params.filter=012345 6789
+    ${special chars from id1 firstname}    Run Keyword And Continue On Failure    check_auto_suggest    ids=${id1}    params.filter=first~!@#$%
+    ${special chars from id1 last}    Run Keyword And Continue On Failure    check_auto_suggest    ids=${id1}    params.filter=last^&*()
+    ${special chars from id2 firstname}    Run Keyword And Continue On Failure    check_auto_suggest    ids=${id2}    params.filter=first[]{};':&quot;
+    ${special chars from id2 lastname}    Run Keyword And Continue On Failure    check_auto_suggest    ids=${id2}    params.filter=last,./<>?
+
+contact - autosuggest Group, suggest Contact and suggest both
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty addressbook}    empty_addressbook
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${list contact}    list_contact    params.addressBookId=${addr id}
+    ${empty contact}    empty_contact_or_group_from_list    res=${list contact}    findWhat=contact_group    addr_id=${addr id}
+    Log    Create group, contact, assign contact to group
+    ${create_group}    create_group    params.addressBookId=${addr id}    params.group.name=testBeFilteredGroup
+    ${group id}    check_created_id_by_name    res=${create_group}    name=testBeFilteredGroup
+    ${home mail}    makeContactField    label=home    type=lzEmail    value=home@test.com    primary=false
+    ${contact fields}    Create List    ${home mail}
+    ${contact info json1}    make_contact    @type=Contact    firstName=testFirst1    lastName=testLast    email=${common_from}${common_domain}    fields=${contact fields}
+    ${create contact res1}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json1}
+    ${contact id}    check_created_id_by_name    firstName=testFirst1    res=${create contact res1}
+    ${contact id list}    Create List    ${contact id}
+    Log    check auto suggestions by ids
+    ${group id list}    Create List    ${group id}
+    ${typeFilter group}    Create List    group
+    ${check suggest group}    Run Keyword And Continue On Failure    check_auto_suggest    ids=${group id list}    params.filter=testBeFilteredG    params.typeFilter=${typeFilter group}
+    ${typeFilter contact}    Create List    contact
+    ${check suggest contact}    Run Keyword And Continue On Failure    check_auto_suggest    ids=${contact id list}    params.filter=testFir    params.typeFilter=${typeFilter contact}
+    ${id list}    Create List    ${group id}    ${contact id}
+    ${typeFilter contact group}    Create List    contact    group
+    ${check suggest both}    Run Keyword And Continue On Failure    check_auto_suggest    ids=${id list}    params.filter=test    params.typeFilter=${typeFilter contact group}
+
+contact - autosuggest contact without email and expect empty result
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty addressbook}    empty_addressbook
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${list contact}    list_contact    params.addressBookId=${addr id}
+    ${empty contact}    empty_contact_or_group_from_list    res=${list contact}    findWhat=contact_group    addr_id=${addr id}
+    Log    Create group, contact, assign contact to group
+    ${contact info json1}    make_contact    @type=Contact    firstName=testFirst1    lastName=testLast
+    ${create contact res1}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json1}
+    ${contact id}    check_created_id_by_name    firstName=testFirst1    res=${create contact res1}
+    Log    check auto suggestions by ids
+    ${check_auto_suggest}    check_auto_suggest    ids=    params.filter=test
+
+contact - autocollect PAB - list collect, del collect, create collect and check result
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${list all contact}    list_all_contact
+    ${empty contact}    empty_contact_or_group_from_list_all    res=${list all contact}    findWhat=contact group
+    ${empty addressbook}    empty_addressbook
+    ${empty_collected_address}    empty_collected_address
+    ${addr list}    Create List    ${common_from}${common_domain}    ${common_to}${common_domain}
+    ${collect_autocollect_collect}    collect_autocollect_create    params.addresses=${addr list}
+    ${check_collect_create}    check_collect_create    res=${collect_autocollect_collect}    expect_addrList=${addr list}    item=address
+
+contact - autocollect PAB - add duplicated address (dup to default PAB)
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty addressbook}    empty_addressbook
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${list contact}    list_contact    params.addressBookId=${addr id}
+    ${empty contact}    empty_contact_or_group_from_list    res=${list contact}    findWhat=contact_group    addr_id=${addr id}
+    ${empty_collected_address}    empty_collected_address
+    Log    create contact with a address
+    ${mail To field}    makeContactField    label=home    type=lzEmail    value=${common_to}${common_domain}    primary=false
+    ${contact fields}    Create List    ${mail To field}
+    ${contact info json}    make_contact    @type=Contact    firstName=contact_with_to_mail    lastName=lastname    fields=${contact fields}
+    ${create contact res}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json}
+    Log    create auto-collect addresses and check the not dup one
+    ${addr list}    Create List    ${common_from}${common_domain}    ${common_to}${common_domain}
+    ${collect_autocollect_collect}    collect_autocollect_create    params.addresses=${addr list}
+    ${added addr list}    Create List    ${common_from}${common_domain}
+    ${check_collect_create}    check_collect_create    res=${collect_autocollect_collect}    expect_addrList=${added addr list}    item=address
+
+contact - autocollect PAB - add duplicated address (dup to autocollect PAB)
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty addressbook}    empty_addressbook
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${list contact}    list_contact    params.addressBookId=${addr id}
+    ${empty contact}    empty_contact_or_group_from_list    res=${list contact}    findWhat=contact_group    addr_id=${addr id}
+    ${empty_collected_address}    empty_collected_address
+    Log    create From addr
+    ${addr list from}    Create List    ${common_from}${common_domain}
+    ${collect_autocollect_collect1}    collect_autocollect_create    params.addresses=${addr list from}
+    ${check_collect_create}    check_collect_create    res=${collect_autocollect_collect1}    expect_addrList=${addr list from}    item=address
+    Log    create From and To addr
+    ${addr list from and to}    Create List    ${common_from}${common_domain}    ${common_to}${common_domain}
+    ${collect_autocollect_collect2}    collect_autocollect_create    params.addresses=${addr list from and to}
+    ${create result To}    Create List    ${common_to}${common_domain}
+    ${check_collect_create}    check_collect_create    res=${collect_autocollect_collect2}    expect_addrList=${create result To}    item=address
+
+contact - autocollect PAB - check all autocollect paire of id and address
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${list all contact}    list_all_contact
+    ${empty contact}    empty_contact_or_group_from_list_all    res=${list all contact}    findWhat=contact group
+    ${empty addressbook}    empty_addressbook
+    ${empty_collected_address}    empty_collected_address
+    ${addr list}    Create List    ${common_from}${common_domain}    ${common_to}${common_domain}
+    ${collect_autocollect_collect}    collect_autocollect_create    params.addresses=${addr list}
+    ${check_collect_create_ids}    check_collect_create    res=${collect_autocollect_collect}    item=id    id_cnt=2
+    ${collected_addrss_get}    collected_addrss_get_all    collectRes=${collect_autocollect_collect}
+
+contact - set photo JPG
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${work mail}    makeContactField    label=work    type=lzEmail    value=work@test.com    primary=false
+    ${home mail}    makeContactField    label=home    type=lzEmail    value=home@test.com    primary=false
+    ${contact fields}    Create List    ${work mail}    ${home mail}
+    ${contact info json}    make_contact    @type=Contact    firstName=testFirst    lastName=testLast    email=${common_from}${common_domain}    fields=${contact fields}
+    ${create contact res}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json}
+    ${contact id}    check_created_id_by_name    firstName=testFirst    res=${create contact res}
+    ${attachment}    upload_file    url=${resource_upload}    fname=Fish.jpg
+    ${attach_param_1}    makeHashField    str-@resolver=Upload    str-id=${attachment}
+    ${set_photo}    set_photo    params.addressBookId=${addr id}    params.contactId=${contact id}    params.photo=${attach_param_1}
+    ${contact id list}    Create List    ${contact id}
+    ${get_contact}    get_contacts    params.addressBookId=${addr id}    params.ids=${contact id list}
+
+contact - set photo PNG
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${work mail}    makeContactField    label=work    type=lzEmail    value=work@test.com    primary=false
+    ${home mail}    makeContactField    label=home    type=lzEmail    value=home@test.com    primary=false
+    ${contact fields}    Create List    ${work mail}    ${home mail}
+    ${contact info json}    make_contact    @type=Contact    firstName=testFirst    lastName=testLast    email=${common_from}${common_domain}    fields=${contact fields}
+    ${create contact res}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json}
+    ${contact id}    check_created_id_by_name    firstName=testFirst    res=${create contact res}
+    ${attachment}    upload_file    url=${resource_upload}    fname=Owl.png
+    ${attach_param_1}    makeHashField    str-@resolver=Upload    str-id=${attachment}
+    ${set_photo}    set_photo    params.addressBookId=${addr id}    params.contactId=${contact id}    params.photo=${attach_param_1}
+    ${contact id list}    Create List    ${contact id}
+    ${get_contact}    get_contacts    params.addressBookId=${addr id}    params.ids=${contact id list}
+
+contact - set photo GIF
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${work mail}    makeContactField    label=work    type=lzEmail    value=work@test.com    primary=false
+    ${home mail}    makeContactField    label=home    type=lzEmail    value=home@test.com    primary=false
+    ${contact fields}    Create List    ${work mail}    ${home mail}
+    ${contact info json}    make_contact    @type=Contact    firstName=testFirst    lastName=testLast    email=${common_from}${common_domain}    fields=${contact fields}
+    ${create contact res}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json}
+    ${contact id}    check_created_id_by_name    firstName=testFirst    res=${create contact res}
+    ${attachment}    upload_file    url=${resource_upload}    fname=horse.gif
+    ${attach_param_1}    makeHashField    str-@resolver=Upload    str-id=${attachment}
+    ${set_photo}    set_photo    params.addressBookId=${addr id}    params.contactId=${contact id}    params.photo=${attach_param_1}
+    ${contact id list}    Create List    ${contact id}
+    ${get_contact}    get_contacts    params.addressBookId=${addr id}    params.ids=${contact id list}
+
+contact - set photo and try resource download
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${work mail}    makeContactField    label=work    type=lzEmail    value=work@test.com    primary=false
+    ${home mail}    makeContactField    label=home    type=lzEmail    value=home@test.com    primary=false
+    ${contact fields}    Create List    ${work mail}    ${home mail}
+    ${contact info json}    make_contact    @type=Contact    firstName=testFirst    lastName=testLast    email=${common_from}${common_domain}    fields=${contact fields}
+    ${create contact res}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json}
+    ${contact id}    check_created_id_by_name    firstName=testFirst    res=${create contact res}
+    ${fid}    upload_file    url=${resource_upload}    fname=Fish.jpg
+    ${attach_param_1}    makeHashField    str-@resolver=Upload    str-id=${fid}
+    ${set_photo}    set_photo    params.addressBookId=${addr id}    params.contactId=${contact id}    params.photo=${attach_param_1}
+    ${contact id list}    Create List    ${contact id}
+    ${get_contact}    get_contacts    params.addressBookId=${addr id}    params.ids=${contact id list}
+    ${smartObject}    makeHashField    str-@type=Contact    str-firstName=testFirst    str-lastName=testLast    str-email=${common_from}${common_domain}    fields=${contact fields}
+    ${resource_download_h}    makeHashField    str-@resolver=Inline    smartObject=${smartObject}
+    ${resource_download}    resource_download_postReq_json    descriptor.contactId=${contact id}    descriptor.addressBookId=${addr id}    url=${resource_load}    req_name=RESOURCE_DOWNLOAD_CONTACT_PHOTO    return_response=true
+
+contact - contact birthday create event, check event
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty addressbook}    empty_addressbook
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${list contact}    list_contact    params.addressBookId=${addr id}
+    ${empty contact}    empty_contact_or_group_from_list    res=${list contact}    findWhat=contact    addr_id=${addr id}
+    Log    create contact with birthday
+    ${birth day}    makeContactField    label=birthday    type=lzPersonal    value=19860608    primary=false
+    ${contact fields}    Create List    ${birth day}
+    ${contact info json}    make_contact    @type=Contact    firstName=testFirst    lastName=testLast    fields=${contact fields}
+    ${create contact res}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json}
+    Log    check calendar event
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar
+    ${ey}    ${em}    ${ed}    Get Time    year month day    NOW
+    ${birthday_startTime}    birthday_startTime    birthday=${birth day}
+    ${report_event}    report_event    params.calendarIds=${cal ids}    params.startTime=${birthday_startTime}    params.endTime=${ey}${em}${ed}T235959
+
+contact - prefs - set autoSuggestCL on, check get prefs
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${map}    makeHashField    str-contacts.autoSuggestCL=true
+    ${setAutosuggest_on}    set_prefs    params.map=${map}
+    ${get_prefs}    get_prefs
+    ${check_result_items}    check_result_items    res=${get_prefs}    contacts.autoSuggestCL=true
+
+contact - prefs - set autoSuggestCL off, check get prefs
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${map}    makeHashField    str-contacts.autoSuggestCL=false
+    ${setAutosuggest_off}    set_prefs    params.map=${map}
+    ${get_prefs}    get_prefs
+    ${check_result_items}    check_result_items    res=${get_prefs}    contacts.autoSuggestCL=false
+
+contact - resource load - export vcard as vcf ( Default PAB )
+    [Tags]
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty addressbook}    empty_addressbook
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${work mail}    makeContactField    label=work    type=lzEmail    value=work@test.com    primary=false
+    ${home mail}    makeContactField    label=home    type=lzEmail    value=home@test.com    primary=false
+    ${contact fields}    Create List    ${work mail}    ${home mail}
+    ${contact info json}    make_contact    @type=Contact    firstName=test_exportVcard    lastName=vcf    email=${common_from}${common_domain}    fields=${contact fields}
+    ${create contact res}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json}
+    ${export contact result}    resource_download_postReq_json    url=${resource_load}    req_name=RESOURCE_DOWNLOAD_CONTACTS    descriptor.addressBookId=${addr id}    descriptor.filename=savedvcar.vcf    descriptor.format=vcard3
+
+contact - resource load - export csv as outlook2010 ( Default PAB )
+    [Tags]
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty addressbook}    empty_addressbook
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${work mail}    makeContactField    label=work    type=lzEmail    value=work@test.com    primary=false
+    ${home mail}    makeContactField    label=home    type=lzEmail    value=home@test.com    primary=false
+    ${contact fields}    Create List    ${work mail}    ${home mail}
+    ${contact info json}    make_contact    @type=Contact    firstName=test_exportCsv    lastName=outlook2010    email=${common_from}${common_domain}    fields=${contact fields}
+    ${create contact res}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json}
+    ${export contact result}    resource_download_postReq_json    url=${resource_load}    req_name=RESOURCE_DOWNLOAD_CONTACTS    descriptor.addressBookId=${addr id}    descriptor.filename=savedcsv.csv    descriptor.format=outlook2010
+    ...    return_response=true
+    ${check results}    check_listString_from_res    res=${export contact result}    exp_list=test_exportCsv outlook2010
+
+contact - resource load - import by vcard( Default PAB ) - UI request
+    [Tags]
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${default addressbook id}    get_addressbook_id_by_name    name=${default_addressbook_name}
+    ${fid_vcard}    upload_file    url=${resource_upload}    fname=vcard_contact.vcf
+    ${attach_param}    makeHashField    str-@resolver=upload    int-id=${fid_vcard}
+    ${params}    makeHashField    str-addressBookId=${default addressbook id}    dict-source=${attach_param}
+    ${result2}    import_contact_UI    params=${params}    url=${common_url}
+    User Logout
+
+contact - resource load - import by import csv( User PAB ) - APIdoc request
+    [Tags]
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty addressbook}    empty_addressbook
+    ${timestamp}    Get Time    epoch
+    ${address name}    Convert To String    ${timestamp}
+    ${create result}    create_addressbook    params.object.name=${address name}
+    ${addr id}    check_created_id_by_name    name=${address name}    res=${create result}
+    ${fid_vcard}    upload_file    url=${resource_upload}    fname=csv_contact.csv
+    ${attach_param}    makeHashField    str-@resolver=Upload    int-id=${fid_vcard}
+    ${result2}    import_contact    params.addressBookId=${addr id}    params.source=${attach_param}
+    User Logout
+
+t4
+    [Tags]    excluded
+
+user - getCurrentUserInfo and check result fields
+    [Tags]    excluded
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${get_current_user_info}    get_current_user_info
+    ${get_current_user_info result}    check_user_info_fields_res    field_list=${current_user_info_fields}    res=${get_current_user_info}
+
+contact - prefs - set autosuggest on
+    [Tags]
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${preview_map}    makeHashField    str-contacts.autoSuggestCL=true    str-attr.user.FirstName=${common_from}${common_domain}    str-attr.user.LastName=${common_from}${common_domain}    str-attr.user.mail.ViewMode=previewright,conversationOn
+    ${set_prefs_id}    set_prefs_id    params.map=${preview_map}    url=${common_url}
+    ${get_prefs}    get_prefs
+    Should Contain    ${get_prefs}    true
+    User Logout
+
+contact - prefs - set autosuggest off
+    [Tags]
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${preview_map}    makeHashField    str-contacts.autoSuggestCL=false    str-attr.user.FirstName=${common_from}${common_domain}    str-attr.user.LastName=${common_from}${common_domain}    str-attr.user.mail.ViewMode=previewright,conversationOn
+    ${set_prefs_id}    set_prefs_id    params.map=${preview_map}    url=${common_url}
+    ${get_prefs}    get_prefs
+    Should Contain    ${get_prefs}    false
+    User Logout
+
+test
+    [Tags]    excluded
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty addressbook}    empty_addressbook
+    ${addr id}    get_addressbook_id_by_name    name=Default
+    ${work mail}    makeContactField    label=work    type=lzEmail    value=work@test.com    primary=false
+    ${home mail}    makeContactField    label=home    type=lzEmail    value=home@test.com    primary=false
+    ${contact fields}    Create List    ${work mail}    ${home mail}
+    ${contact info json}    make_contact    @type=Contact    firstName=testFirst    lastName=testLast    email=${common_from}${common_domain}    fields=${contact fields}
+    ${create contact res}    create_contact    params.addressBookId=${addr id}    params.contact=${contact info json}
+    ${export contact result}    resource_download_postReq_json    url=${resource_load}    req_name=RESOURCE_DOWNLOAD_CONTACTS    descriptor.addressBookId=${addr id}    descriptor.filename=savedvcar.vcf    descriptor.format=vcard3
+
+FUS-5616 : send contact as vcard
+    [Documentation]    after MERCURY-317 fixed, this case may need to update
+    [Tags]    excluded
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${empty inbox}    empty_folder    name=INBOX
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    Log    create a contact
+    ${default addressbook id}    get_addressbook_id_by_name    name=${default_addressbook_name}
+    ${field 1}    makeContactField    label=middlename    type=lzHeader    value=middlenamevalue    primary=false
+    ${field 2}    makeContactField    label=nickname    type=lzHeader    value=nicknamevalue    primary=false
+    ${field 3}    makeContactField    label=street    type=lzAddress_home    value=streetaddr    primary=false
+    ${field 4}    makeContactField    label=city    type=lzAddress_home    value=cityaddr    primary=false
+    ${field 5}    makeContactField    label=state    type=lzAddress_home    value=stateaddr    primary=false
+    ${field 6}    makeContactField    label=zip    type=lzAddress_home    value=zipaddr    primary=false
+    ${field 7}    makeContactField    label=country    type=lzAddress_home    value=countryaddr    primary=false
+    ${field 8}    makeContactField    label=home    type=lzEmail    value=home@openwave.com    primary=false
+    ${field 9}    makeContactField    label=work    type=lzEmail    value=work@openwave.com    primary=false
+    ${field 10}    makeContactField    label=other    type=lzEmail    value=other@openwave.com    primary=false
+    ${field 11}    makeContactField    label=home    type=lzPhone_mobile    value=13811111111    primary=false
+    ${field 12}    makeContactField    label=work    type=lzPhone_mobile    value=13822222222    primary=false
+    ${field 13}    makeContactField    label=other    type=lzPhone_mobile    value=13833333333    primary=false
+    ${field 14}    makeContactField    label=home    type=lzPhone    value=44444444    primary=false
+    ${field 15}    makeContactField    label=work    type=lzPhone    value=55555555    primary=false
+    ${field 16}    makeContactField    label=other    type=lzPhone    value=66666666    primary=false
+    ${field 17}    makeContactField    label=birthday    type=lzPersonal    value=20141212    primary=false
+    ${field 18}    makeContactField    label=otherfields    type=lzOther    value=otherfieldvalue    primary=false
+    ${field 19}    makeContactField    label=street2    type=lzAddress_home    value=street2addr    primary=false
+    ${field 20}    makeContactField    label=street3    type=lzAddress_home    value=street3addr    primary=false
+    ${contact fields}    Create List    ${field 1}    ${field 2}    ${field 3}    ${field 4}    ${field 5}
+    ...    ${field 6}    ${field 7}    ${field 8}    ${field 9}    ${field 10}    ${field 11}
+    ...    ${field 12}    ${field 13}    ${field 14}    ${field 15}    ${field 16}    ${field 17}
+    ...    ${field 18}
+    ${create result}    create_contact    firstName=vcardfirst    lastName=vcardlast    addressBookId=${default addressbook id}    contactFields=${contact fields}
+    Log    send that contact as vcard
+    ${contact id}    get_contact_id_by_name    addressBookId=${default addressbook id}    firstName=vcardfirst
+    ${send vcard mail}    send_vcard    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=vcard test    id=${contact id}    firstName=vcardfirst
+    ...    lastName=vcardlast    addressBookId=${default addressbook id}    contactFields=${contact fields}
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${check vcard mail}    check_message_by_subject    subject=vcard test    expectCnt=1
+    ${msg id}    get_mail_id_by_subject    subject=vcard test    folder=INBOX
+    ${vcard text}    check_vcard    folder=INBOX    url=${mail_get_attach_url}    msg_id=${msg id}
+    User Logout
+    Should Contain    ${vcard text}    vcardfirst
+    Should Contain    ${vcard text}    vcardlast
+    Should Contain    ${vcard text}    middlenamevalue
+    Should Contain    ${vcard text}    nicknamevalue
+    Should Contain    ${vcard text}    streetaddr
+    Should Contain    ${vcard text}    cityaddr
+    Should Contain    ${vcard text}    stateaddr
+    Should Contain    ${vcard text}    zipaddr
+    Should Contain    ${vcard text}    countryaddr
+    Should Contain    ${vcard text}    home@openwave.com
+    Should Contain    ${vcard text}    work@openwave.com
+    Should Contain    ${vcard text}    other@openwave.com
+    Should Contain    ${vcard text}    13811111111
+    Should Contain    ${vcard text}    13822222222
+    Should Contain    ${vcard text}    13833333333
+    Should Contain    ${vcard text}    44444444
+    Should Contain    ${vcard text}    55555555
+    Should Contain    ${vcard text}    66666666
+    Should Contain    ${vcard text}    20141212
+    Should Contain    ${vcard text}    otherfieldvalue
+    Should Contain    ${vcard text}    street2addr
+    Should Contain    ${vcard text}    street3addr
+
+FUS-6170 : autocomplete - max count limitation( webtop config )
+    [Documentation]    <maxCollectedEmails value="20" />
+    [Tags]    excluded
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty autocomplete}    empty_autocomplete
+    ${max complete result}    create_Max_AutoCMPLTContact    maxCnt=${max_autocollect_count}
+    User Logout
+
+FUS-6218 : address book - max count limitation( webtop config )
+    [Documentation]    <maxAddressBooks value="9" />
+    ...
+    ...    10-auto complete-default=8?
+    [Tags]    excluded
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty addressbook}    empty_addressbook    name=${default_addressbook_name}
+    ${max complete result}    create_Max_AddrBook    maxCnt=${max_addressbook_count}
+    ${empty addressbook}    empty_addressbook    name=${default_addressbook_name}
+    User Logout
+
+FUS-6311 : contact - check contact - save photo check lzPhoto value
+    [Tags]    excluded
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${timestamp}    Get Time    epoch
+    ${first name}    Convert To String    ${timestamp}
+    ${default addressbook id}    get_addressbook_id_by_name    name=${default addressbook name}
+    ${field photo}    makeContactField    label=available    type=lzPhoto    value=true    primary=false
+    ${contact fields}    Create List    ${field photo}
+    ${create result}    create_full_contact    firstName=${first name}    lastName=pythonJPG    addressBookId=${default addressbook id}    contactFields=${contact fields}
+    ${contact id}    get_contact_id_by_name    addressBookId=${default addressbook id}    firstName=${first name}
+    ${attachment1}    Upload File    url=${common_upload_url}    fname=horse.gif
+    ${set photo result1}    set_photo    addressBookId=${default addressbook id}    contact_id=${contact id}    id=${attachment1}
+    ${get conatct 1}    get_contact    addressBookId=${default addressbook id}    contact_id=${contact id}
+    ${check contact 1}    check_get_contact    name=type    value=lzPhoto    res=${get conatct 1}
+    User Logout

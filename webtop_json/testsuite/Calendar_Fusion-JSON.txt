@@ -1,0 +1,1925 @@
+*** Settings ***
+Documentation     This suite cover all related webtop API by functional steps
+Library           ../baseapi/Login.py    ${HostPort}/bin/auth
+Library           ../testcase/ContactLib.py    ${common_url}
+Library           ../testcase/MailLib.py    ${common_url}
+Library           ../baseapi/Login_sso.py    ${common_url}
+Library           ../testcase/PrefsLib.py    ${common_url}
+Library           ../testcase/CalendarLib.py    ${common_url}
+Library           ../testcase/FileUploadLib.py    ${common_url}
+Library           ../testcase/GlobalHelper.py
+
+*** Test Cases ***
+Calendar - list
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${list result}    list_calendar
+    User Logout
+
+Calendar - create calendar
+    [Tags]
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${del_all_calendars}    del_all_calendars
+    ${create result}    create_calendar    params.name=createTest
+    ${get_calendar_param_by_key}    check_result_items    res=${create result}    name=createTest
+    ${del_all_calendars2}    del_all_calendars
+    User Logout
+
+Calendar - delete calendar
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${del_all_calendars}    del_all_calendars
+    ${create result}    create_calendar    params.name=delTest
+    ${get_calendar_param_by_key}    get_calendar_param_by_key    res=${create result}    key=name    exp_value=delTest    get=id
+    ${del_all_calendars}    del_all_calendars
+    User Logout
+
+Calendar - empty calendar for event
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${nowTime}    Get Time    epoch
+    ${create result}    create_calendar    params.name=toBeEmpty_${nowTime}
+    ${cal id}    get_calendar_param_by_key    res=${create result}    key=name    exp_value=toBeEmpty_${nowTime}    get=id
+    ${startTime}    Get Time    epoch    NOW - 1 day
+    ${endTime}    Get Time    epoch    NOW + 1 day
+    ${makeHashField}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime}000    str-endMillis=${endTime}000    str-summary=singleEvent_toBeEmpty_${nowTime}    list-attendees=[]
+    ...    str-@type=Event
+    ${create_event}    create_event    params.event=${makeHashField}
+    ${empty_calendar}    empty_calendar    params.id=${cal id}
+
+Calendar - rename calendar ---- work around for MERCURY-424 Calendar ID is not fully returned from Create-Calendar response
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${del_all_calendars}    del_all_calendars
+    ${create result}    create_calendar    params.name=renameTest
+    ${cal ids}    get_calendar_id_by_name    name=renameTest
+    ${cal id}    get_list_value    list=${cal ids}    index=0
+    ${rename_calendar}    rename_calendar    params.name=newName    params.id=${cal id}
+    ${list result}    list_calendar
+    ${short_id}    split_for_str_by_char    str=${cal id}    char=/    index=-1
+    Should Contain    ${list result}    ${short_id}
+    ${del_all_calendars}    del_all_calendars
+    User Logout
+
+Calendar - set color for calendar
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${del_all_calendars}    del_all_calendars
+    ${create result}    create_calendar    params.name=setColorCal
+    ${cal id}    get_calendar_param_by_key    res=${create result}    key=name    exp_value=setColorCal    get=id
+    ${set_color_calendar}    set_color_for_calendar    params.color=5    params.id=${cal id}
+    ${list result}    list_calendar
+    ${check name and new color}    check_hash_params_From_list    list=${list result}    color=5    name=setColorCal
+    ${del_all_calendars}    del_all_calendars
+    User Logout
+
+Calendar - set visible for calendar
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${del_all_calendars}    del_all_calendars
+    ${create result}    create_calendar    params.name=setVisibleCal
+    ${cal id}    get_calendar_param_by_key    res=${create result}    key=name    exp_value=setVisibleCal    get=id
+    ${set_visible_False}    set_visible_for_calendar    params.id=${cal id}    params.visible=False
+    ${list result}    list_calendar
+    ${check name and False}    check_hash_params_From_list    list=${list result}    name=setVisibleCal    visible=False
+    ${set_visible_True}    set_visible_for_calendar    params.id=${cal id}    params.visible=True
+    ${list result2}    list_calendar
+    ${check name and True}    check_hash_params_From_list    list=${list result2}    name=setVisibleCal    visible=True
+
+Calendar - get access list
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${del_all_calendars}    del_all_calendars
+    ${create result}    create_calendar    params.name=getAccessTest
+    ${cal id}    get_calendar_param_by_key    res=${create result}    key=name    exp_value=getAccessTest    get=id
+    ${get_access_list}    get_access_list    params.calendarId=${cal id}
+
+Event - create event
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${startTime}    Get Time    epoch    NOW
+    ${endTime}    Get Time    epoch    NOW + 1 hour
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar
+    ${cal id}    get_list_value    list=${cal ids}    index=0
+    ${makeHashField}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime}000    str-endMillis=${endTime}000    str-summary=singleEvent_${startTime}    list-attendees=[]
+    ...    str-@type=Event
+    ${create_event}    create_event    params.event=${makeHashField}
+
+Event - create, report event
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${startTime}    Get Time    epoch    NOW - 1 day
+    ${endTime}    Get Time    epoch    NOW + 1 day
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar
+    ${cal id}    get_list_value    list=${cal ids}    index=0
+    ${makeHashField}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime}000    str-endMillis=${endTime}000    str-summary=singleEvent_${startTime}    list-attendees=[]
+    ...    str-@type=Event
+    ${create_event}    create_event    params.event=${makeHashField}
+    ${sy}    ${sm}    ${sd}    ${sh}    ${smin}    ${ss}    Get Time
+    ...    year month day hour min sec    NOW - 10 day
+    ${ey}    ${em}    ${ed}    ${eh}    ${emin}    ${es}    Get Time
+    ...    year month day hour min sec    NOW + 10 day
+    ${report_event}    report_event    params.calendarIds=${cal ids}    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+
+Event - create, report, del, empty events in default calendar
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${startTime}    Get Time    epoch    NOW - 1 day
+    ${endTime}    Get Time    epoch    NOW + 1 day
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar
+    ${cal id}    get_list_value    list=${cal ids}    index=0
+    ${makeHashField}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime}000    str-endMillis=${endTime}000    str-summary=singleEvent_${startTime}    list-attendees=[]
+    ...    str-@type=Event
+    ${create_event}    create_event    params.event=${makeHashField}
+    ${sy}    ${sm}    ${sd}    ${sh}    ${smin}    ${ss}    Get Time
+    ...    year month day hour min sec    NOW - 100 day
+    ${ey}    ${em}    ${ed}    ${eh}    ${emin}    ${es}    Get Time
+    ...    year month day hour min sec    NOW + 100 day
+    ${report_event}    report_event    params.calendarIds=${cal ids}    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    ${cal id}    get_list_value    list=${cal ids}    index=0
+    ${event ids}    get_oringinal_event_ids    res=${report_event}
+    ${event id}    get_list_value    list=${event ids}    index=0
+    ${del_events}    del_events    params.calendarId=${cal id}    params.eventId=${event id}
+    ${empty_result}    empty_event    name=${common_from}${common_domain}'s main calendar    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+
+Event - create 3-days DURRATION, report, read event and check read
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    Log    empty events
+    ${sy}    ${sm}    ${sd}    ${sh}    ${smin}    ${ss}    Get Time
+    ...    year month day hour min sec    NOW - 100 day
+    ${ey}    ${em}    ${ed}    ${eh}    ${emin}    ${es}    Get Time
+    ...    year month day hour min sec    NOW + 100 day
+    ${empty_result}    empty_event    name=${common_from}${common_domain}'s main calendar    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    Log    create event
+    ${startTime}    Get Time    epoch    NOW - 1 day
+    ${endTime}    Get Time    epoch    NOW + 1 day
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar
+    ${cal id}    get_list_value    list=${cal ids}    index=0
+    ${makeHashField}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime}000    str-endMillis=${endTime}000    str-summary=singleEvent_${startTime}    list-attendees=[]
+    ...    str-@type=Event
+    ${create_event}    create_event    params.event=${makeHashField}
+    Log    report, read and check event
+    ${report_event}    report_event    params.calendarIds=${cal ids}    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    ${event ids}    get_oringinal_event_ids    res=${report_event}
+    ${event id}    get_list_value    list=${event ids}    index=0
+    ${read_event}    read_event    params.calendarId=${cal id}    params.eventId=${event id}
+    ${check_result_items}    check_result_items    res=${read_event}    calendarId=${cal id}    summary=singleEvent_${startTime}
+
+Event - create single event with CATEGORY, read event and check read
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${del_all_calendars}    del_all_calendars
+    ${sy}    ${sm}    ${sd}    ${sh}    ${smin}    ${ss}    Get Time
+    ...    year month day hour min sec    NOW - 365 day
+    ${ey}    ${em}    ${ed}    ${eh}    ${emin}    ${es}    Get Time
+    ...    year month day hour min sec    NOW + 365 day
+    ${empty_result}    empty_event    name=${common_from}${common_domain}'s main calendar    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    Log    create event
+    ${startTime}    Get Time    epoch    NOW
+    ${endTime}    Get Time    epoch    NOW + 1 hour
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar
+    ${cal id}    get_list_value    list=${cal ids}    index=0
+    ${makeHashField}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime}000    str-endMillis=${endTime}000    str-summary=FUN_${startTime}    list-attendees=[]
+    ...    str-@type=Event    str-categories=FUN
+    ${create_event}    create_event    params.event=${makeHashField}
+    Log    report, read and check event
+    ${report_event}    report_event    params.calendarIds=${cal ids}    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    ${event ids}    get_oringinal_event_ids    res=${report_event}
+    ${event id}    get_list_value    list=${event ids}    index=0
+    ${read_event}    read_event    params.calendarId=${cal id}    params.eventId=${event id}
+    ${check_result_items}    check_result_items    res=${read_event}    calendarId=${cal id}    summary=FUN_${startTime}
+
+Event - create DAILY by interval and COUNT, check read res
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${del_all_calendars}    del_all_calendars
+    ${sy}    ${sm}    ${sd}    ${sh}    ${smin}    ${ss}    Get Time
+    ...    year month day hour min sec    NOW - 100 day
+    ${ey}    ${em}    ${ed}    ${eh}    ${emin}    ${es}    Get Time
+    ...    year month day hour min sec    NOW + 100 day
+    ${empty_result}    empty_event    name=${common_from}${common_domain}'s main calendar    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    Log    create event
+    ${startTime}    Get Time    epoch    NOW
+    ${endTime}    Get Time    epoch    NOW + 1 day
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar
+    ${cal id}    get_list_value    list=${cal ids}    index=0
+    ${makeHashField_recurrence}    makeHashField    str-frequency=daily    int-interval=2    int-count=5
+    ${makeHashField}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime}000    str-endMillis=${endTime}000    str-summary=dailyIntervalCount_${startTime}    list-attendees=[]
+    ...    str-@type=Event    dict-recurrence=${makeHashField_recurrence}
+    ${create_event}    create_event    params.event=${makeHashField}
+    Log    report, read and check event
+    ${report_event}    report_event    params.calendarIds=${cal ids}    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    ${event ids}    get_oringinal_event_ids    res=${report_event}
+    ${event id}    get_list_value    list=${event ids}    index=0
+    ${read_event}    read_event    params.calendarId=${cal id}    params.eventId=${event id}
+    ${check_result_items}    check_result_items    res=${read_event}    calendarId=${cal id}    summary=dailyIntervalCount_${startTime}    recurrence=${makeHashField_recurrence}
+
+Event - create DAILY by interval and UNTIL, check read res
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${del_all_calendars}    del_all_calendars
+    ${sy}    ${sm}    ${sd}    ${sh}    ${smin}    ${ss}    Get Time
+    ...    year month day hour min sec    NOW - 100 day
+    ${ey}    ${em}    ${ed}    ${eh}    ${emin}    ${es}    Get Time
+    ...    year month day hour min sec    NOW + 100 day
+    ${empty_result}    empty_event    name=${common_from}${common_domain}'s main calendar    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    Log    create event
+    ${startTime}    Get Time    epoch    NOW
+    ${endTime}    Get Time    epoch    NOW + 1 hour
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar
+    ${cal id}    get_list_value    list=${cal ids}    index=0
+    ${until}    Get Time    epoch    NOW + 7 day
+    ${makeHashField_recurrence}    makeHashField    str-frequency=daily    int-interval=2    str-until=${until}000
+    ${makeHashField}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime}000    str-endMillis=${endTime}000    str-summary=dailyIntervalUntil_${startTime}    list-attendees=[]
+    ...    str-@type=Event    dict-recurrence=${makeHashField_recurrence}
+    ${create_event}    create_event    params.event=${makeHashField}
+    Log    report, read and check event
+    ${report_event}    report_event    params.calendarIds=${cal ids}    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    ${event ids}    get_oringinal_event_ids    res=${report_event}
+    ${event id}    get_list_value    list=${event ids}    index=0
+    ${read_event}    read_event    params.calendarId=${cal id}    params.eventId=${event id}
+    ${check_result_items}    check_result_items    res=${read_event}    calendarId=${cal id}    summary=dailyIntervalUntil_${startTime}    recurrence=${makeHashField_recurrence}
+
+Event - create WEEKLY by interval, COUNT and DAYLIST, check read res
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${del_all_calendars}    del_all_calendars
+    ${sy}    ${sm}    ${sd}    ${sh}    ${smin}    ${ss}    Get Time
+    ...    year month day hour min sec    NOW - 100 day
+    ${ey}    ${em}    ${ed}    ${eh}    ${emin}    ${es}    Get Time
+    ...    year month day hour min sec    NOW + 100 day
+    ${empty_result}    empty_event    name=${common_from}${common_domain}'s main calendar    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    Log    create event
+    ${startTime}    Get Time    epoch    NOW
+    ${endTime}    Get Time    epoch    NOW + 1 hour
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar
+    ${cal id}    get_list_value    list=${cal ids}    index=0
+    ${makeHashField_recurrence}    makeHashField    str-frequency=weekly    int-interval=2    int-count=5    list-dayList=['tu','we']
+    ${makeHashField}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime}000    str-endMillis=${endTime}000    str-summary=weeklyIntervalCount_${startTime}    list-attendees=[]
+    ...    str-@type=Event    dict-recurrence=${makeHashField_recurrence}
+    ${create_event}    create_event    params.event=${makeHashField}
+    Log    report, read and check event
+    ${report_event}    report_event    params.calendarIds=${cal ids}    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    ${event ids}    get_oringinal_event_ids    res=${report_event}
+    ${event id}    get_list_value    list=${event ids}    index=0
+    ${read_event}    read_event    params.calendarId=${cal id}    params.eventId=${event id}
+    ${check_result_items}    check_result_items    res=${read_event}    calendarId=${cal id}    summary=weeklyIntervalCount_${startTime}    recurrence=${makeHashField_recurrence}
+
+Event - create WEEKLY by interval, UNTIL and DAYLIST, check read res
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${del_all_calendars}    del_all_calendars
+    ${sy}    ${sm}    ${sd}    ${sh}    ${smin}    ${ss}    Get Time
+    ...    year month day hour min sec    NOW - 100 day
+    ${ey}    ${em}    ${ed}    ${eh}    ${emin}    ${es}    Get Time
+    ...    year month day hour min sec    NOW + 100 day
+    ${empty_result}    empty_event    name=${common_from}${common_domain}'s main calendar    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    Log    create event
+    ${startTime}    Get Time    epoch    NOW
+    ${endTime}    Get Time    epoch    NOW + 1 hour
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar
+    ${cal id}    get_list_value    list=${cal ids}    index=0
+    ${until}    Get Time    epoch    NOW + 30 day
+    ${makeHashField_recurrence}    makeHashField    str-frequency=weekly    int-interval=1    str-until=${until}000    list-dayList=['tu','we']
+    ${makeHashField}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime}000    str-endMillis=${endTime}000    str-summary=weeklyIntervalUntil_${startTime}    list-attendees=[]
+    ...    str-@type=Event    dict-recurrence=${makeHashField_recurrence}
+    ${create_event}    create_event    params.event=${makeHashField}
+    Log    report, read and check event
+    ${report_event}    report_event    params.calendarIds=${cal ids}    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    ${event ids}    get_oringinal_event_ids    res=${report_event}
+    ${event id}    get_list_value    list=${event ids}    index=0
+    ${read_event}    read_event    params.calendarId=${cal id}    params.eventId=${event id}
+    ${check_result_items}    check_result_items    res=${read_event}    calendarId=${cal id}    summary=weeklyIntervalUntil_${startTime}    recurrence=${makeHashField_recurrence}
+
+Event - create MONTHLY by interval, COUNT, day of MONTH, check read res
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${del_all_calendars}    del_all_calendars
+    ${sy}    ${sm}    ${sd}    ${sh}    ${smin}    ${ss}    Get Time
+    ...    year month day hour min sec    NOW - 365 day
+    ${ey}    ${em}    ${ed}    ${eh}    ${emin}    ${es}    Get Time
+    ...    year month day hour min sec    NOW + 365 day
+    ${empty_result}    empty_event    name=${common_from}${common_domain}'s main calendar    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    Log    create event
+    ${startTime}    Get Time    epoch    NOW
+    ${endTime}    Get Time    epoch    NOW + 1 hour
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar
+    ${cal id}    get_list_value    list=${cal ids}    index=0
+    ${monthday}    Get Time    day
+    ${monthDayList}    create_int_list    ${monthday}
+    ${makeHashField_recurrence}    makeHashField    str-frequency=monthly    int-interval=1    int-count=5    monthDayList=${monthDayList}
+    ${makeHashField}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime}000    str-endMillis=${endTime}000    str-summary=monthCount_dayofMonth    list-attendees=[]
+    ...    str-@type=Event    dict-recurrence=${makeHashField_recurrence}
+    ${create_event}    create_event    params.event=${makeHashField}
+    Log    report, read and check event
+    ${report_event}    report_event    params.calendarIds=${cal ids}    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    ${event ids}    get_oringinal_event_ids    res=${report_event}
+    ${event id}    get_list_value    list=${event ids}    index=0
+    ${read_event}    read_event    params.calendarId=${cal id}    params.eventId=${event id}
+    ${check_result_items}    check_result_items    res=${read_event}    calendarId=${cal id}    summary=monthCount_dayofMonth    recurrence=${makeHashField_recurrence}
+
+Event - create MONTHLY by interval, COUNT, day of WEEK, check read res
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${del_all_calendars}    del_all_calendars
+    ${sy}    ${sm}    ${sd}    ${sh}    ${smin}    ${ss}    Get Time
+    ...    year month day hour min sec    NOW - 365 day
+    ${ey}    ${em}    ${ed}    ${eh}    ${emin}    ${es}    Get Time
+    ...    year month day hour min sec    NOW + 365 day
+    ${empty_result}    empty_event    name=${common_from}${common_domain}'s main calendar    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    Log    create event
+    ${startTime}    Get Time    epoch    NOW
+    ${endTime}    Get Time    epoch    NOW + 1 hour
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar
+    ${cal id}    get_list_value    list=${cal ids}    index=0
+    ${monthday}    Get Time    day
+    ${setPos}    week_number_setPos    ${monthday}
+    ${makeHashField_recurrence}    makeHashField    str-frequency=monthly    int-interval=1    int-count=5    int-setPos=${setPos}    list-dayList=['we']
+    ${makeHashField}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime}000    str-endMillis=${endTime}000    str-summary=monthCount_dayofWeek    list-attendees=[]
+    ...    str-@type=Event    dict-recurrence=${makeHashField_recurrence}
+    ${create_event}    create_event    params.event=${makeHashField}
+    Log    report, read and check event
+    ${report_event}    report_event    params.calendarIds=${cal ids}    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    ${event ids}    get_oringinal_event_ids    res=${report_event}
+    ${event id}    get_list_value    list=${event ids}    index=0
+    ${read_event}    read_event    params.calendarId=${cal id}    params.eventId=${event id}
+    ${check_recurrence}    makeHashField    str-frequency=monthly    int-interval=1    int-count=5    int-setPos=${setPos}    list-dayList=['we']
+    ...    updateSetPos=true
+    ${check_result_items}    check_result_items    res=${read_event}    calendarId=${cal id}    summary=monthCount_dayofWeek    recurrence=${check_recurrence}
+
+Event - create MONTHLY by interval , UNTIL, day of MONTH, check read res
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${del_all_calendars}    del_all_calendars
+    ${sy}    ${sm}    ${sd}    ${sh}    ${smin}    ${ss}    Get Time
+    ...    year month day hour min sec    NOW - 365 day
+    ${ey}    ${em}    ${ed}    ${eh}    ${emin}    ${es}    Get Time
+    ...    year month day hour min sec    NOW + 365 day
+    ${empty_result}    empty_event    name=${common_from}${common_domain}'s main calendar    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    Log    create event
+    ${startTime}    Get Time    epoch    NOW
+    ${endTime}    Get Time    epoch    NOW + 1 hour
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar
+    ${cal id}    get_list_value    list=${cal ids}    index=0
+    ${monthday}    Get Time    day
+    ${monthDayList}    create_int_list    ${monthday}
+    ${until}    Get Time    epoch    NOW + 180 day
+    ${makeHashField_recurrence}    makeHashField    str-frequency=monthly    int-interval=1    monthDayList=${monthDayList}    str-until=${until}000
+    ${makeHashField}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime}000    str-endMillis=${endTime}000    str-summary=monthUntil_dayofMonth    list-attendees=[]
+    ...    str-@type=Event    dict-recurrence=${makeHashField_recurrence}
+    ${create_event}    create_event    params.event=${makeHashField}
+    Log    report, read and check event
+    ${report_event}    report_event    params.calendarIds=${cal ids}    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    ${event ids}    get_oringinal_event_ids    res=${report_event}
+    ${event id}    get_list_value    list=${event ids}    index=0
+    ${read_event}    read_event    params.calendarId=${cal id}    params.eventId=${event id}
+    ${check_result_items}    check_result_items    res=${read_event}    calendarId=${cal id}    summary=monthUntil_dayofMonth    recurrence=${makeHashField_recurrence}
+
+Event - create MONTHLY by interval, UNTIL, day of WEEK, check read res
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${del_all_calendars}    del_all_calendars
+    ${sy}    ${sm}    ${sd}    ${sh}    ${smin}    ${ss}    Get Time
+    ...    year month day hour min sec    NOW - 365 day
+    ${ey}    ${em}    ${ed}    ${eh}    ${emin}    ${es}    Get Time
+    ...    year month day hour min sec    NOW + 365 day
+    ${empty_result}    empty_event    name=${common_from}${common_domain}'s main calendar    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    Log    create event
+    ${startTime}    Get Time    epoch    NOW
+    ${endTime}    Get Time    epoch    NOW + 1 hour
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar
+    ${cal id}    get_list_value    list=${cal ids}    index=0
+    ${monthday}    Get Time    day
+    ${setPos}    week_number_setPos    ${monthday}
+    ${until}    Get Time    epoch    NOW + 180 day
+    ${makeHashField_recurrence}    makeHashField    str-frequency=monthly    int-interval=1    int-setPos=${setPos}    list-dayList=['we']    str-until=${until}000
+    ${makeHashField}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime}000    str-endMillis=${endTime}000    str-summary=monthUntil_dayofWeek    list-attendees=[]
+    ...    str-@type=Event    dict-recurrence=${makeHashField_recurrence}
+    ${create_event}    create_event    params.event=${makeHashField}
+    Log    report, read and check event
+    ${report_event}    report_event    params.calendarIds=${cal ids}    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    ${event ids}    get_oringinal_event_ids    res=${report_event}
+    ${event id}    get_list_value    list=${event ids}    index=0
+    ${read_event}    read_event    params.calendarId=${cal id}    params.eventId=${event id}
+    ${check_recurrence}    makeHashField    str-frequency=monthly    int-interval=1    int-setPos=${setPos}    list-dayList=['we']    str-until=${until}000
+    ...    updateSetPos=true
+    ${check_result_items}    check_result_items    res=${read_event}    calendarId=${cal id}    summary=monthUntil_dayofWeek    recurrence=${check_recurrence}
+
+Event - create YEARLY by interval and COUNT, check read res
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${del_all_calendars}    del_all_calendars
+    ${sy}    ${sm}    ${sd}    ${sh}    ${smin}    ${ss}    Get Time
+    ...    year month day hour min sec    NOW - 3650 day
+    ${ey}    ${em}    ${ed}    ${eh}    ${emin}    ${es}    Get Time
+    ...    year month day hour min sec    NOW + 3650 day
+    ${empty_result}    empty_event    name=${common_from}${common_domain}'s main calendar    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    Log    create event
+    ${startTime}    Get Time    epoch    NOW
+    ${endTime}    Get Time    epoch    NOW + 1 day
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar
+    ${cal id}    get_list_value    list=${cal ids}    index=0
+    ${makeHashField_recurrence}    makeHashField    str-frequency=yearly    int-interval=2    int-count=5
+    ${makeHashField}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime}000    str-endMillis=${endTime}000    str-summary=yearlyIntervalCount_${startTime}    list-attendees=[]
+    ...    str-@type=Event    dict-recurrence=${makeHashField_recurrence}
+    ${create_event}    create_event    params.event=${makeHashField}
+    Log    report, read and check event
+    ${report_event}    report_event    params.calendarIds=${cal ids}    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    ${event ids}    get_oringinal_event_ids    res=${report_event}
+    ${event id}    get_list_value    list=${event ids}    index=0
+    ${read_event}    read_event    params.calendarId=${cal id}    params.eventId=${event id}
+    ${check_result_items}    check_result_items    res=${read_event}    calendarId=${cal id}    summary=yearlyIntervalCount_${startTime}    recurrence=${makeHashField_recurrence}
+
+Event - create YEARLY by interval and UNTIL, check read res
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${del_all_calendars}    del_all_calendars
+    ${sy}    ${sm}    ${sd}    ${sh}    ${smin}    ${ss}    Get Time
+    ...    year month day hour min sec    NOW - 3650 day
+    ${ey}    ${em}    ${ed}    ${eh}    ${emin}    ${es}    Get Time
+    ...    year month day hour min sec    NOW + 3650 day
+    ${empty_result}    empty_event    name=${common_from}${common_domain}'s main calendar    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    Log    create event
+    ${startTime}    Get Time    epoch    NOW
+    ${endTime}    Get Time    epoch    NOW + 1 hour
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar
+    ${cal id}    get_list_value    list=${cal ids}    index=0
+    ${until}    Get Time    epoch    NOW + 7 day
+    ${makeHashField_recurrence}    makeHashField    str-frequency=daily    int-interval=2    str-until=${until}000
+    ${makeHashField}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime}000    str-endMillis=${endTime}000    str-summary=dailyIntervalUntil_${startTime}    list-attendees=[]
+    ...    str-@type=Event    dict-recurrence=${makeHashField_recurrence}
+    ${create_event}    create_event    params.event=${makeHashField}
+    Log    report, read and check event
+    ${report_event}    report_event    params.calendarIds=${cal ids}    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    ${event ids}    get_oringinal_event_ids    res=${report_event}
+    ${event id}    get_list_value    list=${event ids}    index=0
+    ${read_event}    read_event    params.calendarId=${cal id}    params.eventId=${event id}
+    ${check_result_items}    check_result_items    res=${read_event}    calendarId=${cal id}    summary=dailyIntervalUntil_${startTime}    recurrence=${makeHashField_recurrence}
+
+Event - delete 1 sub-event of recurrent event and check report res
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${sy}    ${sm}    ${sd}    ${sh}    ${smin}    ${ss}    Get Time
+    ...    year month day hour min sec    NOW - 100 day
+    ${ey}    ${em}    ${ed}    ${eh}    ${emin}    ${es}    Get Time
+    ...    year month day hour min sec    NOW + 100 day
+    ${empty_result}    empty_event    name=${common_from}${common_domain}'s main calendar    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    Log    create event
+    ${startTime}    Get Time    epoch    NOW
+    ${endTime}    Get Time    epoch    NOW + 1 day
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar
+    ${cal id}    get_list_value    list=${cal ids}    index=0
+    ${makeHashField_recurrence}    makeHashField    str-frequency=daily    int-interval=2    int-count=5
+    ${makeHashField}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime}000    str-endMillis=${endTime}000    str-summary=dailyIntervalCount_${startTime}    list-attendees=[]
+    ...    str-@type=Event    dict-recurrence=${makeHashField_recurrence}
+    ${create_event}    create_event    params.event=${makeHashField}
+    Log    report, delete sub event
+    ${report_event}    report_event    params.calendarIds=${cal ids}    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    ${master ids}    get_recurrence_master_event_ids    res=${report_event}
+    ${master id}    get_list_value    list=${master ids}    index=0
+    ${event id}    get_recurrence_sub_event_ids    res=${report_event}    masterId=${master id}    index=2
+    ${del_events}    del_events    params.calendarId=${cal id}    params.eventId=${event id}
+    Log    check - report after delete
+    ${report_event2}    report_event    params.calendarIds=${cal ids}    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    ${events_after_del}    get_res_value_by_key    res=${report_event2}    key=events
+    ${expect_results_cnt_from_res}    expect_results_cnt_from_res    res=${events_after_del}    cnt=5    middle_key=results
+
+Event - update SINGLE event for summary, category, location, and check read res
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${sy}    ${sm}    ${sd}    ${sh}    ${smin}    ${ss}    Get Time
+    ...    year month day hour min sec    NOW - 365 day
+    ${ey}    ${em}    ${ed}    ${eh}    ${emin}    ${es}    Get Time
+    ...    year month day hour min sec    NOW + 365 day
+    ${empty_result}    Run Keyword And Ignore Error    empty_event    name=${common_from}${common_domain}'s main calendar    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    Log    create event
+    ${startTime}    Get Time    epoch    NOW
+    ${endTime}    Get Time    epoch    NOW + 1 hour
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar
+    ${cal id}    get_list_value    list=${cal ids}    index=0
+    ${makeHashField}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime}000    str-endMillis=${endTime}000    str-summary=FUN_${startTime}    list-attendees=[]
+    ...    str-@type=Event    str-categories=FUN
+    ${create_event}    create_event    params.event=${makeHashField}
+    ${report_event}    report_event    params.calendarIds=${cal ids}    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    ${event ids}    get_oringinal_event_ids    res=${report_event}
+    ${event id}    get_list_value    list=${event ids}    index=0
+    Log    Update event
+    ${makeHashField1}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime}000    str-endMillis=${endTime}000    str-summary=FUN_updateTo_Invite    list-attendees=[]
+    ...    str-@type=Event    str-categories=Invite    str-uid=${event id}    str-location=mylocation
+    ${update_event}    update_event    params.event=${makeHashField1}
+    Log    check read res
+    ${read_event2}    read_event    params.calendarId=${cal id}    params.eventId=${event id}
+    ${check_result_items}    check_result_items    res=${read_event2}    calendarId=${cal id}    summary=FUN_updateTo_Invite    categories=Invite    location=mylocation
+
+Event - update 1 INSTANCE of daily recurrent event for summary, allDay and check
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${del_all_calendars}    del_all_calendars
+    ${sy}    ${sm}    ${sd}    ${sh}    ${smin}    ${ss}    Get Time
+    ...    year month day hour min sec    NOW - 100 day
+    ${ey}    ${em}    ${ed}    ${eh}    ${emin}    ${es}    Get Time
+    ...    year month day hour min sec    NOW + 100 day
+    ${empty_result}    Run Keyword And Ignore Error    empty_event    name=${common_from}${common_domain}'s main calendar    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    Log    create event
+    ${startTime}    Get Time    epoch    NOW
+    ${endTime}    Get Time    epoch    NOW + 1 hour
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar
+    ${cal id}    get_list_value    list=${cal ids}    index=0
+    ${makeHashField_recurrence}    makeHashField    str-frequency=daily    int-interval=1    int-count=5
+    ${makeHashField}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime}000    str-endMillis=${endTime}000    str-summary=dailyIntervalCount_${startTime}    list-attendees=[]
+    ...    str-@type=Event    dict-recurrence=${makeHashField_recurrence}
+    ${create_event}    create_event    params.event=${makeHashField}
+    Log    report, read and check event
+    ${report_event}    report_event    params.calendarIds=${cal ids}    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    ${master ids}    get_recurrence_master_event_ids    res=${report_event}
+    ${master id}    get_list_value    list=${master ids}    index=0
+    ${event id}    get_recurrence_sub_event_ids    res=${report_event}    masterId=${master id}    index=1
+    Log    Update event
+    ${startTime2}    Get Time    epoch    NOW + 1 day
+    ${endTime2}    Get Time    epoch    NOW + 1 day + 1 hour
+    ${makeHashField2}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime2}000    str-endMillis=${endTime2}000    str-summary=update-allDay_${startTime}    list-attendees=[]
+    ...    str-@type=Event    dict-recurrence=${makeHashField_recurrence}    str-uid=${event id}    str-recurrenceOf=${master id}    str-allDay=true
+    ${update_event}    update_event    params.event=${makeHashField2}    params.scope=instance
+    Log    check read res
+    ${read_event2}    read_event    params.calendarId=${cal id}    params.eventId=${event id}
+    ${check_result_items}    check_result_items    res=${read_event2}    calendarId=${cal id}    summary=update-allDay_${startTime}    allDay=true
+
+Event - update 1 INSTANCE for all recurrent events
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${del_all_calendars}    del_all_calendars
+    ${sy}    ${sm}    ${sd}    ${sh}    ${smin}    ${ss}    Get Time
+    ...    year month day hour min sec    NOW - 100 day
+    ${ey}    ${em}    ${ed}    ${eh}    ${emin}    ${es}    Get Time
+    ...    year month day hour min sec    NOW + 100 day
+    ${empty_result}    Run Keyword And Ignore Error    empty_event    name=${common_from}${common_domain}'s main calendar    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    Log    create event
+    ${startTime}    Get Time    epoch    NOW
+    ${endTime}    Get Time    epoch    NOW + 1 hour
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar
+    ${cal id}    get_list_value    list=${cal ids}    index=0
+    ${makeHashField_recurrence}    makeHashField    str-frequency=daily    int-interval=1    int-count=5
+    ${makeHashField}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime}000    str-endMillis=${endTime}000    str-summary=dailyIntervalCount_${startTime}    list-attendees=[]
+    ...    str-@type=Event    dict-recurrence=${makeHashField_recurrence}
+    ${create_event}    create_event    params.event=${makeHashField}
+    Log    report, read and check event
+    ${report_event}    report_event    params.calendarIds=${cal ids}    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    ${master ids}    get_recurrence_master_event_ids    res=${report_event}
+    ${master id}    get_list_value    list=${master ids}    index=0
+    ${event id}    get_recurrence_sub_event_ids    res=${report_event}    masterId=${master id}    index=1
+    Log    Update event
+    ${startTime2}    Get Time    epoch    NOW + 1 day
+    ${endTime2}    Get Time    epoch    NOW + 1 day + 1 hour
+    ${makeHashField2}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime2}000    str-endMillis=${endTime2}000    str-summary=update_${startTime2}    list-attendees=[]
+    ...    str-@type=Event    dict-recurrence=${makeHashField_recurrence}    str-uid=${event id}    str-recurrenceOf=${master id}
+    ${update_event}    update_event    params.event=${makeHashField2}    params.scope=all
+    Log    check events
+    ${report_event2}    report_event    params.calendarIds=${cal ids}    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    ${event ids}    get_oringinal_event_ids    res=${report_event2}
+    ${event id}    get_list_value    list=${event ids}    index=0
+    ${read_event}    read_event    params.calendarId=${cal id}    params.eventId=${event id}
+    ${check_result_items}    check_result_items    res=${read_event}    calendarId=${cal id}    summary=update_${startTime2}    recurrence=${makeHashField_recurrence}
+
+Event - delete 1 instance and then UPDATE all LEFT events, check count from read res
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${del_all_calendars}    del_all_calendars
+    ${sy}    ${sm}    ${sd}    ${sh}    ${smin}    ${ss}    Get Time
+    ...    year month day hour min sec    NOW - 100 day
+    ${ey}    ${em}    ${ed}    ${eh}    ${emin}    ${es}    Get Time
+    ...    year month day hour min sec    NOW + 100 day
+    ${empty_result}    Run Keyword And Ignore Error    empty_event    name=${common_from}${common_domain}'s main calendar    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    Log    create event
+    ${startTime}    Get Time    epoch    NOW
+    ${endTime}    Get Time    epoch    NOW + 1 hour
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar
+    ${cal id}    get_list_value    list=${cal ids}    index=0
+    ${makeHashField_recurrence}    makeHashField    str-frequency=daily    int-interval=1    int-count=5
+    ${makeHashField}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime}000    str-endMillis=${endTime}000    str-summary=dailyIntervalCount_${startTime}    list-attendees=[]
+    ...    str-@type=Event    dict-recurrence=${makeHashField_recurrence}
+    ${create_event}    create_event    params.event=${makeHashField}
+    Log    del the 3rd event
+    ${report_event}    report_event    params.calendarIds=${cal ids}    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    ${master ids}    get_recurrence_master_event_ids    res=${report_event}
+    ${master id}    get_list_value    list=${master ids}    index=0
+    ${del event id}    get_recurrence_sub_event_ids    res=${report_event}    masterId=${master id}    index=2
+    ${update event id}    get_recurrence_sub_event_ids    res=${report_event}    masterId=${master id}    index=0
+    ${del_events}    del_events    params.calendarId=${cal id}    params.eventId=${del event id}
+    Log    check - count report after delete
+    ${report_event after del}    report_event    params.calendarIds=${cal ids}    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    ${events}    get_res_value_by_key    res=${report_event after del}    key=events
+    ${expect_results_cnt_after del}    expect_results_cnt_from_res    res=${events}    cnt=5    middle_key=results
+    Log    Update event
+    ${startTime2}    Get Time    epoch    NOW + 1 day
+    ${endTime2}    Get Time    epoch    NOW + 1 day + 1 hour
+    ${makeHashField2}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime2}000    str-endMillis=${endTime2}000    str-summary=update-allDay_${startTime}    list-attendees=[]
+    ...    str-@type=Event    dict-recurrence=${makeHashField_recurrence}    str-uid=${update event id}    str-recurrenceOf=${master id}    str-allDay=true
+    ${update_event}    update_event    params.event=${makeHashField2}    params.scope=all
+    Log    check - count after updated
+    ${report_event after update}    report_event    params.calendarIds=${cal ids}    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    ${events_after_update}    get_res_value_by_key    res=${report_event after update}    key=events
+    ${expect_results_cnt_after update}    expect_results_cnt_from_res    res=${events_after_update}    cnt=5    middle_key=results
+
+Event - delete 1 instance and affect ALL series, check count from read res
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${sy}    ${sm}    ${sd}    ${sh}    ${smin}    ${ss}    Get Time
+    ...    year month day hour min sec    NOW - 100 day
+    ${ey}    ${em}    ${ed}    ${eh}    ${emin}    ${es}    Get Time
+    ...    year month day hour min sec    NOW + 100 day
+    ${empty_result}    Run Keyword And Ignore Error    empty_event    name=${common_from}${common_domain}'s main calendar    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    Log    create event
+    ${startTime}    Get Time    epoch    NOW
+    ${endTime}    Get Time    epoch    NOW + 1 hour
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar
+    ${cal id}    get_list_value    list=${cal ids}    index=0
+    ${makeHashField_recurrence}    makeHashField    str-frequency=daily    int-interval=1    int-count=5
+    ${makeHashField}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime}000    str-endMillis=${endTime}000    str-summary=dailyIntervalCount_${startTime}    list-attendees=[]
+    ...    str-@type=Event    dict-recurrence=${makeHashField_recurrence}
+    ${create_event}    create_event    params.event=${makeHashField}
+    Log    del all events from 3rd event
+    ${report_event}    report_event    params.calendarIds=${cal ids}    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    ${master ids}    get_recurrence_master_event_ids    res=${report_event}
+    ${master id}    get_list_value    list=${master ids}    index=0
+    ${del event id}    get_recurrence_sub_event_ids    res=${report_event}    masterId=${master id}    index=2
+    ${del_events}    del_events    params.calendarId=${cal id}    params.eventId=${del event id}    params.scope=all
+    Log    check events after delete
+    ${report_event2}    report_event    params.calendarIds=${cal ids}    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    ${events_after_del}    get_res_value_by_key    res=${report_event2}    key=events
+    ${expect_results_cnt_after update}    expect_results_cnt_from_res    res=${events_after_del}    cnt=0    middle_key=results
+
+Event - create with orgnizer and attendee, send invite
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${sy}    ${sm}    ${sd}    ${sh}    ${smin}    ${ss}    Get Time
+    ...    year month day hour min sec    NOW - 100 day
+    ${ey}    ${em}    ${ed}    ${eh}    ${emin}    ${es}    Get Time
+    ...    year month day hour min sec    NOW + 100 day
+    ${empty_result}    Run Keyword And Ignore Error    empty_event    name=${common_from}${common_domain}'s main calendar    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    Log    create event
+    ${startTime}    Get Time    epoch    NOW
+    ${endTime}    Get Time    epoch    NOW + 1 hour
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar
+    ${cal id}    get_list_value    list=${cal ids}    index=0
+    ${attendee}    makeHashField    str-commonName=${common_to}${common_domain}    str-status=needsAction    str-address=${common_to}${common_domain}    str-type=internal
+    ${attendee_list}    Create List    ${attendee}
+    ${organizer}    makeHashField    str-commonName=${common_from}${common_domain}    str-address=${common_from}${common_domain}
+    ${makeHashField}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime}000    str-endMillis=${endTime}000    str-summary=singleEvent_${startTime}    attendees=${attendee_list}
+    ...    str-@type=Event    organizer=${organizer}
+    ${create_event}    create_event    params.event=${makeHashField}
+    Log    send invite
+    ${report_event}    report_event    params.calendarIds=${cal ids}    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    ${event ids}    get_oringinal_event_ids    res=${report_event}
+    ${event id}    get_list_value    list=${event ids}    index=0
+    ${event}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime}000    str-endMillis=${endTime}000    str-summary=singleEvent_${startTime}    str-@type=Event
+    ...    attendees=${attendee_list}    str-uid=${event id}    organizer=${organizer}
+    ${send_invite}    event_send_invite    params.event=${event}    params.notifyType=CREATE_EVENT
+
+Event - attendee add event from invitation-ACCEPTED
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${sy}    ${sm}    ${sd}    ${sh}    ${smin}    ${ss}    Get Time
+    ...    year month day hour min sec    NOW - 100 day
+    ${ey}    ${em}    ${ed}    ${eh}    ${emin}    ${es}    Get Time
+    ...    year month day hour min sec    NOW + 100 day
+    ${empty_result}    Run Keyword And Ignore Error    empty_event    name=${common_from}${common_domain}'s main calendar    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    Log    create event
+    ${startTime}    Get Time    epoch    NOW
+    ${endTime}    Get Time    epoch    NOW + 1 hour
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar
+    ${cal id}    get_list_value    list=${cal ids}    index=0
+    ${attendee}    makeHashField    str-commonName=${common_to}${common_domain}    str-status=needsAction    str-address=${common_to}${common_domain}    str-type=internal
+    ${attendee_list}    Create List    ${attendee}
+    ${organizer}    makeHashField    str-commonName=${common_from}${common_domain}    str-address=${common_from}${common_domain}
+    ${makeHashField}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime}000    str-endMillis=${endTime}000    str-summary=singleEvent_${startTime}    attendees=${attendee_list}
+    ...    str-@type=Event    organizer=${organizer}
+    ${create_event}    create_event    params.event=${makeHashField}
+    Log    send invite
+    ${report_event}    report_event    params.calendarIds=${cal ids}    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    ${event ids}    get_oringinal_event_ids    res=${report_event}
+    ${event id}    get_list_value    list=${event ids}    index=0
+    ${event}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime}000    str-endMillis=${endTime}000    str-summary=singleEvent_${startTime}    str-@type=Event
+    ...    attendees=${attendee_list}    str-uid=${event id}    organizer=${organizer}
+    ${send_invite}    event_send_invite    params.event=${event}    params.notifyType=CREATE_EVENT
+    User Logout
+    Log    attendee updateRSVP
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${attendee_update_event_rsvp}    attendee_update_event_rsvp    params.status=ACCEPTED    params.ownerName=${common_from}${common_domain}    params.calendarId=${cal id}    params.ownerId=${common_from}${common_domain}    params.eventUid=${event id}
+    ...    params.email=${common_to}${common_domain}
+
+Event - attendee check invitation by view msg resource , by download attachment
+    [Tags]    excluded
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${sy}    ${sm}    ${sd}    ${sh}    ${smin}    ${ss}    Get Time
+    ...    year month day hour min sec    NOW - 100 day
+    ${ey}    ${em}    ${ed}    ${eh}    ${emin}    ${es}    Get Time
+    ...    year month day hour min sec    NOW + 100 day
+    ${empty_result}    Run Keyword And Ignore Error    empty_event    name=${common_from}${common_domain}'s main calendar    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    Log    create event
+    ${startTime}    Get Time    epoch    NOW
+    ${endTime}    Get Time    epoch    NOW + 1 hour
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar
+    ${cal id}    get_list_value    list=${cal ids}    index=0
+    ${attendee}    makeHashField    str-commonName=${common_to}${common_domain}    str-status=needsAction    str-address=${common_to}${common_domain}    str-type=internal
+    ${attendee_list}    Create List    ${attendee}
+    ${organizer}    makeHashField    str-commonName=${common_from}${common_domain}    str-address=${common_from}${common_domain}
+    ${makeHashField}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime}000    str-endMillis=${endTime}000    str-summary=singleEvent_${startTime}    attendees=${attendee_list}
+    ...    str-@type=Event    organizer=${organizer}
+    ${create_event}    create_event    params.event=${makeHashField}
+    Log    send invite
+    ${report_event}    report_event    params.calendarIds=${cal ids}    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    ${event ids}    get_oringinal_event_ids    res=${report_event}
+    ${event id}    get_list_value    list=${event ids}    index=0
+    ${event}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime}000    str-endMillis=${endTime}000    str-summary=singleEvent_${startTime}    str-@type=Event
+    ...    attendees=${attendee_list}    str-uid=${event id}    organizer=${organizer}
+    ${send_invite}    event_send_invite    params.event=${event}    params.notifyType=CREATE_EVENT
+    User Logout
+    Log    attendee updateRSVP
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${mail id}    get_mail_id_by_subject    subject=Event invitation: singleEvent_${startTime}    params.folderPath=INBOX
+    ${view_resource}    resource_download_postReq_json    descriptor.folder=INBOX    descriptor.uid=${mail id}    url=${resource_load}    req_name=RESOURCE_DOWNLOAD_MSG_VIEWSOURCE    return_response=true
+    ${view_resource result}    check_listString_from_res    res=${view_resource}    exp_list=singleEvent_${startTime} Participants ${common_from} ${common_from}
+    ${view_attachment}    resource_download_postReq_json    descriptor.folder=INBOX    descriptor.uid=${mail id}    url=${resource_load}    req_name=RESOURCE_DOWNLOAD_MSG_VIEWSOURCE    descriptor.part=1
+
+t2
+    [Tags]    excluded
+
+t3
+    [Tags]    excluded
+
+Event - share calendar by set access list
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${del_all_calendars}    del_all_calendars
+    Log    create cal and event
+    ${startTime}    Get Time    epoch    NOW
+    ${endTime}    Get Time    epoch    NOW + 1 hour
+    ${create result}    create_calendar    params.name=setAccessTest
+    ${list result}    list_calendar
+    ${cal id}    get_id_list_by_name    res=${list result}    name=setAccessTest    index=0
+    ${makeHashField}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime}000    str-endMillis=${endTime}000    str-summary=singleEvent_${common_from}    list-attendees=[]
+    ...    str-@type=Event
+    ${create_event}    create_event    params.event=${makeHashField}
+    Log    set access to any internal - read
+    ${calendarAccess}    makeHashField    str-level=read    str-userType=anyInternal
+    ${accessList}    Create List    ${calendarAccess}
+    ${set_access_list}    set_access_list    params.calendarId=${cal id}    params.ownerName=${common_from}${common_domain}    params.accessList=${accessList}
+    ${get_access_list}    get_access_list    params.calendarId=${cal id}
+    ${res_value_list}    get_res_value_by_key    res=${get_access_list}    key=${cal id}
+    ${res_value}    get_list_value    list=${res_value_list}    index=0
+    ${check_result_items}    check_result_items    res=${res_value}    userType=anyInternal    level=read
+
+Event - subscribe READ calendar, check calendar
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${del_all_calendars}    del_all_calendars
+    Log    create cal and event
+    ${startTime}    Get Time    epoch    NOW
+    ${endTime}    Get Time    epoch    NOW + 1 hour
+    ${create result}    create_calendar    params.name=subscribeTest
+    ${list result}    list_calendar
+    ${cal id}    get_id_list_by_name    res=${list result}    name=subscribeTest    index=0
+    ${makeHashField}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime}000    str-endMillis=${endTime}000    str-summary=singleEvent_${common_from}    list-attendees=[]
+    ...    str-@type=Event
+    ${create_event}    create_event    params.event=${makeHashField}
+    Log    set access to any internal - read
+    ${calendarAccess}    makeHashField    str-level=read    str-userType=anyInternal
+    ${accessList}    Create List    ${calendarAccess}
+    ${set_access_list}    set_access_list    params.calendarId=${cal id}    params.ownerName=${common_from}${common_domain}    params.accessList=${accessList}
+    User Logout
+    Log    user2 subscribe calendar and check calendar
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${del_all_calendars_2}    del_all_calendars
+    ${subscribe_calendar}    subscribe_calendar    params.url=${cal id}    params.name=${common_to}_subscribed
+    ${list result}    list_calendar
+    ${cal id2}    get_id_list_by_name    res=${list result}    name=${common_to}_subscribed    index=0
+    Should Be Equal    ${cal id}    ${cal id2}
+
+Event - subscribe READ calendar, check event
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${del_all_calendars}    del_all_calendars
+    Log    create cal and event
+    ${startTime}    Get Time    epoch    NOW
+    ${endTime}    Get Time    epoch    NOW + 1 hour
+    ${create result}    create_calendar    params.name=subscribeCheckEvent
+    ${list result}    list_calendar
+    ${cal ids}    get_id_list_by_name    res=${list result}    name=subscribeCheckEvent
+    ${cal id}    get_list_value    list=${cal ids}    index=0
+    ${makeHashField}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime}000    str-endMillis=${endTime}000    str-summary=singleEvent_${common_from}    list-attendees=[]
+    ...    str-@type=Event
+    ${create_event}    create_event    params.event=${makeHashField}
+    Log    set access to any internal - read
+    ${calendarAccess}    makeHashField    str-level=read    str-userType=anyInternal
+    ${accessList}    Create List    ${calendarAccess}
+    ${set_access_list}    set_access_list    params.calendarId=${cal id}    params.ownerName=${common_from}${common_domain}    params.accessList=${accessList}
+    User Logout
+    Log    user2 subscribe calendar and check event
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${del_all_calendars_2}    del_all_calendars
+    ${subscribe_calendar}    subscribe_calendar    params.url=${cal id}    params.name=${common_to}_subscribed
+    ${sy}    ${sm}    ${sd}    ${sh}    ${smin}    ${ss}    Get Time
+    ...    year month day hour min sec    NOW - 365 day
+    ${ey}    ${em}    ${ed}    ${eh}    ${emin}    ${es}    Get Time
+    ...    year month day hour min sec    NOW + 365 day
+    ${report_event}    report_event    params.calendarIds=${cal ids}    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    ${event ids}    get_oringinal_event_ids    res=${report_event}
+    ${event id}    get_list_value    list=${event ids}    index=0
+    ${read_event}    read_event    params.calendarId=${cal id}    params.eventId=${event id}
+    ${check_result_items}    check_result_items    res=${read_event}    calendarId=${cal id}    summary=singleEvent_${common_from}
+
+Event - subscribe READ calendar, check unable to update event
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${del_all_calendars}    del_all_calendars
+    Log    create cal and event
+    ${startTime}    Get Time    epoch    NOW
+    ${endTime}    Get Time    epoch    NOW + 1 hour
+    ${create result}    create_calendar    params.name=subscribeCheckEvent
+    ${list result}    list_calendar
+    ${cal ids}    get_id_list_by_name    res=${list result}    name=subscribeCheckEvent
+    ${cal id}    get_list_value    list=${cal ids}    index=0
+    ${makeHashField}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime}000    str-endMillis=${endTime}000    str-summary=singleEvent_${common_from}    list-attendees=[]
+    ...    str-@type=Event
+    ${create_event}    create_event    params.event=${makeHashField}
+    Log    set access to any internal - read
+    ${calendarAccess}    makeHashField    str-level=read    str-userType=anyInternal
+    ${accessList}    Create List    ${calendarAccess}
+    ${set_access_list}    set_access_list    params.calendarId=${cal id}    params.ownerName=${common_from}${common_domain}    params.accessList=${accessList}
+    User Logout
+    Log    user2 subscribe calendar and check event
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${del_all_calendars_2}    del_all_calendars
+    ${subscribe_calendar}    subscribe_calendar    params.url=${cal id}    params.name=${common_to}_subscribed
+    ${sy}    ${sm}    ${sd}    ${sh}    ${smin}    ${ss}    Get Time
+    ...    year month day hour min sec    NOW - 365 day
+    ${ey}    ${em}    ${ed}    ${eh}    ${emin}    ${es}    Get Time
+    ...    year month day hour min sec    NOW + 365 day
+    ${report_event}    report_event    params.calendarIds=${cal ids}    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    ${event ids}    get_oringinal_event_ids    res=${report_event}
+    ${event id}    get_list_value    list=${event ids}    index=0
+    ${read_event}    read_event    params.calendarId=${cal id}    params.eventId=${event id}
+    ${check_result_items}    check_result_items    res=${read_event}    calendarId=${cal id}    summary=singleEvent_${common_from}
+    Log    Update event and check
+    ${makeHashField1}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime}000    str-endMillis=${endTime}000    str-summary=updateBy_subscriber    list-attendees=[]
+    ...    str-@type=Event    str-categories=Invite    str-uid=${event id}    str-location=mylocation
+    ${error}    Run Keyword And Ignore Error    update_event    params.event=${makeHashField1}
+    ${expect error}    expect_error    res=${error}    expectStr=calendar.notWritable
+
+Event - subscribe READWRITE calendar, check calendar
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${del_all_calendars}    del_all_calendars
+    Log    create cal and event
+    ${startTime}    Get Time    epoch    NOW
+    ${endTime}    Get Time    epoch    NOW + 1 hour
+    ${create result}    create_calendar    params.name=ToReadwrite_checkCal
+    ${list result}    list_calendar
+    ${cal ids}    get_id_list_by_name    res=${list result}    name=ToReadwrite_checkCal
+    ${cal id}    get_list_value    list=${cal ids}    index=0
+    ${makeHashField}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime}000    str-endMillis=${endTime}000    str-summary=singleEvent_${common_from}    list-attendees=[]
+    ...    str-@type=Event
+    ${create_event}    create_event    params.event=${makeHashField}
+    Log    set access to any internal - read
+    ${calendarAccess}    makeHashField    str-level=readwrite    str-userType=anyInternal    username=${common_to}${common_domain}
+    ${accessList}    Create List    ${calendarAccess}
+    ${set_access_list}    set_access_list    params.calendarId=${cal id}    params.ownerName=${common_from}${common_domain}    params.accessList=${accessList}
+    User Logout
+    Log    user2 subscribe calendar and check calendar
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${del_all_calendars_2}    del_all_calendars
+    ${subscribe_calendar}    subscribe_calendar    params.url=${cal id}    params.name=${common_to}_subscribed
+    ${list result}    list_calendar
+    ${cal id2}    get_id_list_by_name    res=${list result}    name=${common_to}_subscribed    index=0
+    Should Be Equal    ${cal id}    ${cal id2}
+
+Event - subscribe READWRITE calendar, check, update and check again
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${del_all_calendars}    del_all_calendars
+    Log    create cal and event
+    ${startTime}    Get Time    epoch    NOW
+    ${endTime}    Get Time    epoch    NOW + 1 hour
+    ${create result}    create_calendar    params.name=ToReadwrite_checkEvent
+    ${list result}    list_calendar
+    ${cal ids}    get_calendar_id_by_name    res=${list result}    name=ToReadwrite_checkEvent
+    ${cal id}    get_list_value    list=${cal ids}    index=0
+    ${makeHashField}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime}000    str-endMillis=${endTime}000    str-summary=singleEvent_${common_from}    list-attendees=[]
+    ...    str-@type=Event
+    ${create_event}    create_event    params.event=${makeHashField}
+    Log    set access to any internal - read
+    ${calendarAccess}    makeHashField    str-level=readwrite    str-userType=anyInternal    username=${common_to}${common_domain}
+    ${accessList}    Create List    ${calendarAccess}
+    ${set_access_list}    set_access_list    params.calendarId=${cal id}    params.ownerName=${common_from}${common_domain}    params.accessList=${accessList}
+    User Logout
+    Log    user2 subscribe calendar and check event
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${del_all_calendars_2}    del_all_calendars
+    ${subscribe_calendar}    subscribe_calendar    params.url=${cal id}    params.name=${common_to}_subscribed
+    ${sy}    ${sm}    ${sd}    ${sh}    ${smin}    ${ss}    Get Time
+    ...    year month day hour min sec    NOW - 365 day
+    ${ey}    ${em}    ${ed}    ${eh}    ${emin}    ${es}    Get Time
+    ...    year month day hour min sec    NOW + 365 day
+    ${report_event}    report_event    params.calendarIds=${cal ids}    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    ${event ids}    get_oringinal_event_ids    res=${report_event}
+    ${event id}    get_list_value    list=${event ids}    index=0
+    ${read_event}    read_event    params.calendarId=${cal id}    params.eventId=${event id}
+    ${check_result_items}    check_result_items    res=${read_event}    calendarId=${cal id}    summary=singleEvent_${common_from}
+    Log    Update event and check
+    ${makeHashField1}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime}000    str-endMillis=${endTime}000    str-summary=updateBy${common_to}    list-attendees=[]
+    ...    str-@type=Event    str-categories=Invite    str-uid=${event id}    str-location=mylocation
+    ${update_event}    update_event    params.event=${makeHashField1}
+    ${read_event2}    read_event    params.calendarId=${cal id}    params.eventId=${event id}
+    ${check_result_items}    check_result_items    res=${read_event2}    calendarId=${cal id}    summary=updateBy${common_to}    categories=Invite    location=mylocation
+
+Event - copy event ----------------------- MERCURY-440 JSON - Calendar ID is cut to breif in list-calendar after create calendar and any request
+    [Tags]    excluded
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${del_all_calendars}    del_all_calendars
+    ${startTime}    Get Time    epoch    NOW - 1 day
+    ${endTime}    Get Time    epoch    NOW + 1 day
+    ${create result}    create_calendar    params.name=copyEventTestCal
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar
+    ${cal id}    get_list_value    list=${cal ids}    index=0
+    ${makeHashField}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime}000    str-endMillis=${endTime}000    str-summary=copyEventTestEvent    list-attendees=[]
+    ...    str-@type=Event
+    ${create_event}    create_event    params.event=${makeHashField}
+    ${sy}    ${sm}    ${sd}    ${sh}    ${smin}    ${ss}    Get Time
+    ...    year month day hour min sec    NOW - 10 day
+    ${ey}    ${em}    ${ed}    ${eh}    ${emin}    ${es}    Get Time
+    ...    year month day hour min sec    NOW + 10 day
+    ${report_event}    report_event    params.calendarIds=${cal ids}    params.startTime=${sy}${sm}${sd}T${sh}${smin}${ss}    params.endTime=${ey}${em}${ed}T${eh}${emin}${es}
+    ${event id}    get_oringinal_event_ids    res=${report_event}    index=0
+    ${cal id2}    get_calendar_id_by_name    name=copyEventTestCal    index=0
+    ${copy_event}    copy_event    params.calendarId=${cal id}    params.eventId=${event id}    params.destCalendarId=${cal id2}
+
+Event - create an event with alarm
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${startTime}    Get Time    epoch    NOW
+    ${endTime}    Get Time    epoch    NOW + 1 hour
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar
+    ${cal id}    get_list_value    list=${cal ids}    index=0
+    ${alarm}    makeHashField    str-relativeTo=start    int-offsetMinutes=-5    int-lastTriggered=0    str-action=email    str-address=${common_from}${common_domain}
+    ...    str-summary=alarmSummary    str-description=alarmDescription
+    ${makeHashField}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime}000    str-endMillis=${endTime}000    str-summary=testEventAlarm_${startTime}    list-attendees=[]
+    ...    str-@type=Event    alarm=${alarm}
+    ${create_event}    create_event    params.event=${makeHashField}
+    ${event id}    get_res_value_by_key    res=${create_event}    key=uid
+    ${read_event}    read_event    params.calendarId=${cal id}    params.eventId=${event id}
+    ${alarm_hash}    get_res_value_by_key    res=${read_event}    key=alarm
+    ${check_alarm_items}    check_result_items    res=${alarm_hash}    summary=alarmSummary    offsetMinutes=-5    address=${common_from}${common_domain}
+
+Event - create an event with alarm and check notification mail arrived by subject
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${move to trash}    Run Keyword And Ignore Error    move_all_mail    params.folderPath=INBOX    params.destFolderPath=Trash    all=true
+    ${set timezone}    set_timzone    zoneId=${local_timezone}
+    ${startTime}    Get Time    epoch    NOW + 2 minute
+    ${endTime}    Get Time    epoch    NOW + 1 hour
+    ${cal id}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar    index=0
+    ${empty result}    empty_calendar    id=${cal id}
+    ${alarm}    makeHashField    str-relativeTo=start    int-offsetMinutes=-1    int-lastTriggered=0    str-action=email    str-address=${common_from}${common_domain}
+    ...    str-summary=alarmSummary_${startTime}    str-description=alarmDescription
+    ${makeHashField}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime}000    str-endMillis=${endTime}000    str-summary=testEventAlarm_${startTime}    list-attendees=[]
+    ...    str-@type=Event    alarm=${alarm}
+    ${create_event}    create_event    params.event=${makeHashField}
+    sleep    1.5 min
+    ${authlogin_after soft}    user_auth_loginByToken    request=auth.loginByToken    url=${login_url}
+    ${check reminder}    check_message_by_str    params.folderPath=INBOX    expectStr=Reminder    expectCnt=1
+    ${check summary}    check_message_by_str    params.folderPath=INBOX    expectStr=alarmSummary_${startTime}    expectCnt=1
+
+Event - create an event with alarm and check notification mail details
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${set timezone}    set_timzone    zoneId=${local_timezone}
+    ${startTime}    Get Time    epoch    NOW + 2 minute
+    ${endTime}    Get Time    epoch    NOW + 1 hour
+    ${cal id}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar    index=0
+    ${empty result}    empty_calendar    id=${cal id}
+    ${empty inbox}    Empty Folder    folderPath=INBOX
+    ${alarm}    makeHashField    str-relativeTo=start    int-offsetMinutes=-1    int-lastTriggered=0    str-action=email    str-address=${common_from}${common_domain}
+    ...    str-summary=alarmSummary_${startTime}    str-description=alarmDescription
+    ${makeHashField}    makeHashField    str-calendarId=${cal id}    str-startMillis=${startTime}000    str-endMillis=${endTime}000    str-summary=testEventAlarm_${startTime}    list-attendees=[]
+    ...    str-@type=Event    alarm=${alarm}
+    ${create_event}    create_event    params.event=${makeHashField}
+    sleep    2 min
+    ${authlogin_after soft}    user_auth_loginByToken    request=auth.loginByToken    url=${login_url}
+    ${list result2}    list_mail    params.folderPath=INBOX
+    ${msg list}    get_res_value_by_key    res=${list result2}    key=messages
+    ${msg}    get_list_value    list=${msg list}    index=0
+    ${check_result_item}    check_result_item    res=${msg}    subject=Reminder: alarmSummary_${startTime}
+
+Event - import calendar events to user-created calendar
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${del_all_calendars}    del_all_calendars
+    ${create result}    create_calendar    name=for import test
+    ${cal id}    get_calendar_param_by_key    res=${create result}    key=name    exp_value=for import test    get=id
+    ${fid}    upload_file    url=${resource_upload}    fname=201503exported-events.ics
+    ${attach_param}    makeHashField    str-@resolver=Upload    str-id=${fid}
+    ${import result}    import_event    params.id=${cal id}    params.resource=${attach_param}
+    User Logout
+
+Event - import to default calendar
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${del_all_calendars}    del_all_calendars
+    ${create result}    create_calendar    name=for import test
+    ${cal id}    get_calendar_param_by_key    res=${create result}    key=name    exp_value=for import test    get=id
+    ${fid}    upload_file    url=${resource_upload}    fname=201503exported-events.ics
+    ${attach_param}    makeHashField    str-@resolver=Upload    str-id=${fid}
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar
+    ${cal id default}    get_list_value    list=${cal ids}    index=0
+    ${import result}    import_event    params.id=${cal id default}    params.resource=${attach_param}
+    User Logout
+
+Event - resource load - export event from default calendar
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar    index=0
+    ${export_calendar_events}    resource_download_postReq_json    descriptor.calendarId=${cal ids}    descriptor.filename=robotExportEvent.ics    url=${resource_load}    req_name=RESOURCE_DOWNLOAD_EVENTS
+
+a
+    [Tags]    excluded
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${fid}    upload_file    url=${resource_upload}    fname=Fish.jpg
+
+s
+    [Tags]    excluded
+    sleep    1.5 min
+
+d
+    [Tags]    excluded
+
+f
+    [Tags]    excluded
+
+g
+    [Tags]    excluded
+
+Task list - list
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar    index=0
+    ${list_tasklist}    list_tasklist    params.calendarId=${cal ids}
+
+Task list - create
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${startTime}    Get Time    epoch    NOW
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar    index=0
+    ${makeHashField}    makeHashField    str-calendarId=${cal ids}    str-name=Create${startTime}    str-@type=TaskList
+    ${create_tasklist}    create_tasklist    params.taskList=${makeHashField}
+    ${created_id}    get_res_value_by_key    res=${create_tasklist}    key=id
+
+Task list - create and check by list
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${startTime}    Get Time    epoch    NOW
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar    index=0
+    ${makeHashField}    makeHashField    str-calendarId=${cal ids}    str-name=Create${startTime}    str-@type=TaskList
+    ${create_tasklist}    create_tasklist    params.taskList=${makeHashField}
+    ${list_tasklist}    list_tasklist    params.calendarId=${cal ids}
+    ${check_hash_params_From_list}    check_hash_params_From_list    list=${list_tasklist}    calendarId=${cal ids}    name=Create${startTime}
+
+Task list - del and check by list
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${startTime}    Get Time    epoch    NOW
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar    index=0
+    ${makeHashField}    makeHashField    str-calendarId=${cal ids}    str-name=Create_${startTime}    str-@type=TaskList
+    ${create_tasklist}    create_tasklist    params.taskList=${makeHashField}
+    ${created_id}    get_res_value_by_key    res=${create_tasklist}    key=id
+    ${del_tasklist}    del_tasklist    params.calendarId=${cal ids}    params.taskListId=${created_id}
+    ${list_tasklist}    list_tasklist    params.calendarId=${cal ids}
+    ${error}    Run Keyword And Ignore Error    check_hash_params_From_list    list=${list_tasklist}    calendarId=${cal ids}    name=Create_${startTime}
+    ${expect error}    expect_error    res=${error}    expectStr=Not any matched found
+
+Task list - update tasklist for new name
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${startTime}    Get Time    epoch    NOW
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar    index=0
+    ${makeHashField}    makeHashField    str-calendarId=${cal ids}    str-name=Create${startTime}    str-@type=TaskList
+    ${create_tasklist}    create_tasklist    params.taskList=${makeHashField}
+    ${created_id}    get_res_value_by_key    res=${create_tasklist}    key=id
+    ${makeHashField2}    makeHashField    str-calendarId=${cal ids}    str-name=updateCreate${startTime}    str-@type=TaskList    str-id=${created_id}
+    ${update_tasklist}    update_tasklist    params.taskList=${makeHashField2}
+    ${list_tasklist}    list_tasklist    params.calendarId=${cal ids}
+    ${check_hash_params_From_list}    check_hash_params_From_list    list=${list_tasklist}    calendarId=${cal ids}    name=updateCreate${startTime}
+
+Task list - share tasklist with task
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${startTime}    Get Time    epoch    NOW + 1 day
+    ${endTime}    Get Time    epoch    NOW + 2 day
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar    index=0
+    ${makeHashField_tasklist}    makeHashField    str-calendarId=${cal ids}    str-name=Create${startTime}    str-@type=TaskList
+    ${create_tasklist}    create_tasklist    params.taskList=${makeHashField_tasklist}
+    ${tasklist_id}    get_res_value_by_key    res=${create_tasklist}    key=id
+    ${makeHashFieldGroup}    makeHashField    str-X-CP-TASKLIST=${tasklist_id}
+    ${makeHashField}    makeHashField    str-summary=Todo_${startTime}    str-status=COMPLETED    str-priority=9    str-@type=ToDo    xproperties=${makeHashFieldGroup}
+    ...    str-startMillis=${startTime}000    str-dueMillis=${endTime}000    str-calendarId=${cal ids}
+    ${create_task}    create_task    params.toDo=${makeHashField}
+    ${address list}    Create List    ${common_to}${common_domain}
+    ${share_tasklist_by_mail}    share_tasklist_by_mail    params.calendarId=${cal ids}    params.taskListId=${tasklist_id}    params.addresses=${address list}
+
+Task list - empty tasklists
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar    index=0
+    ${empty_tasklist}    empty_tasklist    calendarId=${cal ids}
+
+Task Todo - report task Todos - MERCURY-496 Calendar(JSON) - got "INTERNAL_ERROR" when 'calendar.toDo.report ' with no params
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${cal id}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar    index=0
+    ${list_task result}    list_task    params.calendarId=${cal id}
+
+Task Todo - create Inprogress, priority5, default-group
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${startTime}    Get Time    epoch    NOW
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar    index=0
+    ${makeHashField}    makeHashField    str-summary=Todo_${startTime}    str-status=IN-PROCESS    str-priority=5    str-@type=ToDo    eval-xproperties={}
+    ...    str-calendarId=${cal ids}
+    ${create_task}    create_task    params.toDo=${makeHashField}
+    ${created_uid}    get_res_value_by_key    res=${create_task}    key=uid
+
+Task Todo - create and del todo
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${startTime}    Get Time    epoch    NOW
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar    index=0
+    ${makeHashField}    makeHashField    str-summary=Todo_${startTime}    str-status=IN-PROCESS    str-priority=5    str-@type=ToDo    eval-xproperties={}
+    ...    str-calendarId=${cal ids}
+    ${create_task}    create_task    params.toDo=${makeHashField}
+    ${created_uid}    get_res_value_by_key    res=${create_task}    key=uid
+    ${del_task result}    del_task    params.calendarId=${cal ids}    params.toDoId=${created_uid}
+
+Task Todo - create with start/end time
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${startTime}    Get Time    epoch    NOW + 1 day
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar    index=0
+    ${endTime}    Get Time    epoch    NOW + 2 day
+    ${makeHashField}    makeHashField    str-summary=Todo_${startTime}    str-status=IN-PROCESS    str-priority=5    str-@type=ToDo    eval-xproperties={}
+    ...    str-startMillis=${startTime}000    str-dueMillis=${endTime}000    str-calendarId=${cal ids}
+    ${create_task}    create_task    params.toDo=${makeHashField}
+
+Task Todo - set alarm
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${startTime}    Get Time    epoch    NOW + 1 day
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar    index=0
+    ${endTime}    Get Time    epoch    NOW + 2 day
+    ${alarm}    makeHashField    str-relativeTo=start    int-offsetMinutes=-5    int-lastTriggered=0    str-action=email    str-address=${common_from}${common_domain}
+    ${makeHashField}    makeHashField    str-summary=Todo_${startTime}    str-status=IN-PROCESS    str-priority=5    str-@type=ToDo    eval-xproperties={}
+    ...    str-startMillis=${startTime}000    str-dueMillis=${endTime}000    str-calendarId=${cal ids}    alarm=${alarm}
+    ${create_task}    create_task    params.toDo=${makeHashField}
+
+Task Todo - set alarm and cancel alarm
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${startTime}    Get Time    epoch    NOW + 1 day
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar    index=0
+    ${endTime}    Get Time    epoch    NOW + 2 day
+    ${alarm}    makeHashField    str-relativeTo=start    int-offsetMinutes=-5    int-lastTriggered=0    str-action=email    str-address=${common_from}${common_domain}
+    ${makeHashField}    makeHashField    str-summary=Todo_${startTime}    str-status=IN-PROCESS    str-priority=5    str-@type=ToDo    eval-xproperties={}
+    ...    str-startMillis=${startTime}000    str-dueMillis=${endTime}000    str-calendarId=${cal ids}    alarm=${alarm}
+    ${create_task}    create_task    params.toDo=${makeHashField}
+    ${created_uid}    get_res_value_by_key    res=${create_task}    key=uid
+    ${makeHashField2}    makeHashField    str-uid=${created_uid}    str-summary=update-Todo_${startTime}    str-status=IN-PROCESS    str-priority=5    str-@type=ToDo
+    ...    eval-xproperties={}    str-startMillis=${startTime}000    str-dueMillis=${endTime}000    str-calendarId=${cal ids}
+    ${update_task result}    update_task    params.toDo=${makeHashField2}
+    ${check_result_items}    check_result_items    res=${update_task result}    summary=update-Todo_${startTime}    uid=${created_uid}
+
+Task Todo - create needs-action, priority3, default-group
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${startTime}    Get Time    epoch    NOW + 1 day
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar    index=0
+    ${endTime}    Get Time    epoch    NOW + 2 day
+    ${makeHashField}    makeHashField    str-summary=Todo_${startTime}    str-status=NEEDS-ACTION    str-priority=3    str-@type=ToDo    eval-xproperties={}
+    ...    str-startMillis=${startTime}000    str-dueMillis=${endTime}000    str-calendarId=${cal ids}
+    ${create_task}    create_task    params.toDo=${makeHashField}
+
+Task Todo - create completed, priority9, created-group
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${startTime}    Get Time    epoch    NOW + 1 day
+    ${endTime}    Get Time    epoch    NOW + 2 day
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar    index=0
+    ${makeHashField_tasklist}    makeHashField    str-calendarId=${cal ids}    str-name=Create${startTime}    str-@type=TaskList
+    ${create_tasklist}    create_tasklist    params.taskList=${makeHashField_tasklist}
+    ${tasklist_id}    get_res_value_by_key    res=${create_tasklist}    key=id
+    ${makeHashFieldGroup}    makeHashField    str-X-CP-TASKLIST=${tasklist_id}
+    ${makeHashField}    makeHashField    str-summary=Todo_${startTime}    str-status=COMPLETED    str-priority=9    str-@type=ToDo    xproperties=${makeHashFieldGroup}
+    ...    str-startMillis=${startTime}000    str-dueMillis=${endTime}000    str-calendarId=${cal ids}
+    ${create_task}    create_task    params.toDo=${makeHashField}
+
+Task Todo - report todos and del all
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty_todos result}    empty_todos    name=${common_from}${common_domain}'s main calendar    index=0
+
+Task Todo - create, move task and check by report
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${del_all_calendars}    del_all_calendars
+    ${startTime}    Get Time    epoch    NOW
+    ${cal id default}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar    index=0
+    ${create cal}    create_calendar    params.name=calendar${startTime}
+    ${cal id created}    get_calendar_id_by_name    name=calendar${startTime}    index=0
+    ${makeHashField}    makeHashField    str-summary=Todo_${startTime}    str-status=IN-PROCESS    str-priority=5    str-@type=ToDo    eval-xproperties={}
+    ...    str-calendarId=${cal id default}
+    ${create_task}    create_task    params.toDo=${makeHashField}
+    ${created_uid}    get_res_value_by_key    res=${create_task}    key=uid
+    ${move_task}    move_task    params.calendarId=${cal id default}    params.todoIdId=${created_uid}    params.destCalendarId=${cal id created}
+    ${list_task}    list_task    params.calendarId=${cal id created}
+    ${toDos}    get_res_value_by_key    res=${list_task}    key=toDos
+    ${todo_list}    get_res_value_by_key    res=${toDos}    key=results
+    ${check_hash_params_From_list}    check_hash_params_From_list    list=${todo_list}    calendarId=${cal id created}    summary=Todo_${startTime}
+
+Task Todo - update task and check
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${startTime}    Get Time    epoch    NOW
+    ${cal ids}    get_calendar_id_by_name    name=${common_from}${common_domain}'s main calendar    index=0
+    ${makeHashField}    makeHashField    str-summary=Todo_${startTime}    str-status=IN-PROCESS    str-priority=5    str-@type=ToDo    eval-xproperties={}
+    ...    str-calendarId=${cal ids}
+    ${create_task}    create_task    params.toDo=${makeHashField}
+    ${created_uid}    get_res_value_by_key    res=${create_task}    key=uid
+    ${makeHashField2}    makeHashField    str-summary=update-Todo_${startTime}    str-status=IN-PROCESS    str-priority=5    str-@type=ToDo    str-uid=${created_uid}
+    ...    str-calendarId=${cal ids}
+    ${update_task result}    update_task    params.toDo=${makeHashField2}
+    ${check_result_items}    check_result_items    res=${update_task result}    summary=update-Todo_${startTime}    uid=${created_uid}
+
+t0
+    [Tags]    excluded
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${startTime}    Get Time    epoch    NOW
+    ${del_all_calendars}    del_all_calendars
+    ${create result}    create_calendar    name=for import test
+    ${cal id}    get_calendar_param_by_key    res=${create result}    key=name    exp_value=for import test    get=id
+    ${calendar_descriptor}    makeHashField    str-@resolver=calendar    str-calendarId=${cal id}    str-filename=downloadedCalenar${startTime}.ics    str-componentType=EVENT
+    ${resource_load}    resource_load    params.descriptor=${calendar_descriptor}
+
+t1
+    [Tags]    excluded
+
+t2
+    [Tags]    excluded
+
+test- calendar preference load
+    [Tags]    excluded
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${calendar_preference_load}    calendar_preference_load
+
+t4
+    [Tags]    excluded
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${get_current_user_info}    get_current_user_info
+    ${get_current_user_info result}    check_user_info_fields_res    field_list=${current_user_info_fields}    res=${get_current_user_info}
+
+test3
+    [Tags]    excluded
+
+Settings - set calendar prefs - MERCURY-433 Calendar Setting(json) - missing api : calendar setPreferences
+    [Documentation]    MERCURY-433 Calendar Setting(json) - missing api : calendar setPreferences
+    [Tags]
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${set view result}    Set Calendar Prefs    name=calendar.defaultview
+    ${set day start result}    Set Calendar Prefs    name=attr.user.StartTimeOfDay
+    ${set day end result}    Set Calendar Prefs    name=attr.user.endTimeOfDay
+    ${set week start result}    Set Calendar Prefs    name=calendar.weekstart
+    ${set event duration result}    Set Calendar Prefs    name=calendar.timeinterval
+    ${set event duration unit result}    Set Calendar Prefs    name=attr.user.CalendarReminderUnit
+    ${set task view result}    Set Calendar Prefs    name=attr.user.TaskViewType
+    ${set task sort result}    Set Calendar Prefs    name=attr.user.TaskSortType
+    ${set task reminder unit result}    Set Calendar Prefs    name=attr.user.TaskReminderUnit
+    User Logout
+
+FUS-5628 : Event - create with one attendee - daily end by a date( default cal )
+    [Documentation]    default event param is :
+    ...    start time:2019.09.30 \ 9:30-10:00
+    ...    end day: 2019.11.30
+    ...
+    ...    default recurry is :daily
+    ...
+    ...    so there will be :1+30+30=61 events
+    ...
+    ...
+    ...    report event: 2019.09.30-2019.11.30, so they can get all 61 event
+    [Tags]    excluded
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty result}    empty_calendar    default_cal_name=${default_cal_name}
+    ${default cal id}    get_cal_id_by_name    name=${default_cal_name}
+    ${attendee 1}    make_attendee    email=${common_to}${common_domain}
+    ${attendees}    Create List    ${attendee 1}
+    ${summary}    Get Time    epoch
+    ${create event}    create_event    calendarId=${default cal id}    summary=${summary}    attendees=${attendees}
+    ${check event}    check_event_by_summary    expectStr=${common_to}${common_domain}    expectCnt=62    summary=${summary}    calendarId=${default cal id}
+    User Logout
+
+FUS-5643 : Event - preview invite mail
+    [Documentation]    message" : "failed to bind parameter 'images' to value \"NONE\" : valid enum values are [none, embeddedOnly, embeddedAndRemote]"
+    ...
+    ...    can not see mail print in UI,it is configurable
+    [Tags]    excluded
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${result}    Empty Folder    name=INBOX
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty result}    empty_calendar    default_cal_name=${default_cal_name}
+    ${default cal id}    get_cal_id_by_name    name=${default_cal_name}
+    ${attendee 1}    make_attendee    email=${common_to}${common_domain}
+    ${attendees}    Create List    ${attendee 1}
+    ${summary}    Get Time    epoch
+    ${event id}    create_event    calendarId=${default cal id}    summary=${summary}    attendees=${attendees}
+    ${event invite}    event_send_invite    calendarId=${default cal id}    summary=${summary}    attendees=${attendees}    id=${event id}
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${check result}    check_message_by_subject    subject=Event invitation: ${summary}    expectCnt=1
+    ${preview result}    print_preview_message    folder=INBOX
+    User Logout
+    User Logout
+
+FUS-5644 : Event - dowload invite mail
+    [Tags]    excluded
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${result}    Empty Folder    name=INBOX
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty result}    empty_calendar    default_cal_name=${default_cal_name}
+    ${default cal id}    get_cal_id_by_name    name=${default_cal_name}
+    ${attendee 1}    make_attendee    email=${common_to}${common_domain}
+    ${attendees}    Create List    ${attendee 1}
+    ${summary}    Get Time    epoch
+    ${event id}    create_event    calendarId=${default cal id}    summary=${summary}    attendees=${attendees}
+    ${event invite}    event_send_invite    calendarId=${default cal id}    summary=${summary}    attendees=${attendees}    id=${event id}
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${check result}    check_message_by_subject    subject=Event invitation: ${summary}    expectCnt=1
+    ${download result}    download_message    folder=INBOX
+    User Logout
+
+FUS-5645 : Event - Attendee response event invation Yes
+    [Tags]    excluded
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${result}    Empty Folder    name=INBOX
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty result}    empty_calendar    default_cal_name=${default_cal_name}
+    ${default cal id}    get_cal_id_by_name    name=${default_cal_name}
+    ${attendee 1}    make_attendee    email=${common_to}${common_domain}
+    ${attendees}    Create List    ${attendee 1}
+    ${summary}    Get Time    epoch
+    ${event id}    create_event    calendarId=${default cal id}    summary=${summary}    attendees=${attendees}
+    ${event invite}    event_send_invite    calendarId=${default cal id}    summary=${summary}    attendees=${attendees}    id=${event id}
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${check result}    check_message_by_subject    subject=Event invitation: ${summary}    expectCnt=1    folder=INBOX
+    ${update_rsvp}    update_rsvp    opt=1    calid=${default cal id}    ownerid=${common_from}${common_domain}    ownername=${common_from}${common_domain}    eid=${event id}
+    ...    email=${common_to}${common_domain}
+    ${default cal id to}    get_cal_id_by_name    name=${default_cal_name_to}
+    ${check event}    check_event_by_summary    expectStr=${common_to}${common_domain}    expectCnt=62    summary=${summary}    calendarId=${default cal id to}
+    User Logout
+
+FUS-5646 : Event - Attendee response event invation Maybe
+    [Tags]    excluded
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${result}    Empty Folder    name=INBOX
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty result}    empty_calendar    default_cal_name=${default_cal_name}
+    ${default cal id}    get_cal_id_by_name    name=${default_cal_name}
+    ${attendee 1}    make_attendee    email=${common_to}${common_domain}
+    ${attendees}    Create List    ${attendee 1}
+    ${summary}    Get Time    epoch
+    ${event id}    create_event    calendarId=${default cal id}    summary=${summary}    attendees=${attendees}
+    ${event invite}    event_send_invite    calendarId=${default cal id}    summary=${summary}    attendees=${attendees}    id=${event id}
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${check result}    check_message_by_subject    subject=Event invitation: ${summary}    expectCnt=1    folder=INBOX
+    ${update_rsvp}    update_rsvp    opt=3    calid=${default cal id}    ownerid=${common_from}${common_domain}    ownername=${common_from}${common_domain}    eid=${event id}
+    ...    email=${common_to}${common_domain}
+    ${default cal id to}    get_cal_id_by_name    name=${default_cal_name_to}
+    ${check event}    check_event_by_summary    expectStr=${common_to}${common_domain}    expectCnt=62    summary=${summary}    calendarId=${default cal id to}
+    User Logout
+
+FUS-5647 : Event - Attendee response event invation No
+    [Tags]    excluded
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${result}    Empty Folder    name=INBOX
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty result}    empty_calendar    default_cal_name=${default_cal_name}
+    ${default cal id}    get_cal_id_by_name    name=${default_cal_name}
+    ${attendee 1}    make_attendee    email=${common_to}${common_domain}
+    ${attendees}    Create List    ${attendee 1}
+    ${summary}    Get Time    epoch
+    ${event id}    create_event    calendarId=${default cal id}    summary=${summary}    attendees=${attendees}
+    ${event invite}    event_send_invite    calendarId=${default cal id}    summary=${summary}    attendees=${attendees}    id=${event id}
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${check result}    check_message_by_subject    subject=Event invitation: ${summary}    expectCnt=1    folder=INBOX
+    ${update_rsvp}    update_rsvp    opt=2    calid=${default cal id}    ownerid=${common_from}${common_domain}    ownername=${common_from}${common_domain}    eid=${event id}
+    ...    email=${common_to}${common_domain}
+    ${default cal id to}    get_cal_id_by_name    name=${default_cal_name_to}
+    ${check event}    check_event_by_summary    expectCnt=0    summary=${summary}    calendarId=${default cal id to}
+    User Logout
+
+FUS-5676 : Group - share with tasks
+    [Tags]    excluded
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${empty folder}    empty_folder    name=INBOX
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${default cal id}    get_cal_id_by_name    name=${default_cal_name}
+    ${group name}    Get Time    epoch
+    ${create result}    create_taskgroup    calendarId=${default cal id}    name=${group name}
+    ${group id}    get_tasklist_id_by_name    name=${group name}    calendarId=${default cal id}
+    ${create result}    create_task_with_alarm    summary=for share    address=${common_from}${common_domain}    calendarId=${default cal id}    value=${group id}
+    ${share group}    share_group_by_email    calendarId=${default cal id}    taskListId=${group id}    attendees=${common_to}${common_domain}
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${check result}    check_message_by_str    expectStr=Share task:    expectCnt=1
+    User Logout
+
+FUS-5677 : Group - share with no tasks
+    [Documentation]    for mercury-293
+    [Tags]    excluded
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${empty folder}    empty_folder    name=INBOX    expectCnt=1
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${default cal id}    get_cal_id_by_name    name=${default_cal_name}
+    ${group name}    Get Time    epoch
+    ${create result}    create_taskgroup    calendarId=${default cal id}    name=${group name}
+    ${group id}    get_tasklist_id_by_name    name=${group name}    calendarId=${default cal id}
+    ${share group}    share_group_no_task    calendarId=${default cal id}    taskListId=${group id}    attendees=${common_to}${common_domain}
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${check result}    check_message_by_str    expectStr=Share task:    expectCnt=0
+    User Logout
+
+Search - event by time range( proper time range )
+    [Tags]
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${del_all_calendars}    del_all_calendars
+    ${params_map_1}    makeHashField    str-attr.user.timezone.UseDeviceTimeZone=false
+    ${save no use device zone}    Set Mail Prefs    params.map=${params_map_1}
+    ${set timezone}    set_timzone    zoneId=${local_timezone}
+    ${default cal id}    get_calendar_id_by_name    name=${default_cal_name}    index=0
+    ${summary}    Get Time    epoch
+    ${starttime}    Evaluate    ${summary}-10*60*60
+    ${endtime}    Evaluate    ${summary}+10*60*60
+    ${starttime_big}    Evaluate    ${summary}-20*60*60
+    ${endtime_big}    Evaluate    ${summary}+20*60*60
+    ${empty_start}    make_timestr    ${starttime_big}
+    ${empty_end}    make_timestr    ${endtime_big}
+    ${empty_result}    empty_event    name=${common_from}${common_domain}'s main calendar    params.startTime=${empty_start}    params.endTime=${empty_end}
+    ${makeHashField}    makeHashField    str-calendarId=${default cal id}    str-startMillis=${startTime}000    str-endMillis=${endTime}000    str-summary=${summary}    list-attendees=[]
+    ...    str-@type=Event
+    ${create_event}    create_event    params.event=${makeHashField}
+    ${report_start}    make_timestr    ${starttime}
+    ${report_end}    make_timestr    ${endtime}
+    ${report event}    check_report_event    startTime=${report_start}    endTime=${report_end}    expectCnt=1    expectStr=${summary}
+    User Logout
+
+Search - event by time range( wrong time range )
+    [Tags]
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${del_all_calendars}    del_all_calendars
+    ${params_map_1}    makeHashField    str-attr.user.timezone.UseDeviceTimeZone=false
+    ${save no use device zone}    Set Mail Prefs    params.map=${params_map_1}
+    ${set timezone}    set_timzone    zoneId=${local_timezone}
+    ${default cal id}    get_calendar_id_by_name    name=${default_cal_name}    index=0
+    ${summary}    Get Time    epoch
+    ${event_starttime}    Evaluate    ${summary}+5*60
+    ${event_endtime}    Evaluate    ${summary}+ 10*60
+    ${empty_starttime}    Evaluate    ${summary}-10*60*60
+    ${emtpy_endtime}    Evaluate    ${summary}+10*60*60
+    ${starttime_big}    Evaluate    ${summary}+1*60*60
+    ${endtime_big}    Evaluate    ${summary}+2*60*60
+    ${empty_start}    make_timestr    ${event_starttime}
+    ${empty_end}    make_timestr    ${endtime_big}
+    ${empty_result}    empty_event    name=${common_from}${common_domain}'s main calendar    params.startTime=${empty_start}    params.endTime=${empty_end}
+    ${makeHashField}    makeHashField    str-calendarId=${default cal id}    str-startMillis=${event_starttime}000    str-endMillis=${event_endtime}000    str-summary=${summary}    list-attendees=[]
+    ...    str-@type=Event    str-categories=vacation
+    ${create_event}    create_event    params.event=${makeHashField}
+    ${report_start}    make_timestr    ${starttime_big}
+    ${report_end}    make_timestr    ${endtime_big}
+    ${report event}    check_report_event    startTime=${report_start}    endTime=${report_end}    expectCnt=0
+    User Logout
+
+Search - event by time range/category
+    [Tags]
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${del_all_calendars}    del_all_calendars
+    ${params_map_1}    makeHashField    str-attr.user.timezone.UseDeviceTimeZone=false
+    ${save no use device zone}    Set Mail Prefs    params.map=${params_map_1}
+    ${set timezone}    set_timzone    zoneId=${local_timezone}
+    ${default cal id}    get_calendar_id_by_name    name=${default_cal_name}    index=0
+    ${summary}    Get Time    epoch
+    ${event_starttime}    Evaluate    ${summary}+5*60
+    ${event_endtime}    Evaluate    ${summary}+ 10*60
+    ${empty_starttime}    Evaluate    ${summary}-10*60*60
+    ${emtpy_endtime}    Evaluate    ${summary}+10*60*60
+    ${empty_start}    make_timestr    ${empty_starttime}
+    ${empty_end}    make_timestr    ${emtpy_endtime}
+    ${empty_result}    empty_event    name=${common_from}${common_domain}'s main calendar    params.startTime=${empty_start}    params.endTime=${empty_end}
+    ${makeHashField}    makeHashField    str-calendarId=${default cal id}    str-startMillis=${event_starttime}000    str-endMillis=${event_endtime}000    str-summary=${summary}    list-attendees=[]
+    ...    str-@type=Event    str-categories=vacation
+    ${create_event}    create_event    params.event=${makeHashField}
+    ${report_startTime}    Evaluate    ${event_starttime}-60
+    ${report_endTime}    Evaluate    ${event_endtime}+60
+    ${report_start}    make_timestr    ${report_startTime}
+    ${report_end}    make_timestr    ${report_endTime}
+    ${report event}    check_report_event    params.startTime=${report_start}    params.endTime=${report_end}    expectCnt=1    params.filter.categories=vacation
+    ${report event}    check_report_event    params.startTime=${report_start}    params.endTime=${report_end}    expectCnt=0    params.filter.categories=doctor
+    User Logout
+
+Search - event by time range/with or without reminder
+    [Documentation]    alarms only = true# only list event or task with reminder
+    ...    alarms only = false#list all event or task
+    ...
+    ...    todo: create event with alram failed!!
+    [Tags]    excluded
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${del_all_calendars}    del_all_calendars
+    ${default cal id}    get_calendar_id_by_name    name=${default_cal_name}    index=0
+    ${empty_calendar}    empty_calendar    params.id=${default cal id}
+    ${set timezone}    set_timzone    zoneId=${local_timezone}
+    ${summary}    Get Time    epoch
+    ${event_starttime}    Evaluate    ${summary}+5*60
+    ${event_endtime}    Evaluate    ${summary}+ 10*60
+    ${empty_starttime}    Evaluate    ${summary}-10*60*60
+    ${emtpy_endtime}    Evaluate    ${summary}+10*60*60
+    ${empty_start}    make_timestr    ${empty_starttime}
+    ${empty_end}    make_timestr    ${emtpy_endtime}
+    ${empty_result}    empty_event    name=${common_from}${common_domain}'s main calendar    params.startTime=${empty_start}    params.endTime=${empty_end}
+    ${alarm}    makeHashField    str-relativeTo=start    int-offsetMinutes=-5    int-lastTriggered=0    str-action=email    str-address=${common_from}${common_domain}
+    ...    str-summary=alarmSummary    str-description=alarmDescription
+    ${makeHashField}    makeHashField    str-calendarId=${default cal id}    str-startMillis=${event_starttime}000    str-endMillis=${event_endtime}000    str-summary=${summary}    list-attendees=[]
+    ...    str-@type=Event    alarm=${alarm}    str-categories=vacation
+    ${create_event}    create_event    params.event=${makeHashField}
+    ${report_start}    make_timestr    ${event_starttime}
+    ${report_end}    make_timestr    ${event_endtime}
+    ${report event}    check_report_event    params.startTime=${report_start}    params.endTime=${report_end}    expectCnt=1    params.filter.alarm=true
+    ${report event}    check_report_event    params.startTime=${report_start}    params.endTime=${report_end}    expectCnt=0    params.filter.alarm=false
+    User Logout
+
+Search - event by time range/calendar
+    [Tags]
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${del_all_calendars}    del_all_calendars
+    ${params_map_1}    makeHashField    str-attr.user.timezone.UseDeviceTimeZone=false
+    ${save no use device zone}    Set Mail Prefs    params.map=${params_map_1}
+    ${set timezone}    set_timzone    zoneId=${local_timezone}
+    ${default cal id}    get_calendar_id_by_name    name=${default_cal_name}    index=0
+    ${summary}    Get Time    epoch
+    ${event_starttime}    Evaluate    ${summary}+5*60
+    ${event_endtime}    Evaluate    ${summary}+ 10*60
+    ${empty_starttime}    Evaluate    ${summary}-10*60*60
+    ${emtpy_endtime}    Evaluate    ${summary}+10*60*60
+    ${empty_start}    make_timestr    ${empty_starttime}
+    ${empty_end}    make_timestr    ${emtpy_endtime}
+    ${empty_result}    empty_event    name=${common_from}${common_domain}'s main calendar    params.startTime=${empty_start}    params.endTime=${empty_end}
+    ${makeHashField}    makeHashField    str-calendarId=${default cal id}    str-startMillis=${event_starttime}000    str-endMillis=${event_endtime}000    str-summary=default event    list-attendees=[]
+    ...    str-@type=Event    str-categories=vacation
+    ${create_event}    create_event    params.event=${makeHashField}
+    ${create result}    create_calendar    params.name=user created calender
+    ${user cal id}    get_calendar_id_by_name    name=user created calender    index=0
+    ${makeHashField_usercal}    makeHashField    str-calendarId=${user cal id}    str-startMillis=${event_starttime}000    str-endMillis=${event_endtime}000    str-summary=user event    list-attendees=[]
+    ...    str-@type=Event    str-categories=doctor
+    ${create_event}    create_event    params.event=${makeHashField_usercal}
+    ${report_start}    make_timestr    ${event_starttime}
+    ${report_end}    make_timestr    ${event_endtime}
+    ${cal id list}    create list    ${user cal id}
+    ${report event}    check_report_event    params.calendarIds=${cal id list}    params.startTime=${report_start}    params.endTime=${report_end}    expectCnt=1    expectStr=user event
+    ${empty list}    create list
+    ${report event}    check_report_event    params.calendarIds=${empty list}    params.startTime=${report_start}    params.endTime=${report_end}    expectCnt=2
+    User Logout
+
+Search - event by time range/content
+    [Documentation]    filter included all field??
+    [Tags]
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${del_all_calendars}    del_all_calendars
+    ${params_map_1}    makeHashField    str-attr.user.timezone.UseDeviceTimeZone=false
+    ${save no use device zone}    Set Mail Prefs    params.map=${params_map_1}
+    ${set timezone}    set_timzone    zoneId=${local_timezone}
+    ${default cal id}    get_calendar_id_by_name    name=${default_cal_name}    index=0
+    ${summary}    Get Time    epoch
+    ${event_starttime}    Evaluate    ${summary}+5*60
+    ${event_endtime}    Evaluate    ${summary}+ 10*60
+    ${empty_starttime}    Evaluate    ${summary}-10*60*60
+    ${emtpy_endtime}    Evaluate    ${summary}+10*60*60
+    ${empty_start}    make_timestr    ${empty_starttime}
+    ${empty_end}    make_timestr    ${emtpy_endtime}
+    ${empty_result}    empty_event    name=${common_from}${common_domain}'s main calendar    params.startTime=${empty_start}    params.endTime=${empty_end}
+    ${makeHashField}    makeHashField    str-calendarId=${default cal id}    str-startMillis=${event_starttime}000    str-endMillis=${event_endtime}000    str-summary=${summary}    list-attendees=[]
+    ...    str-@type=Event    str-categories=vacation    str-description=default description
+    ${create_event}    create_event    params.event=${makeHashField}
+    ${create result}    create_calendar    params.name=user created calender
+    ${user cal id}    get_calendar_id_by_name    name=user created calender    index=0
+    ${makeHashField_usercal}    makeHashField    str-calendarId=${user cal id}    str-startMillis=${event_starttime}000    str-endMillis=${event_endtime}000    str-summary=event in user cal    list-attendees=[]
+    ...    str-@type=Event    str-categories=doctor    str-description=default description
+    ${create_event}    create_event    params.event=${makeHashField_usercal}
+    ${report_start}    make_timestr    ${event_starttime}
+    ${report_end}    make_timestr    ${event_endtime}
+    ${empty list}    create list
+    ${report event}    check_report_event    params.startTime=${report_start}    params.endTime=${report_end}    expectCnt=1    params.filter.text=event in user cal    params.calendarIds=${empty list}
+    ${report event}    check_report_event    params.startTime=${report_start}    params.endTime=${report_end}    expectCnt=0    params.filter.text=event in default cal    params.calendarIds=${empty list}
+    ${report event}    check_report_event    params.startTime=${report_start}    params.endTime=${report_end}    expectCnt=2    params.filter.text=default description    params.calendarIds=${empty list}
+    User Logout
+
+Search - task by time range( proper time range )
+    [Documentation]    report: alarm only field need to test
+    [Tags]
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty_todos result}    empty_todos    name=${common_from}${common_domain}'s main calendar    index=0
+    ${del_all_calendars}    del_all_calendars
+    ${params_map_1}    makeHashField    str-attr.user.timezone.UseDeviceTimeZone=false
+    ${save no use device zone}    Set Mail Prefs    params.map=${params_map_1}
+    ${set timezone}    set_timzone    zoneId=${local_timezone}
+    ${default cal id}    get_calendar_id_by_name    name=${default_cal_name}    index=0
+    ${summary}    Get Time    epoch
+    ${starttime}    Evaluate    ${summary}-10*60*60
+    ${endtime}    Evaluate    ${summary}+10*60*60
+    ${makeHashField}    makeHashField    str-summary=${summary}    str-status=IN-PROCESS    str-priority=5    str-@type=ToDo    eval-xproperties={}
+    ...    str-calendarId=${default cal id}
+    ${create task}    create_task    params.toDo=${makeHashField}
+    ${start_time_str}    make_timestr    ${starttime}
+    ${end_time_str}    make_timestr    ${endtime}
+    ${report event}    check_report_task    params.startTime=${start_time_str}    params.endTime=${end_time_str}    expectCnt=1    expectStr=${summary}    params.calendarId=${default cal id}
+    User Logout
+
+Search - task by time range( wrong time range, no alarm )
+    [Documentation]    no matter what time range, if you don't have duedate, you will be included in result
+    [Tags]
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty_todos result}    empty_todos    name=${common_from}${common_domain}'s main calendar    index=0
+    ${del_all_calendars}    del_all_calendars
+    ${params_map_1}    makeHashField    str-attr.user.timezone.UseDeviceTimeZone=false
+    ${save no use device zone}    Set Mail Prefs    params.map=${params_map_1}
+    ${set timezone}    set_timzone    zoneId=${local_timezone}
+    ${cal id}    get_calendar_id_by_name    name=${default_cal_name}    index=0
+    ${summary}    Get Time    epoch
+    ${event_starttime}    Evaluate    ${summary}+5*60
+    ${event_endtime}    Evaluate    ${summary}+ 10*60
+    ${empty_starttime}    Evaluate    ${summary}-10*60*60
+    ${emtpy_endtime}    Evaluate    ${summary}+10*60*60
+    ${starttime_big}    Evaluate    ${summary}+1*60*60
+    ${endtime_big}    Evaluate    ${summary}+2*60*60
+    ${due_time}    Evaluate    ${summary}+8*60
+    ${makeHashField}    makeHashField    str-summary=${summary}    str-status=IN-PROCESS    str-priority=5    str-@type=ToDo    eval-xproperties={}
+    ...    str-dueMillis=${due_time}000    str-calendarId=${cal id}
+    ${create task}    create_task    params.toDo=${makeHashField}
+    ${start_time_str}    make_timestr    ${starttime_big}
+    ${end_time_str}    make_timestr    ${endtime_big}
+    ${report event}    check_report_task    params.startTime=${start_time_str}    params.endTime=${end_time_str}    expectCnt=0    expectStr=${summary}    params.calendarId=${cal id}
+    User Logout
+
+----Search - task by time range( wrong time range, with alarm )
+    [Documentation]    MERCURY-496
+    [Tags]    excluded
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${del_all_calendars}    del_all_calendars
+    ${params_map_1}    makeHashField    str-attr.user.timezone.UseDeviceTimeZone=false
+    ${save no use device zone}    Set Mail Prefs    params.map=${params_map_1}
+    ${set timezone}    set_timzone    zoneId=${local_timezone}
+    ${default cal id}    get_calendar_id_by_name    name=${default_cal_name}    index=0
+    ${summary}    Get Time    epoch
+    ${search_starttime}    Evaluate    ${summary}+5*60
+    ${search_endtime}    Evaluate    ${summary}+ 10*60
+    ${due_time}    Evaluate    ${summary}+8*60
+    ${starttime_big}    Evaluate    ${summary}+1*60*60
+    ${endtime_big}    Evaluate    ${summary}+2*60*60
+    ${empty_todos result}    empty_todos    calendarName=${default_cal_name}    params.calendarId=${default cal id}
+    ${alarm}    makeHashField    str-relativeTo=start    int-offsetMinutes=-5    int-lastTriggered=0    str-action=email    str-address=${common_from}${common_domain}
+    ${makeHashField}    makeHashField    str-summary=with alarm    str-status=IN-PROCESS    str-priority=5    str-@type=ToDo    eval-xproperties={}
+    ...    str-dueMillis=${due_time}000    str-calendarId=${default cal id}    alarm=${alarm}
+    ${create_task}    create_task    params.toDo=${makeHashField}
+    ${start_time_str}    make_timestr    ${search_starttime}
+    ${end_time_str}    make_timestr    ${search_endtime}
+    ${start_time_str_wrong}    make_timestr    ${starttime_big}
+    ${end_time_str_wrong}    make_timestr    ${endtime_big}
+    ${filter_alarmonly}    makeHashField    str-alarm=true
+    ${report event}    check_report_task    startTime=${start_time_str}    endTime=${end_time_str}    expectCnt=1    expectStr=with alarm    params.filter=${filter_alarmonly}
+    ${filter_no_alarm}    makeHashField    str-alarm=false
+    ${report event}    check_report_task    startTime=${start_time_str_wrong}    endTime=${end_time_str_wrong}    expectCnt=0    params.filter=${filter_no_alarm}
+    User Logout
+
+-----Search - task by time range/with or without reminder
+    [Documentation]    MERCURY-496
+    [Tags]    excluded
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${del_all_calendars}    del_all_calendars
+    ${params_map_1}    makeHashField    str-attr.user.timezone.UseDeviceTimeZone=false
+    ${save no use device zone}    Set Mail Prefs    params.map=${params_map_1}
+    ${set timezone}    set_timzone    zoneId=${local_timezone}
+    ${default cal id}    get_calendar_id_by_name    name=${default_cal_name}    index=0
+    ${summary}    Get Time    epoch
+    ${starttime}    Evaluate    ${summary}-10*60*60
+    ${endtime}    Evaluate    ${summary}+10*60*60
+    ${due_time}    Evaluate    ${summary}+8*60*60
+    ${empty_todos result}    empty_todos    calendarName=${default_cal_name}
+    ${alarm}    makeHashField    str-relativeTo=start    int-offsetMinutes=-5    int-lastTriggered=0    str-action=email    str-address=${common_from}${common_domain}
+    ${makeHashField}    makeHashField    str-summary=with alarm    str-status=IN-PROCESS    str-priority=5    str-@type=ToDo    eval-xproperties={}
+    ...    str-dueMillis=${due_time}000    str-calendarId=${default cal id}    alarm=${alarm}
+    ${create_task}    create_task    params.toDo=${makeHashField}
+    ${makeHashField}    makeHashField    str-summary=without alarm    str-status=IN-PROCESS    str-priority=5    str-@type=ToDo    eval-xproperties={}
+    ...    str-dueMillis=${due_time}000    str-calendarId=${default cal id}
+    ${create task}    create_task    params.toDo=${makeHashField}
+    ${start_time_str}    make_timestr    ${starttime}
+    ${end_time_str}    make_timestr    ${endtime}
+    ${filter_alarmonly}    makeHashField    str-alarms=true
+    ${report event}    check_report_task    startTime=${start_time_str}    endTime=${end_time_str}    expectCnt=1    expectStr=with alarm    params.filter=${filter_alarmonly}
+    ${filter_no_alarm}    makeHashField    str-alarms=false
+    ${report event}    check_report_task    startTime=${start_time_str}    endTime=${end_time_str}    expectCnt=2    params.filter=${filter_no_alarm}
+    User Logout
+
+Search - task by time range/calendar
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty_todos result}    empty_todos    name=${common_from}${common_domain}'s main calendar    index=0
+    ${del_all_calendars}    del_all_calendars
+    ${params_map_1}    makeHashField    str-attr.user.timezone.UseDeviceTimeZone=false
+    ${save no use device zone}    Set Mail Prefs    params.map=${params_map_1}
+    ${set timezone}    set_timzone    zoneId=${local_timezone}
+    ${cal id}    get_calendar_id_by_name    name=${default_cal_name}    index=0
+    ${summary}    Get Time    epoch
+    ${due_time}    Evaluate    ${summary}+8*60
+    ${search_starttime}    Evaluate    ${summary}+5*60
+    ${search_endtime}    Evaluate    ${summary}+ 10*60
+    ${makeHashField}    makeHashField    str-summary=in default cal    str-status=IN-PROCESS    str-priority=5    str-@type=ToDo    eval-xproperties={}
+    ...    str-dueMillis=${due_time}000    str-calendarId=${cal id}
+    ${create task}    create_task    params.toDo=${makeHashField}
+    ${create result}    create_calendar    params.name=user created calender
+    ${user cal id}    get_calendar_id_by_name    name=user created calender    index=0
+    ${makeHashField}    makeHashField    str-summary=in user cal    str-status=IN-PROCESS    str-priority=5    str-@type=ToDo    eval-xproperties={}
+    ...    str-dueMillis=${due_time}000    str-calendarId=${user cal id}
+    ${create task}    create_task    params.toDo=${makeHashField}
+    ${start_time_str}    make_timestr    ${search_starttime}
+    ${end_time_str}    make_timestr    ${search_endtime}
+    ${report event}    check_report_task    startTime=${start_time_str}    endTime=${end_time_str}    expectCnt=1    expectStr=in default cal    params.calendarId=${cal id}
+    ${report event}    check_report_task    startTime=${start_time_str}    endTime=${end_time_str}    expectCnt=1    expectStr=in user cal    params.calendarId=${user cal id}
+    User Logout
+
+Search - task by time range/content
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty_todos result}    empty_todos    name=${common_from}${common_domain}'s main calendar    index=0
+    ${del_all_calendars}    del_all_calendars
+    ${params_map_1}    makeHashField    str-attr.user.timezone.UseDeviceTimeZone=false
+    ${save no use device zone}    Set Mail Prefs    params.map=${params_map_1}
+    ${set timezone}    set_timzone    zoneId=${local_timezone}
+    ${default cal id}    get_calendar_id_by_name    name=${default_cal_name}    index=0
+    ${summary}    Get Time    epoch
+    ${due_time}    Evaluate    ${summary}+8*60
+    ${search_starttime}    Evaluate    ${summary}+5*60
+    ${search_endtime}    Evaluate    ${summary}+ 10*60
+    ${makeHashField}    makeHashField    str-summary=in default cal    str-status=IN-PROCESS    str-priority=5    str-@type=ToDo    eval-xproperties={}
+    ...    str-dueMillis=${due_time}000    str-calendarId=${default cal id}
+    ${create task}    create_task    params.toDo=${makeHashField}
+    ${create result}    create_calendar    params.name=user created calender
+    ${user cal id}    get_calendar_id_by_name    name=user created calender    index=0
+    ${makeHashField}    makeHashField    str-summary=in user cal    str-status=IN-PROCESS    str-priority=5    str-@type=ToDo    eval-xproperties={}
+    ...    str-dueMillis=${due_time}000    str-calendarId=${user cal id}
+    ${create task}    create_task    params.toDo=${makeHashField}
+    ${start_time_str}    make_timestr    ${search_starttime}
+    ${end_time_str}    make_timestr    ${search_endtime}
+    ${filter}    makeHashField    str-text=in default cal
+    ${report event}    check_report_task    startTime=${start_time_str}    endTime=${end_time_str}    expectCnt=1    params.filter=${filter}    params.calendarId=${default cal id}
+    ${filter2}    makeHashField    str-text=in user cal
+    ${report event2}    check_report_task    startTime=${start_time_str}    endTime=${end_time_str}    expectCnt=1    params.filter=${filter2}    params.calendarId=${user cal id}
+
+FUS-6160 : Event - for mercury-302
+    [Documentation]    Attendee update one recurrency event summery,then read other event
+    [Tags]    excluded
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty result}    empty_calendar    default_cal_name=${default_cal_name}
+    ${default cal id}    get_cal_id_by_name    name=${default_cal_name}
+    ${attendee 1}    make_attendee    email=${common_to}${common_domain}
+    ${attendees}    Create List    ${attendee 1}
+    ${summary}    Get Time    epoch
+    ${event id}    create_event    calendarId=${default cal id}    summary=${summary}    attendees=${attendees}
+    ${event invite}    event_send_invite    calendarId=${default cal id}    summary=${summary}    attendees=${attendees}    id=${event id}
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${default cal id to}    get_cal_id_by_name    name=${default_cal_name_to}
+    ${update_rsvp}    update_rsvp    opt=1    calid=${default cal id}    ownerid=${common_from}${common_domain}    ownername=${common_from}${common_domain}    eid=${event id}
+    ...    email=${common_to}${common_domain}
+    ${new_event_id}    get_one_event_id    summary=${summary}
+    ${update result}    update_event    id=${new_event_id}    calendarId=${default cal id to}    summary=${summary} updated-one    affects=instance    attendees=${attendees}
+    @{event id list}    get_event_id_by_summary    summary=${summary}    calendarId=${default cal id to}    eventLimit=100    pageSize=100
+    : FOR    ${each id}    IN    @{event id list}
+    \    ${read result}    read_event    calendarId=${default cal id to}    id=${each id}
+    \    Exit For Loop
+    User Logout
+
+-----------------FUS-5625 : Calendar - max quota
+    [Tags]    excluded
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${empty result}    empty_calendar    default_cal_name=${default_cal_name}
+    ${r}    Create Max Calendar    calendarMax=${max_cal}
+    User Logout
+
+Event - attendee notify mail after update event name( instance)
+    [Documentation]    test includemasterevent at the same time
+    [Tags]    excluded
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${result}    Empty Folder    folderPath=INBOX
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${set timezone}    set_timzone    zoneId=${local_timezone}
+    ${del_all_calendars}    del_all_calendars
+    ${default cal id}    get_calendar_id_by_name    name=${default_cal_name}    index=0
+    ${empty result}    empty_calendar    id=${default cal id}
+    ${attendee_1}    makeHashField    str-address=${common_to}${common_domain}    str-commonName=${common_to}${common_domain}    str-status=needsAction    str-type=internal
+    ${attendees}    create list    ${attendee_1}
+    ${summary}    Get Time    epoch
+    ${event_starttime}    get_event_default_startMillis
+    ${event_endtime}    get_event_default_endMillis
+    ${event_until}    get_event_default_untilMillis
+    ${organizer}    makeHashField    str-address=${common_from}${common_domain}    str-commonName=${common_from}${common_domain}
+    ${makeHashField_recurrence}    makeHashField    str-frequency=daily    int-interval=1    str-until=${event_until}000
+    ${makeHashField}    makeHashField    str-calendarId=${default cal id}    str-startMillis=${event_starttime}000    str-endMillis=${event_endtime}000    str-summary=${summary}    attendees=${attendees}
+    ...    str-@type=Event    str-categories=vacation    organizer=${organizer}    dict-recurrence=${makeHashField_recurrence}
+    ${master_id}    create_event_1    params.event=${makeHashField}
+    ${makeHashField_invite}    makeHashField    str-calendarId=${default cal id}    str-startMillis=${event_starttime}000    str-endMillis=${event_endtime}000    str-summary=${summary}    attendees=${attendees}
+    ...    str-@type=Event    str-categories=vacation    organizer=${organizer}    dict-recurrence=${makeHashField_recurrence}    str-uid=${master_id}
+    ${send_invite}    event_send_invite    params.event=${makeHashField_invite}    params.notifyType=CREATE_EVENT
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${mail id}    get_mail_id_by_subject    subject=Event invitation: ${summary}    params.folderPath=INBOX
+    ${fetch result}    msg_fetch    params.messageUid=${mail id}    params.folderPath=INBOX
+    Should Contain    ${fetch result}    "recurrence"
+    Should Contain    ${fetch result}    ${local_timezone}
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${calendar ids}    create list    ${default cal id}
+    ${report_start}    get_event_default_starttime
+    ${report_end}    get_event_default_endtime
+    ${event_filter}    makeHashField    str-includeMasterEvents=false
+    ${check event}    check_event_by_summary    expectStr=${common_to}${common_domain}    expectCnt=63    summary=${summary}    params.calendarIds=${calendar ids}    startTime=${report_start}
+    ...    endTime=${report_end}    params.filter=${event_filter}
+    ${event_id}    get_one_event_id    summary=${summary}    startTime=${report_start}    endTime=${report_end}
+    ${makeHashField_update}    makeHashField    str-calendarId=${default cal id}    str-startMillis=${event_starttime}000    str-endMillis=${event_endtime}000    str-summary=${summary} updated-one    attendees=${attendees}
+    ...    str-@type=Event    str-categories=vacation    organizer=${organizer}    dict-recurrence=${makeHashField_recurrence}    str-uid=${event_id}    str-recurrenceOf=${master_id}
+    ${update result}    update_event    params.event=${makeHashField_update}    scope=instance
+    ${check event updated}    check_event_by_summary    expectStr=${common_to}${common_domain}    expectCnt=1    summary=${summary} updated-one    params.calendarIds=${calendar ids}    startTime=${report_start}
+    ...    endTime=${report_end}
+    ${check event other}    check_event_by_summary    expectStr=${common_to}${common_domain}    expectCnt=62    summary=${summary}    params.calendarIds=${calendar ids}    startTime=${report_start}
+    ...    endTime=${report_end}
+    ${send_invite}    event_send_invite    params.event=${makeHashField_update}    params.notifyType=UPDATE_EVENT
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${mail id}    get_mail_id_by_subject    subject=Event updated: ${summary} updated-one    params.folderPath=INBOX
+    ${fetch result}    msg_fetch    params.messageUid=${mail id}    params.folderPath=INBOX
+    Should Contain    ${fetch result}    recurrenceOf
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${del the series}    del_event    calendarId=${default cal id}    eventId=${event id}    scope=all
+    ${check event updated after delete}    check_event_by_summary    expectStr=${common_to}${common_domain}    expectCnt=0    summary=${summary} updated-one    params.calendarIds=${calendar ids}    startTime=${report_start}
+    ...    endTime=${report_end}
+    ${check other events after delete}    check_event_by_summary    expectStr=${common_to}${common_domain}    expectCnt=0    summary=${summary}    params.calendarIds=${calendar ids}    startTime=${report_start}
+    ...    endTime=${report_end}
+    ${send_invite}    event_send_invite    params.event=${makeHashField_invite}    params.notifyType=CANCEL_EVENT
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${mail id}    get_mail_id_by_subject    subject=Event cancelled: ${summary}    params.folderPath=INBOX
+    ${fetch result}    msg_fetch    params.messageUid=${mail id}    params.folderPath=INBOX
+    Should Contain    ${fetch result}    "recurrence"
+    User Logout
+
+Event - attendee notify mail after update event name( all )
+    [Documentation]    to do:wait for the feature ready
+    [Tags]    excluded
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${result}    Empty Folder    folderPath=INBOX
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${set timezone}    set_timzone    zoneId=${local_timezone}
+    ${del_all_calendars}    del_all_calendars
+    ${default cal id}    get_calendar_id_by_name    name=${default_cal_name}    index=0
+    ${empty result}    empty_calendar    id=${default cal id}
+    ${attendee_1}    makeHashField    str-address=${common_to}${common_domain}    str-commonName=${common_to}${common_domain}    str-status=needsAction    str-type=internal
+    ${attendees}    create list    ${attendee_1}
+    ${summary}    Get Time    epoch
+    ${event_starttime}    get_event_default_startMillis
+    ${event_endtime}    get_event_default_endMillis
+    ${event_until}    get_event_default_untilMillis
+    ${organizer}    makeHashField    str-address=${common_from}${common_domain}    str-commonName=${common_from}${common_domain}
+    ${makeHashField_recurrence}    makeHashField    str-frequency=daily    int-interval=1    str-until=${event_until}000
+    ${makeHashField}    makeHashField    str-calendarId=${default cal id}    str-startMillis=${event_starttime}000    str-endMillis=${event_endtime}000    str-summary=${summary}    attendees=${attendees}
+    ...    str-@type=Event    str-categories=vacation    organizer=${organizer}    dict-recurrence=${makeHashField_recurrence}
+    ${create result}    create_event    params.event=${makeHashField}
+    ${calendar ids}    create list    ${default cal id}
+    ${report_start}    get_event_default_starttime
+    ${report_end}    get_event_default_endtime
+    ${check event}    check_event_by_summary    expectStr=${common_to}${common_domain}    expectCnt=63    summary=${summary}    params.calendarIds=${calendar ids}    startTime=${report_start}
+    ...    endTime=${report_end}
+    ${event_id}    get_one_event_id    summary=${summary}    startTime=${report_start}    endTime=${report_end}
+    ${master_id}    get_master_id    summary=${summary}    startTime=${report_start}    endTime=${report_end}
+    ${makeHashField_update}    makeHashField    str-calendarId=${default cal id}    str-startMillis=${event_starttime}000    str-endMillis=${event_endtime}000    str-summary=${summary} updated-all-name    attendees=${attendees}
+    ...    str-@type=Event    str-categories=vacation    organizer=${organizer}    dict-recurrence=${makeHashField_recurrence}    str-uid=${event_id}    str-recurrenceOf=${master_id}
+    ${update result}    update_event    params.event=${makeHashField_update}    scope=all
+    ${makeHashField_invite}    makeHashField    str-calendarId=${default cal id}    str-startMillis=${event_starttime}000    str-endMillis=${event_endtime}000    str-summary=${summary} updated-all-name    attendees=${attendees}
+    ...    str-@type=Event    str-categories=vacation    organizer=${organizer}    dict-recurrence=${makeHashField_recurrence}    str-uid=${master_id}
+    ${send_invite}    event_send_invite    params.event=${makeHashField_invite}    params.notifyType=UPDATE_EVENT
+    ${check event}    check_event_by_summary    expectStr=${common_to}${common_domain}    expectCnt=63    summary=${summary} updated-all-name    params.calendarIds=${calendar ids}    startTime=${report_start}
+    ...    endTime=${report_end}
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${mail id}    get_mail_id_by_subject    subject=Event updated: ${summary} updated-all-name    params.folderPath=INBOX
+    ${fetch result}    msg_fetch    params.messageUid=${mail id}    params.folderPath=INBOX
+    Should Contain    ${fetch result}    "recurrence"
+    Should Contain    ${fetch result}    ${local_timezone}
+    User Logout
+
+Event - for mercury-408
+    [Documentation]    1. update one instance
+    ...    2. update another instance(effect all)
+    ...    3.all event summery should be same
+    ...
+    ...
+    ...    ${del the series} del_event calendarId=${default cal id} id=${event_id_1} affects=all
+    ...
+    ...    pre condition:
+    ...    user timezone should be same with local machine timezone
+    [Tags]    excluded
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${default cal id}    get_calendar_id_by_name    name=${default_cal_name}    index=0
+    ${empty result}    empty_calendar    id=${default cal id}
+    ${summary}    Get Time    epoch
+    ${event_starttime}    get_event_default_startMillis
+    ${event_endtime}    get_event_default_endMillis
+    ${event_until}    get_event_default_untilMillis
+    ${organizer}    makeHashField    str-address=${common_from}${common_domain}    str-commonName=${common_from}${common_domain}
+    ${makeHashField_recurrence}    makeHashField    str-frequency=daily    int-interval=1    str-until=${event_until}000
+    ${makeHashField}    makeHashField    str-calendarId=${default cal id}    str-startMillis=${event_starttime}000    str-endMillis=${event_endtime}000    str-summary=${summary}    list-attendees=[]
+    ...    str-@type=Event    str-categories=vacation    organizer=${organizer}    dict-recurrence=${makeHashField_recurrence}
+    ${create_event}    create_event    params.event=${makeHashField}
+    ${calendar ids}    create list    ${default cal id}
+    ${report_start}    get_event_default_starttime
+    ${report_end}    get_event_default_endtime
+    ${check event}    check_event_by_summary    expectCnt=63    summary=${summary}    params.calendarIds=${calendar ids}    startTime=${report_start}    endTime=${report_end}
+    ${event_id}    get_one_event_id    summary=${summary}    startTime=${report_start}    endTime=${report_end}
+    ${makeHashField_update}    makeHashField    str-calendarId=${default cal id}    str-startMillis=${event_starttime}000    str-endMillis=${event_endtime}000    str-summary=${summary} updated-one    list-attendees=[]
+    ...    str-@type=Event    str-categories=vacation    organizer=${organizer}    dict-recurrence=${makeHashField_recurrence}    str-uid=${event_id}
+    ${update result}    update_event    params.event=${makeHashField_update}    scope=instance
+    ${check event}    check_event_by_summary    expectCnt=1    summary=${summary} updated-one    params.calendarIds=${calendar ids}    startTime=${report_start}    endTime=${report_end}
+    ${check event}    check_event_by_summary    expectCnt=62    summary=${summary}    params.calendarIds=${calendar ids}    startTime=${report_start}    endTime=${report_end}
+    Log    still a series after update one instance
+    ${event_id_1}    get_a_diff_event_id    summary=${summary}    event_id=${event_id}    startTime=${report_start}    endTime=${report_end}
+    Log    below start end time is from 20191001 event, this is not a proper way for data preparation....
+    ${makeHashField_update}    makeHashField    str-calendarId=${default cal id}    str-startMillis=1569893400000    str-endMillis=1569895200000    str-summary=${summary} updated-all    list-attendees=[]
+    ...    str-@type=Event    str-categories=vacation    organizer=${organizer}    dict-recurrence=${makeHashField_recurrence}    str-uid=${event_id_1}
+    ${update result}    update_event    params.event=${makeHashField_update}    scope=all
+    ${check event}    check_event_by_summary    expectCnt=63    summary=${summary} updated-all    params.calendarIds=${calendar ids}    startTime=${report_start}    endTime=${report_end}
+    ${check event}    check_event_by_summary    expectCnt=0    summary=${summary} updated-one    params.calendarIds=${calendar ids}    startTime=${report_start}    endTime=${report_end}
+    User Logout

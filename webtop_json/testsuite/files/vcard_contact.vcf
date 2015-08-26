@@ -1,0 +1,9 @@
+BEGIN:VCARD
+VERSION:3.0
+N;CHARSET=UTF-8:vcard_last;vcard_first;vcard_middle;;
+FN;CHARSET=UTF-8:vcard_first vcard_middle vcard_last
+NICKNAME;CHARSET=UTF-8:vcard_nick
+TEL;CHARSET=UTF-8;TYPE=home;TYPE=cell:1234
+TEL;CHARSET=UTF-8;TYPE=cell;TYPE=work:5678
+NOTE;CHARSET=UTF-8:
+END:VCARD

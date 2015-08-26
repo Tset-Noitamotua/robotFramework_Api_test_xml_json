@@ -1,0 +1,19 @@
+*** Variables ***
+${HostPort}       http://ruby.qa.laszlosystems.com:6010
+${common_url}     ${HostPort}/kiwi/dd
+${common_domain}    @opal.qa.laszlosystems.com
+${common_to}      vvnJul1
+${common_from}    vvnJul
+${mail_password}    p
+${mail_subject}    test
+${mail_body}      Mail Body
+${mail_cc}        vvnJul2
+${mail_bcc}       vvnJul3
+${common_upload_url}    ${HostPort}/kiwi/http/upload?token=%s&sessionId=%s
+${mail_get_attach_url}    ${HostPort}/kiwi/http/viewattachment?&accountId&folder=%s&uid=%s&part=%s
+${file_name}      中文名.txt Fish.jpg Owl.png test2.docx test3.xlsx test4.pptx
+${contact_PABhost}    opal.qa.laszlosystems.com
+${mail_vieweml}    ${HostPort}/kiwi/bin
+${contact_export}    ${HostPort}/kiwi/http/download/
+${mail_faceImg}    ${HostPort}/kiwi/html/rte/resources/images/
+${max_signature}    10

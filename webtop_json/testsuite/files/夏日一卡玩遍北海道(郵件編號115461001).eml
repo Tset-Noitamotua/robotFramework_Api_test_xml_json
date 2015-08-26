@@ -1,0 +1,59 @@
+Return-Path: <aa@tku.edu.tw>
+Original-Recipient: rfc822;test33@tku.edu.tw
+Received: from mta1.wm.tku.edu.tw (192.168.109.97) by cpms3.wm.tku.edu.tw (8.6.117.04)
+        id 5382E83C00000092 for test33@tku.edu.tw; Mon, 11 Aug 2014 08:51:02 +0800
+Received: from smtp1.tku.edu.tw (163.13.1.248) by mta1.wm.tku.edu.tw (8.6.117.04)
+        id 53BCD0EB003CBA92 for test33@tku.edu.tw; Mon, 11 Aug 2014 08:51:02 +0800
+Received: from toodoo2.ipcnet.tku.edu.tw (toodoo2.ipcnet.tku.edu.tw [163.13.240.33])
+	by smtp1.tku.edu.tw (Postfix) with SMTP id F0CC649
+	for <test33@tku.edu.tw>; Mon, 11 Aug 2014 08:50:47 +0800 (CST)
+Received: from mta1.wm.tku.edu.tw (192.168.109.97) by cpms2.wm.tku.edu.tw (8.6.117.04)
+        id 539185AA0012FF13 for 114968@mail.tku.edu.tw; Fri, 8 Aug 2014 21:40:53 +0800
+Received: from mailgw.tku.edu.tw (163.13.1.248) by mta1.wm.tku.edu.tw (8.6.117.04)
+        id 53BCD0EB0038F6A5 for 114968@mail.tku.edu.tw; Fri, 8 Aug 2014 21:40:53 +0800
+Received: from localhost (localhost [127.0.0.1])
+	by mailgw.tku.edu.tw (MOS 3.10.10a-GA)
+	id MWK66200;
+	Fri,  8 Aug 2014 21:40:53 +0800 (CST)
+Received: from MKTMAIL.bot.com.tw (mktmail.bot.com.tw [210.71.212.31])
+	by mailgw.tku.edu.tw (MOS 3.10.10a-GA)
+	with ESMTP id MWK66196;
+	Fri, 8 Aug 2014 21:40:53 +0800 (CST)
+Received: from Notify ([10.4.200.2]) by MKTMAIL.bot.com.tw with Microsoft SMTPSVC(6.0.3790.4675);
+	 Fri, 8 Aug 2014 21:40:53 +0800
+From: "=?utf-8?Q?=E8=87=BA=E7=81=A3=E9=8A=80=E8=A1=8C(Bank of Taiwan)?="
+	<news@mktmail.bot.com.tw>
+To: <toodoo@mail.tku.edu.tw>
+Date: Fri, 8 Aug 2014 21:40:53 +0800
+Subject: =?utf-8?B?5aSP5pel5LiA5Y2h546p6YGN5YyX5rW36YGTKOmDteS7tue3qOiZnzoxMTU0NjEwMDEp?=
+Content-Type: text/html; charset="utf-8"
+Content-Transfer-Encoding: base64
+Message-ID: <MKTMAILXDCTy1jS5wF900038a05@MKTMAIL.bot.com.tw>
+X-OriginalArrivalTime: 08 Aug 2014 13:40:53.0623 (UTC) FILETIME=[5FDC7070:01CFB30E]
+X-Junkmail-Status: score=10/50, host=mailgw.tku.edu.tw
+X-Junkmail-SD-Raw: score=unknown,
+	refid=str=0001.0A150206.53E4D365.00C5:SCGSTAT1385165,ss=1,fgs=1024,
+	ip=210.71.212.31,
+	so=2010-07-09 01:15:44,
+	dmn=5.4.3/2007-10-18,
+	mode=single engine
+X-Junkmail-IWF: false
+X-Mirapoint-Loop-Id: e90acc71bd567479b863576eb52919da
+MIME-Version: 1.0
+
+PG1ldGEgaHR0cC1lcXVpdj0iQ29udGVudC1UeXBlIiBjb250ZW50PSJ0ZXh0L2h0bWw7IGNoYXJz
+ZXQ9dXRmLTgiPjwhLS0gPC9tZXRhPiAtLT4NCjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+Ym9keSB7
+DQoJYmFja2dyb3VuZC1jb2xvcjogIzk5NjZGRjsNCn0NCjwvc3R5bGU+PCEtLSBTYXZlIGZvciBX
+ZWIgU2xpY2VzIChCb3QgZV9ETS5qcGcpIC0tPg0KPHRhYmxlIHdpZHRoPSI4MDAiIGhlaWdodD0i
+NjAwIiBhbGlnbj0iY2VudGVyIiBpZD0iX19fMDEiIGJvcmRlcj0iMCIgY2VsbHNwYWNpbmc9IjAi
+IGNlbGxwYWRkaW5nPSIwIj4NCiAgPHRib2R5Pg0KICAgIDx0cj4NCiAgICAgIDx0ZD48YSBocmVm
+PSJodHRwOi8vd3d3LnNtYXJ0MnBheS5jb20udHcvamFwYW4iIHNoYXBlPSJyZWN0Ij48aW1nIHdp
+ZHRoPSI4MDAiIGhlaWdodD0iNjAwIiBzcmM9Imh0dHA6Ly9ta3RtYWlsLmJvdC5jb20udHcvRURN
+LzIxMjUyL0pBUEFOLmpwZyI+IDwvYT48L3RkPg0KICAgIDwvdHI+DQogIDwvdGJvZHk+DQo8L3Rh
+YmxlPjwhLS0gRW5kIFNhdmUgZm9yIFdlYiBTbGljZXMgLS0+PGNlbnRlcj48dGFibGU+PHRyPjx0
+ZCB2YWxpZ249Im1pZGRsZSI+PGZvbnQgc2l6ZT0iMiI+PGltZyBzcmM9Imh0dHA6Ly9ta3RtYWls
+LmJvdC5jb20udHcvRURNL2ltYWdlLmFzcHg/SUQ9MTE1NDYxMDAxIj7mraTlsIHkv6Hku7bnlLHn
+s7vntbHoh6rli5XnmbzpgIEs6KuL5Yu/5Zue5L+hO+iLpeaCqOS4jeaDs+WGjeaUtuWIsOacrOWF
+rOWPuOmbu+WtkOWgseioiuaBr++8jOiri+aMieatpDxhIGhyZWY9Imh0dHA6Ly9ta3RtYWlsLmJv
+dC5jb20udHcvRURNL1Vuc3Vic2NyaXB0aW9uLmFzcHg/SUQ9MTE1NDYxMDAxIj7lj5bmtojoqILp
+lrE8L2E+77yM6Kyd6Kyd77yBPC9mb250PjwvdGQ+PC90cj48L3RhYmxlPjwvY2VudGVyPg==

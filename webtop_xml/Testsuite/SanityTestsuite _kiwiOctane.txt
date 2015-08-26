@@ -1,0 +1,712 @@
+*** Settings ***
+Documentation     This suite cover all related webtop API by functional steps
+Resource          ../Libs/webtopresource-kiwi-octane.txt
+Library           ../Libs/CalendarLib.py    ${common_url}
+Library           ../Libs/PrefsLib.py    ${common_url}
+Library           ../Libs/MailLib.py    ${common_url}
+Library           ../Libs/CommonLib.py    ${common_url}
+Library           ../Libs/SpecialDataLib.py    ${common_url}
+Library           ../Libs/ContactLib.py    ${common_url}
+
+*** Test Cases ***
+Mail message - Send, check, open, flag, search a message
+    [Documentation]    Send message, check msgfetch, flag as Unread and Flagged message, report as spam
+    [Tags]    Mail
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${sendMsgKW}    Send Message    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=${mail_subject}    priority=3
+    ${search result}    Search Message    text=${sendMsgKW}    folders=INBOX
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${check msgfetch}    Check Message Fetch    folder=INBOX
+    ${getmsg}    Open Message    folder=INBOX    hostport=${mail_vieweml}
+    ${search result}    Search Message    text=${sendMsgKW}    folders=Inbox    timeUnit=days    delta=5
+    ${flag Unread}    Flag Message    folder=INBOX    flag=seen    value=0
+    ${flag Flagged}    Flag Message    folder=INBOX    flag=flagged    value=1
+    User Logout
+
+Mail message - Mark a message as spam and not spam
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${sendMsgKW}    Send Message    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=${mail_subject}    priority=3
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${report spam}    Report Message    folder=INBOX    dstfolder=Spam
+    ${check subject in spam}    check_message_header_subject    folder=Spam
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${report not spam}    Report Message    folder=Spam
+    ${check subject in inbox}    check_message_header_subject    folder=INBOX
+    User Logout
+
+Mail message - Save draft, To/Cc/Bcc, check msg header, move, delete
+    [Documentation]    Save draft, Cc/Bcc, check msgheaderlistcheck, move to trash, delete message
+    [Tags]    Mail
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${save draft}    Save Message As Draft    from=${common_from}${common_domain}    bodytype=plain
+    ${send msg}    Send Message    from=${common_from}${common_domain}    to=${common_to}${common_domain}    cc=${mail_cc}${common_domain}    bcc=${mail_bcc}${common_domain}    mailBody=${mail_body}
+    ...    subject=${mail_subject}    priority=3
+    User Logout
+    User Login    username=${mail_cc}${common_domain}    password=${mail_password}
+    ${cc check msg header}    Check Message Header    folder=INBOX
+    User Logout
+    User Login    username=${mail_bcc}${common_domain}    password=${mail_password}
+    ${Bcc check msg header}    Check Message Header    folder=INBOX
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${To check msg header}    Check Message Header    folder=INBOX
+    ${move to trash}    Move Message    folder=INBOX    dstfolder=Trash    all=true
+    ${delete msg}    Delete Message
+    User Logout
+
+Mail message - Send mail with attachments and preview the attachments
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${attachment}    Upload File    url=${common_upload_url}    fname=${file_name}
+    ${sendMsgKW}    Send Message    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=${mail_subject}    priority=3    attachment=true
+    Sleep    1s
+    ${result}    Preview Attachments    url=${mail_get_attach_url}    folder=INBOX
+    User Logout
+
+Mail message - Send mail with big attachment
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${attachment}    Upload File    url=${common_upload_url}    fname=test.pdf
+    ${sendMsgKW}    Send Message    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=${mail_subject}    priority=3    attachment=true
+    Sleep    3s
+    ${result}    Preview Attachments    url=${mail_get_attach_url}    folder=INBOX
+    User Logout
+
+Mail message - move all messages to trash folder
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${send msg1}    Send Message    from=${common_from}${common_domain}    to=${common_from}${common_domain}
+    ${send msg2}    Send Message    from=${common_from}${common_domain}    to=${common_from}${common_domain}
+    ${move to trash}    Move Message    folder=INBOX    dstfolder=Trash    all=true
+    User Logout
+
+Mail message - print preview
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${send}    Send Message    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=${mail_subject}
+    ${print preview}    print preview message    folder=INBOX
+    User Logout
+
+Mail folder - create, rename, move to trash, delete
+    [Documentation]    create, rename, move to trash, delete folder
+    [Tags]    Mail Folder
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${create folder}    Create Folder
+    ${rename folder}    Rename Folder
+    ${move folder}    Move Folder    target=Trash
+    ${delete folder}    Delete Folder
+    User Logout
+
+Mail folder - create, move to folder, empty trash
+    [Documentation]    create, move to trash folder, empty trash folder
+    [Tags]    Mail Folder
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${create folder}    Create Folder
+    ${move folder}    Move Folder    target=Trash
+    ${result}    Empty Folder
+    User Logout
+
+preference - Mail - General settings, Sendformat Rich
+    [Documentation]    Back to default prefs first, then set one action and check
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${default prefs}    Set Mail Prefs    setDefault=true
+    ${sendFormat rich}    Set Mail Prefs    prefsName=attr.user.mail.SendFormat    prefsValue=rich
+    User Logout
+
+preference - Mail - General settings, AutoSaveDraftFlag
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${default prefs}    Set Mail Prefs    setDefault=true
+    ${autoSaveDraft true}    Set Mail Prefs    prefsName=attr.user.mail.AutoSaveDraftFlag    prefsValue=true
+    User Logout
+
+preference - Mail - General settings, SaveToDraftsInterval
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${default prefs}    Set Mail Prefs    setDefault=true
+    ${saveDraftInterval 60}    Set Mail Prefs    prefsName=attr.user.mail.SaveToDraftsInterval    prefsValue=60
+    User Logout
+
+preference - Mail - General settings, outgoing, check interval and reply quoting settings
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${default prefs}    outgoing_checkinverval_replyquote
+    ${3prefs}    outgoing_checkinverval_replyquote    saveOutgoingMessages=true    replyQuoting=true    autoCheckInterval=1800
+    User Logout
+
+preference - Mail - General settings, ReplyPrefix
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${default prefs}    Set Mail Prefs    setDefault=true
+    ${replyPrefix >}    Set Mail Prefs    prefsName=attr.user.mail.ReplyPrefix    prefsValue=&gt;
+    User Logout
+
+preference - Mail - General settings, autoCreateContact
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${default prefs}    Set Mail Prefs    setDefault=true
+    ${autoCreateContact true}    Set Mail Prefs    prefsName=autoCreateContact    prefsValue=true
+    User Logout
+
+preference - Mail - General settings,TimeDisplayFormat
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${default prefs}    Set Mail Prefs    setDefault=true
+    ${TimeDisplayFormat short}    Set Mail Prefs    prefsName=attr.user.mail.TimeDisplayFormat    prefsValue=short
+    User Logout
+
+preference - Mail - General settings,readFirstMail
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${default prefs}    Set Mail Prefs    setDefault=true
+    ${readFirstMail}    Set Mail Prefs    prefsName=attr.user.mail.readFirstMail    prefsValue=true
+    User Logout
+
+Preference - Mail - Accounts, check & del existed external account, create and check created account
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${check_external_exist}    Check external Account    checkDup=True    name=testtouchui@gmail.com    psw=laszlolaszlo
+    ${creat_external_accounts}    Add External Account    name=testtouchui@gmail.com    psw=laszlolaszlo
+    ${check_external_accounts}    Check external Account    name=testtouchui@gmail.com    psw=laszlolaszlo
+    User Logout
+
+Preference - Mai - Set and Del signature
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${signatureKeyword}    Set Signature    type=html    position=below    isdefault=true
+    ${del sig result}    Delete Signature
+    User Logout
+
+Preference - Mail- add block sender and test for the block function
+    [Documentation]    Send, check fetch, block, send again, check fetch again
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${send msg}    Send Message    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=${mail_subject}
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${msgfetch}    Check Message Fetch    folder=INBOX
+    ${block sender}    Add Block Sender    sender=${common_from}${common_domain}
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${send msg again}    Send Message    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=${mail_subject}
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${msgfetch again}    Check Message Fetch    folder=INBOX    needBlocked=True
+    User Logout
+
+Preference - Mail - add, list and remove blocksender(s)
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${block sender}    Add Block Sender    sender=bs1${common_domain}
+    ${block sender}    Add Block Sender    sender=bs2${common_domain}
+    ${block sender}    Add Block Sender    sender=bs3${common_domain}
+    ${list result}    List Blocksenders
+    ${remove result}    Remove Blocksenders
+    ${remove result}    Remove Blocksenders    all=true
+    User Logout
+
+Preference - Mail- add safe sender and test for the safe send function
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+
+Preference - Mail - add, list and remove safe sender(s)
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${safe sender1}    Add Safe Sender    sender=ss1${common_domain}
+    ${safe sender2}    Add Safe Sender    sender=ss2${common_domain}
+    ${safe sender3}    Add Safe Sender    sender=ss3${common_domain}
+    ${safesender List}    List Safesenders
+    ${remove savesender}    Remove Safesenders
+    ${remove all}    Remove Safesenders    all=true
+    User Logout
+
+Preference - Mail - Auto forward
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${auto fwd}    Auto Forward    destination=${mail_cc}${common_domain}    keepCopy=true
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${send msg}    Send Message    from=${common_from}${common_domain}    to=${common_to}${common_domain}    mailBody=${mail_body}    subject=${mail_subject}    priority=3
+    User Logout
+    User Login    username=${mail_cc}${common_domain}    password=${mail_password}
+    ${Cc check msg header}    Check Message Header    folder=INBOX
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${check msgfetch}    Check Message Header    folder=INBOX
+    User Logout
+
+Preference - Mail - test for disposable address function
+    pass
+
+Preference - Mail - add, list, delete disposable address
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${add}    Add Disposable address    n=3    domain=@devmybtinternet.com
+    ${list}    List Disposable address
+    ${del 1}    Delete Disposable address
+    ${list}    List Disposable address
+    ${del all}    Delete Disposable address    all=true
+    User Logout
+
+Preference - Mail - block image settings in different ways, add a trust sender
+    [Documentation]    0 - Always allow images, 1 - Always block images, 2 - Always allow images from contacts in address book, 3 - Always allow images except when tagged as spam or in spam folder
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${0}    Save Image Blocker    method=0
+    ${1}    Save Image Blocker    method=1
+    ${1}    Save Image Blocker    method=1
+    ${trust}    Trust Image Sender    trust=${common_from}${common_domain}
+    ${2}    Save Image Blocker    method=2
+    ${3}    Save Image Blocker    method=2
+
+Preference - Mail - test image blocker, always allow image
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${0}    Save Image Blocker    method=0
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${r}    Send With Img    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=${mail_subject}    priority=3    smileFace=${mail_faceImg}
+    ...    faceIcon=5
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${check}    Check Message Fetch    kw=${r}    folder=INBOX    html=full
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${r}    Send With Img    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=${mail_subject}    priority=3    smileFace=${mail_faceImg}
+    ...    faceIcon=6
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${check}    Check Message Fetch    kw=${r}    folder=INBOX    html=full
+    User Logout
+
+Preference - Mail - test image blocker, always block
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${1}    Save Image Blocker    method=1
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${r}    Send With Img    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=${mail_subject}    priority=3    smileFace=${mail_faceImg}
+    ...    faceIcon=8
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${msgfetch again}    Check Message Fetch    folder=INBOX    html=full    blockImg=true
+    User Logout
+
+Preference - Mail - test image blocker, always block, add trust sender
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${trust}    Trust Image Sender    trust=${common_from}${common_domain}
+    ${1}    Save Image Blocker    method=1
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${r}    Send With Img    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=${mail_subject}    priority=3    smileFace=${mail_faceImg}
+    ...    faceIcon=8
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${msgfetch again}    Check Message Fetch    kw=${r}    folder=INBOX    html=full    showImg=true
+    User Logout
+
+Preference - Mail - add image trust sender, list and delete sender(s)
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${trust1}    Trust Image Sender    trust=${common_from}${common_domain}
+    ${trust2}    Trust Image Sender    trust=${common_from}${common_domain}
+    ${trust3}    Trust Image Sender    trust=${common_from}${common_domain}
+    ${check}    Image Trust List    sender=${common_from}${common_domain}
+    ${delete one}    Delete Img Trust Sender
+    ${check}    Image Trust List    sender=${common_from}${common_domain}
+    ${delete all}    Delete Img Trust Sender    all=true
+    User Logout
+
+Preference - Mail - test image blocker, allow images from contacts in address book
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${use default PAB}    Use addressbook    defaultPAB=true
+    ${only lastname}    Create Basic Contact    firstName=${common_from}    needMoreInfo=true
+    ${add home mail}    Set More Info    label=home    type=lzEmail    value=${common_from}${common_domain}
+    ${more info contact}    Send Save Contact    withmoreInfo=true
+    ${0}    Save Image Blocker    method=2
+    User Logout
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${r}    Send With Img    to=${common_to}${common_domain}    from=${common_from}${common_domain}    subject=${mail_subject}    priority=3    smileFace=${mail_faceImg}
+    ...    faceIcon=7
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${check}    Check Message Fetch    kw=${r}    folder=INBOX    html=full    showImg=true
+    User Logout
+    User Login    username=${mail_cc}${common_domain}    password=${mail_password}
+    ${r}    Send With Img    to=${common_to}${common_domain}    from=${mail_cc}${common_domain}    subject=${mail_subject}    priority=3    smileFace=${mail_faceImg}
+    ...    faceIcon=7
+    User Logout
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${check}    Check Message Fetch    folder=INBOX    html=full    blockImg=true
+    User Logout
+
+Preference - Profile
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${profile settings}    Set Profile    fistName=test    lastName=vvn    mailAddress=${common_to}${common_domain}    userMoblie=123456789000
+    User Logout
+
+Preference - All Languages
+    [Documentation]    Set all values and test current settings value for each API
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${set languages}    Set Languages
+    User Logout
+
+Preference - All Timeformats
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${set timeformats}    Set Timeformats
+    User Logout
+
+Preference - All Date formats
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${set dateformats}    Set Dateformats
+    User Logout
+
+Preference - All Timezones
+    User Login    username=${common_to}${common_domain}    password=${mail_password}
+    ${set timezones}    Set Timezones
+    User Logout
+
+Preference - calendar and task settings, all and any attribute values
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${single_results}    Set Calendar Prefs    defaultview=list    TaskReminderUnit=60    TaskSortType=title
+    ${default view}    Set Calendar Prefs    all=defaultview
+    ${day start}    Set Calendar Prefs    all=StartTimeOfDay
+    ${day end}    Set Calendar Prefs    all=endTimeOfDay
+    ${week start}    Set Calendar Prefs    all=weekstart
+    ${event duration}    Set Calendar Prefs    all=timeinterval
+    ${event reminder}    Set Calendar Prefs    all=remindertime
+    ${TaskViewType}    Set Calendar Prefs    all=TaskViewType
+    ${TaskSortType}    Set Calendar Prefs    all=TaskSortType
+    ${task reminder}    Set Calendar Prefs    all=TaskReminderUnit
+    User Logout
+
+Calendar - create, rename and delete calendar
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${created cal id}    Create Calendar    dom=${common_domain}    name=${common_from}
+    ${update cal result}    Update Calendar    dom=${common_domain}    name=${common_from}
+    ${delete cal id}    Delete Calendar    dom=${common_domain}    name=${common_from}
+    User Logout
+
+Calendar - create with all categories, create with one category and one attendee
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${created cal id}    Create Calendar    dom=${common_domain}    name=${common_from}
+    ${use calendar}    Use Calendar    name=${common_from}    dom=${common_domain}    defaultCalenar=True
+    ${all categories}    Create Event Categories    allcategories=true
+    ${one category with attendees}    Create Event Categories    attendees=${common_to}${common_domain}
+    User Logout
+
+Calendar - create daily recurrent event - by count, by until date
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${use default cal}    Use Calendar    name=${common_from}    dom=${common_domain}    defaultCalenar=True
+    ${create 3 events}    Create Recurrent Events    freq=daily    count=3    interval=1    attendees=${common_to}${common_domain}
+    ${use user cal}    Use Calendar    name=${common_from}    dom=${common_domain}    userCalendar=True
+    ${create UNTIL events}    Create Recurrent Events    freq=daily    untilMonths=1    interval=5    attendees=${common_to}${common_domain}
+    User Logout
+
+Calendar - create weekly recurrent event - by count, by until date
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${user calendar}    Use Calendar    name=${common_from}    dom=${common_domain}    userCalendar=True
+    ${create event by until date}    Create Recurrent Events    freq=weekly    untilMonths=1    dayList=SU,MO    interval=1
+    ${default calendar}    Use Calendar    name=${common_from}    dom=${common_domain}    defaultCalenar=True
+    ${create event by count}    Create Recurrent Events    freq=weekly    count=3    dayList=TH,FR    interval=1
+    User Logout
+
+Calendar - create monthly recurrent by this day of MONTH (by count / until months)
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${user calendar}    Use Calendar    name=${common_from}    dom=${common_domain}    userCalendar=True
+    ${create 3 events}    Create Recurrent Events    freq=monthly    count=3    interval=1    DayofMonth=true
+    ${default calendar}    Use Calendar    name=${common_from}    dom=${common_domain}    defaultCalenar=True
+    ${create until 3 month}    Create Recurrent Events    freq=monthly    untilMonths=3    interval=1    DayofMonth=true
+    User Logout
+
+Calendar - create monthly recurrent by this day of WEEK (by count / until months)
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${user create calendar}    Use Calendar    name=${common_from}    dom=${common_domain}    userCalendar=True
+    ${this day of week- by count}    Create Recurrent Events    freq=monthly    interval=1    DayofWeek=true    count=3
+    Sleep    1s
+    ${default calendar}    Use Calendar    name=${common_from}    dom=${common_domain}    defaultCalenar=True
+    ${this day of month-by until}    Create Recurrent Events    freq=monthly    interval=1    DayofWeek=true    untilMonths=3
+    User Logout
+
+Calendar - create reminder Minutes/Hours/Days ahead for categories/recurrent events
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${use calendar}    Use Calendar    name=${common_from}    dom=${common_domain}    defaultCalenar=true
+    ${mintues for categories}    Create Event Categories    reminder=3m
+    ${minutes for recurrent}    create_recurrent_Events    reminder=1m    freq=daily    count=3    interval=1
+    ${hours for categories}    Create Event Categories    reminder=1h
+    ${hours for recurrent}    create_recurrent_Events    reminder=1h    freq=daily    count=3    interval=1
+    ${days for categories}    Create Event Categories    reminder=3d
+    ${days for recurrent}    create_recurrent_Events    reminder=3d    freq=daily    count=3    interval=1
+    User Logout
+
+Calendar - create event, add attendee and send invitation
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${use default cal}    Use Calendar    name=${common_from}    dom=${common_domain}    defaultCalenar=True
+    ${create 3 events}    Create Recurrent Events    freq=daily    count=3    interval=1    attendees=${common_to}${common_domain}
+    ${invitaion for recurr}    Send Invitation
+    ${hours for categories}    Create Event Categories    reminder=1h    attendees=${common_to}${common_domain}
+    ${invitation for categories with hours reminder}    Send Invitation
+    User Logout
+
+Calendar - report events from calendars by time unit and duration
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${default calendars}    List Calendars    dom=${common_domain}    name=${common_from}    defaultCalenar=True
+    ${default cal events}    Report Events    timeUnit=month    time=1
+    ${user calendars}    List Calendars    dom=${common_domain}    name=${common_from}    userCalenar=True
+    ${user cal events}    Report Events    timeUnit=week    time=2
+    User Logout
+
+Calendar - update event from daily count3 interval2 to weekly count2 interval1
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${use default cal}    Use Calendar    name=${common_from}    dom=${common_domain}    defaultCalenar=True
+    ${create 3 events}    Create Recurrent Events    freq=daily    count=3    interval=2    attendees=${common_to}${common_domain}
+    ${result}    Update event    freq=weekly    count=2    dayList=TH,FR    interval=1
+    User Logout
+
+Calendar - delete single / recurrent events from default / user calendar
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${use default cal}    Use Calendar    name=${common_from}    dom=${common_domain}    defaultCalenar=True
+    ${all categories}    Create Event Categories    allcategories=true
+    ${create 3 events}    Create Recurrent Events    freq=daily    count=3    interval=1
+    ${default calendars}    List Calendars    name=${common_from}    dom=${common_domain}    defaultCalenar=True
+    ${delete from default cal}    Delete Events    timeUnit=month    time=1
+    User Logout
+
+Calendar - Task - create, update and check group, create a task in the group
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${groupName}    Create Task Group    name=${common_from}    dom=${common_domain}    returnName=true
+    ${newName}    Update Task Group    groupName=${groupName}    newName=blabla
+    ${check result}    List Task Group    check=${newName}
+    ${create task result}    Create Task    localDue=3h    status=IN-PROCESS    priority=3    groupName=${newName}
+    User Logout
+
+Calendar - Task - create a task group and delete task groups
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${groupName}    Create Task Group    name=${common_from}    dom=${common_domain}    returnName=true
+    ${groupList len}    List Task Group    name=${common_from}    dom=${common_domain}
+    ${del groups}    Delete Task Groups
+    User Logout
+
+Calendar - Task - create task, reminder and due time for day/hour/minutes
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${dueTime/reminder-hours}    Create Task    name=${common_from}    dom=${common_domain}    localDue=3h    status=IN-PROCESS    priority=3
+    ...    reminder=2h
+    ${dueTime/reminder-mins}    Create Task    priority=3    reminder=2min    localDue=3min    status=IN-PROCESS
+    ${dueTime/reminder-days}    Create Task    priority=3    reminder=2d    localDue=3d    status=IN-PROCESS
+    User Logout
+
+Calendar - Task - create with different priorities and status and delete all tasks
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${high-inprogress}    Create Task    name=${common_from}    dom=${common_domain}    priority=3    status=IN-PROCESS
+    ${normal-completed}    Create Task    priority=5    status=COMPLETED
+    ${low-NeedsAction}    Create Task    priority=9    status=NEEDS-ACTION
+    ${todoList len}    GetTasks    name=${common_from}    dom=${common_domain}
+    ${result}    Delete Tasks
+    User Logout
+
+Calendar - Task - create task and update it for any attributes
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${high-inprogress}    Create Task    name=${common_from}    dom=${common_domain}    priority=3    status=IN-PROCESS    forUpdate=true
+    ${update title}    Update Task    summary=updated
+    ${dueTime/reminder-hours}    Create Task    status=IN-PROCESS    priority=3    localDue=3h    reminder=2h
+    ${update reminder}    Update Task    priority=1    reminder=1h
+    User Logout
+
+Calendar - Event/Task - advanced search event/task in calendars with any/all conditions
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${defaultCalendar}    Use Calendar    name=${common_from}    dom=${common_domain}    defaultCalenar=True
+    ${userCalendar}    Use Calendar    name=${common_from}    dom=${common_domain}    userCalendar=True
+    ${search default cal}    Advanced Search    calendar=user    action=reportEvents    starYMD=20140501    endYMD=20140608    filter=2014
+    ${search user cal}    Advanced Search    calendar=default    action=reportToDos    starYMD=20140501    endYMD=20140608    filter=2014
+    ${search default cal}    Advanced Search    calendar=all    action=allActions    starYMD=20140501    endYMD=20140608    filter=2014
+    User Logout
+
+Calendar - share calendar with read / readwrite and allow anyone
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${user calendar}    Use Calendar    name=${common_from}    dom=${common_domain}    userCalendar=True
+    ${share to cc readwrite}    Share Calendar    guest=${common_to}    right=readwrite    allowAnyone=true
+    ${user calendar}    Use Calendar    name=${common_from}    dom=${common_domain}    userCalendar=True
+    ${share read allow anyone}    Share Calendar    guest=${mail_cc}    right=read
+    User Logout
+
+Contact - create PAB, list PAB, delete PAB(s)
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${create PAB1}    Create addressbook
+    ${create PAB2}    Create addressbook
+    ${listPAB}    list addressbook
+    ${delete PAB}    delete addressbook
+    ${listPAB}    list addressbook
+    ${delete all}    delete_addressbook    all=true
+    User Logout
+
+Contact - create PAB, list PAB, delete contact group(s) from PAB
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${use default PAB}    Use addressbook    defaultPAB=true
+    ${create group1 in default}    Create Contact Group
+    ${create group2 in default}    Create Contact Group
+    ${user create PAB}    Create addressbook
+    ${use user PAB}    Use addressbook    userPAB=true
+    ${create group1 in userPAB}    Create Contact Group
+    ${create group2 in userPAB}    Create Contact Group
+    ${defaultPAB group}    Delete Contact Group    defaultPAB=true
+    ${defaultPAB group}    Delete Contact Group    defaultPAB=true    all=true
+    ${userPAB group}    Delete Contact Group    userPAB=true
+    ${userPAB group}    Delete Contact Group    userPAB=true    all=true
+    ${delete all}    delete_addressbook    all=true
+    User Logout
+
+Contact - get group from default/user PAB
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${use default PAB}    Use addressbook    defaultPAB=true
+    ${create group1 in default}    Create Contact Group
+    ${user create PAB}    Create addressbook
+    ${use user PAB}    Use addressbook    userPAB=true
+    ${create group1 in userPAB}    Create Contact Group
+    ${get default group}    Get Group    defaultPAB=true
+    ${get user group}    Get Group    userPAB=true
+    User Logout
+
+Contact - create ( in default PAB) simple contact and another with more info contact
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${use default PAB}    Use addressbook    defaultPAB=true
+    ${only lastname}    Create Basic Contact    lastName=${common_from}_lname
+    ${basic contact}    Send Save Contact
+    ${result}    Check Contact    id=${basic contact}
+    ${Basic info}    Create Basic Contact    firstName=${common_from}_fname    needMoreInfo=true
+    ${add work mail}    Set More Info    label=work    type=lzEmail    value=${common_to}${common_domain}
+    ${add home mail}    Set More Info    label=home    type=lzEmail    value=${common_from}${common_domain}
+    ${add home mobile}    Set More Info    label=home    type=lzPhone_mobile    value=234
+    ${addbirthday}    Set More Info    label=birthday    type=lzPersonal    value=20140709
+    ${more info contact}    Send Save Contact    withmoreInfo=true
+    ${result}    Check Contact    id=${more info contact}
+    User Logout
+
+Contact - create ( in user-created PAB) simple contact and another with more info contact
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${use default PAB}    Use addressbook    userPAB=true
+    ${only lastname}    Create Basic Contact    lastName=${common_from}_lname
+    ${basic contact}    Send Save Contact
+    ${check basic}    Check Contact    id=${basic contact}
+    ${Basic info}    Create Basic Contact    firstName=${common_from}_fname    needMoreInfo=true
+    ${add work mail}    Set More Info    label=work    type=lzEmail    value=${common_to}${common_domain}
+    ${add home mail}    Set More Info    label=home    type=lzEmail    value=${common_from}${common_domain}
+    ${add home mobile}    Set More Info    label=home    type=lzPhone_mobile    value=234
+    ${more info contact}    Send Save Contact    withmoreInfo=true
+    ${check full}    Check Contact    id=${more info contact}
+    User Logout
+
+Contact - update for latest created contact
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${use default PAB}    Use addressbook    userPAB=true
+    ${only lastname}    Create Basic Contact    lastName=lname    firstName=fname
+    ${basic contact}    Send Save Contact
+    ${update}    update_contact    newFirstName=newnewnew    needMoreInfo=true
+    ${add work mail}    Set More Info    label=work    type=lzEmail    value=${common_to}${common_domain}
+    ${add home mail}    Set More Info    label=home    type=lzEmail    value=${common_from}${common_domain}
+    ${add home mobile}    Set More Info    label=home    type=lzPhone_mobile    value=234
+    ${more info contact}    Send Save Contact    updatemoreInfo=true
+    ${check full}    Check Contact    id=${more info contact}
+    User Logout
+
+Contact - assign and remove one/all contact(s) between default/user PAB and group
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${assitn all from defaultPAB to group}    move_between_pab_group    defaultPAB=true    all=true
+    ${assitn one userPAB to group}    move_between_pab_group    userPAB=true
+    ${remove all from default PAB group}    move_between_pab_group    defaultPAB=true    remove=true    all=true
+    ${remove one from userPAB group}    move_between_pab_group    userPAB=true    remove=true
+    User Logout
+
+Contact - delete one contact from group, all contacts from group (from default/user PAB)
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${delete one from group}    Delete Contacts    defaultPAB=true    fromGroup=true
+    ${delete all from group}    Delete Contacts    userPAB=true    fromGroup=true    all=true
+    User Logout
+
+Contact - delete one contact from default PAB, all contacts from user created PAB
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${use default PAB}    Use addressbook    defaultPAB=true
+    ${only lastname}    Create Basic Contact    lastName=${common_from}_lname
+    ${basic contact}    Send Save Contact
+    ${create userPAB}    Create addressbook
+    ${use default PAB}    Use addressbook    userPAB=true
+    ${only lastname}    Create Basic Contact    firstName=${common_from}_fname
+    ${basic contact}    Send Save Contact
+    ${use default PAB}    Use addressbook    userPAB=true
+    ${only lastname}    Create Basic Contact    lastName=${common_from}_lname
+    ${basic contact}    Send Save Contact
+    ${delete one contacts}    Delete Contacts    defaultPAB=true
+    ${delete all contacts}    Delete Contacts    userPAB=true    all=true
+    User Logout
+
+Contact - search contact
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${use default PAB}    Use addressbook    defaultPAB=true
+    ${Basic info}    Create Basic Contact    firstName=fname    needMoreInfo=true
+    ${add work mail}    Set More Info    label=work    type=lzEmail    value=${common_to}${common_domain}
+    ${more info contact}    Send Save Contact    withmoreInfo=true
+    ${search workmail}    search_sort_contact    keywords=${common_to}${common_domain}
+    ${search firstname}    search_sort_contact    keywords=fname
+    User Logout
+
+Contact - sort contact
+    [Documentation]    kargs['keywords'] -> keywords for search, \ \ \ kargs['sort'] -> 'firstName ASC', 'firstName DESC', 'lastName ASC', 'lastName DESC', 'email ASC', 'email DESC' '''
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${use default PAB}    Use addressbook    defaultPAB=true
+    ${only lastname}    Create Basic Contact    lastName=a_lastname
+    ${basic contact}    Send Save Contact
+    ${only lastname}    Create Basic Contact    lastName=0_lname
+    ${basic contact}    Send Save Contact
+    ${only lastname}    Create Basic Contact    lastName=_lname
+    ${basic contact}    Send Save Contact
+    ${lastName ASC}    search_sort_contact    sort=lastName ASC
+    ${lastName DESC}    search_sort_contact    sort=lastName DESC
+    User Logout
+
+Contact - merge for dup contacts - previewed, merged and updated, dup contacts deleted
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${use default PAB}    Use addressbook    defaultPAB=true
+    ${only lastname}    Create Basic Contact    firstName=fname
+    ${basic contact}    Send Save Contact
+    ${Basic info}    Create Basic Contact    firstName=fname    needMoreInfo=true
+    ${add work mail}    Set More Info    label=work    type=lzEmail    value=${common_to}${common_domain}
+    ${add home mail}    Set More Info    label=home    type=lzEmail    value=${common_from}${common_domain}
+    ${add home mobile}    Set More Info    label=home    type=lzPhone_mobile    value=234
+    ${more info contact}    Send Save Contact    withmoreInfo=true
+    ${result}    list_contact_dup    defaultPAB=ture
+    ${get contacts}    Get Contacts Merge    fromDup=true
+    User Logout
+
+Contact - merge for created contacts - previewed, merged and updated, dup contacts deleted
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${use default PAB}    Use addressbook    userPAB=true
+    ${only lastname}    Create Basic Contact    lastName=lname    firstName=fname
+    ${basic contact}    Send Save Contact
+    ${only lastname}    Create Basic Contact    lastName=lname
+    ${basic contact}    Send Save Contact
+    ${only lastname}    Create Basic Contact    lastName=lname
+    ${basic contact}    Send Save Contact
+    ${get contacts}    Get Contacts Merge
+    User Logout
+
+Contact - set autosuggest on, create an autosuggest contact and check suggest by keyword
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${set on}    Set Autosuggest Onoff    on=true
+    ${create}    Create Autocomplete    name=1121    address=${common_to}${common_domain}
+    ${filter}    Go Suggest And Check    kw=1121    check=true
+    User Logout
+
+Contact - delete auto-complete contact(s)
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${address1}    Create Autocomplete    name=${common_to}    address=${common_to}${common_domain}
+    ${address2}    Create Autocomplete    name=${mail_cc}    address=${mail_cc}${common_domain}
+    ${address3}    Create Autocomplete    name=${mail_bcc}    address=${mail_bcc}${common_domain}
+    ${list}    list_autocomplete
+    ${delete}    delete_autocomplete
+    ${list}    list_autocomplete
+    ${delete}    delete_autocomplete    all=true
+    User Logout
+
+Contact - Import and Export CSV/VCF conact on default/user-created PAB
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${fid_csv}    Upload File    url=${common_upload_url}    fname=csv_contact.csv
+    ${fid_vcard}    Upload File    url=${common_upload_url}    fname=vcard_contact.vcf
+    ${use default PAB}    Use addressbook    defaultPAB=true
+    ${result1}    Import Contact    fid=${fid_csv}
+    ${as csv}    Export Contact    dlname=savedCsv.csv    url=${contact_export}
+    ${create PAB1}    Create addressbook
+    ${use default PAB}    Use addressbook    userPAB=true
+    ${result2}    Import Contact    fid=${fid_vcard}
+    ${as csv}    Export Contact    dlname=savedCsv.csv    url=${contact_export}
+    User Logout
+
+Mail/Conact - send a contact as vCard, check cVard in attachment
+    User Login    username=${common_from}${common_domain}    password=${mail_password}
+    ${use default PAB}    Use addressbook    defaultPAB=true
+    ${only lastname}    Create Basic Contact    firstName=aaaVcardFirstname
+    ${basic contact}    Send Save Contact
+    ${list}    List Contacts    defaultPAB=true
+    ${send vcard}    Send Vcard    to=${common_from}${common_domain}    from=${common_from}${common_domain}    subject=${mail_subject}    priority=3    bodytype=plain
+    ${check vcard}    Check vcard    url=${mail_get_attach_url}
+    User Logout
+
+test
+    ${result}    Out put    path=c:\\users\\didozhao\\appdata\\local\\temp\\RIDEfxhra4.d
